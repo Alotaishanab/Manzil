@@ -1,0 +1,31 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@assets": ["src/assets/index"],
+      "@context": ["src/context/index"],
+      "@fonts": ["src/assets/fonts/index"],
+      "@components": ["src/components/index"],
+      "@navigation": ["src/navigation/index"],
+      "@screens": ["src/screens/index"],
+      "@services": ["src/services/index"],
+      "@hooks": ["src/hooks/index"],
+      "@colors": ["src/constants/index"],
+      "@svgs":["src/assets/svgs/index"],
+      "@validations":["src/validations/useValidations.ts"],
+      "@useValidations":["src/validations/useValidations.ts"],
+      "@globalStyles": ["src/styles/globalStyles.ts"],
+      "@helpers":["src/helpers/index"],
+      "@useDimension":["src/hooks/useDimension.ts"],
+    }
+  },
+  // "files": ["svg.d.ts"],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ]
+}

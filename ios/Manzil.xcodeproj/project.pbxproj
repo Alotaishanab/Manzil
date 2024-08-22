@@ -1,0 +1,993 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00E356F31AD99517003FC87E /* ManzilTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ManzilTests.m */; };
+		102E89CB5591421497EFB588 /* Poppins-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8FB00B45C1D4BAA9B5117E1 /* Poppins-ExtraLight.ttf */; };
+		127EF314BBF6430BAD86304C /* Quicksand_Bold_Oblique.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9A081C411DDB4360864BCF80 /* Quicksand_Bold_Oblique.otf */; };
+		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
+		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		194BF0DEC8214C488BDA932C /* Poppins-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A774795FBC142B89CF2A92A /* Poppins-SemiBoldItalic.ttf */; };
+		1B6CA06468D14EFC8569C46F /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83495DDD8A104AB5BAC13B7B /* Poppins-SemiBold.ttf */; };
+		1B8070E51A314A259AB782E3 /* Poppins-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7E80CF26035644B79FE04964 /* Poppins-ExtraLightItalic.ttf */; };
+		1EE74BD4DB94054A6A01296E /* libPods-Manzil-ManzilTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 46A9E613764FBE0855959B09 /* libPods-Manzil-ManzilTests.a */; };
+		24A2E51117934DCDB60850C3 /* Quicksand_Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2BC3C7AD42B4319876C0535 /* Quicksand_Light.otf */; };
+		24C58E956BCD43D3A4610B7F /* Poppins-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 242692000E4A4F8282F08FFE /* Poppins-Italic.ttf */; };
+		2DF0EC5DFC02442C8CB5F15A /* Quicksand_Light_Oblique.otf in Resources */ = {isa = PBXBuildFile; fileRef = F278EC81C348425089B566EA /* Quicksand_Light_Oblique.otf */; };
+		39F01ED73441452386CEAE09 /* Poppins-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7877AE7FB1034F12A5E8F670 /* Poppins-ExtraBoldItalic.ttf */; };
+		52DD1FA7CB004B2D9CB13899 /* Poppins-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C2C2A8CD04DD412FADFED626 /* Poppins-BoldItalic.ttf */; };
+		539E7655C27E40E1AE4A9AF6 /* Quicksand_Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = E86593747318483886244075 /* Quicksand_Bold.otf */; };
+		5A0774FE994C4B1CBC8E5A92 /* Quicksand_Book.otf in Resources */ = {isa = PBXBuildFile; fileRef = D82163EA2DFC4113B86B7C1E /* Quicksand_Book.otf */; };
+		65AEEA0078014DF793C7C606 /* Quicksand_Dash.otf in Resources */ = {isa = PBXBuildFile; fileRef = A1FB559B6E9E42F39157C187 /* Quicksand_Dash.otf */; };
+		68CF411FFB1C43ABAF8AFCE1 /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7D4DC146E9584EF58A01FD8E /* Poppins-Light.ttf */; };
+		6F4F6C0E5F5AD2A747029C10 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6665711F5A88AC13E730101D /* PrivacyInfo.xcprivacy */; };
+		800798F87B2D4F5C8CD4220A /* Poppins-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 631AE2A4685F45B496E8D4C3 /* Poppins-MediumItalic.ttf */; };
+		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		828AC717EA2C5EF01AA05FE1 /* libPods-Manzil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B45F7C878A03CBD211231D04 /* libPods-Manzil.a */; };
+		87670240D93B41C3AF0AA6BC /* Poppins-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 42E29A031D97422DBB3396A7 /* Poppins-BlackItalic.ttf */; };
+		8C0B183EABFF4B8382564055 /* Poppins-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D90E336BC5C34AB49D454DC8 /* Poppins-LightItalic.ttf */; };
+		8C6B4494D24D4C1E820D1A75 /* Poppins-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6317E31F604642D68E62E7E5 /* Poppins-Thin.ttf */; };
+		99F5C2962ABD4D1AA525F56B /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FE1A08024A1F459395F447BA /* Poppins-Regular.ttf */; };
+		A933C1A4A5BD47C5AF5BAA84 /* Poppins-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8A9046E53834C529105E0DC /* Poppins-ThinItalic.ttf */; };
+		B11E576BC5284128A6493DD6 /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F0E14C74A46C4ACFA0228E90 /* Poppins-Bold.ttf */; };
+		E2744C343CC940D58AB02244 /* Quicksand_Book_Oblique.otf in Resources */ = {isa = PBXBuildFile; fileRef = AB3F1A98F90841679BC0B3BD /* Quicksand_Book_Oblique.otf */; };
+		E4E44FDF90284C5B929DC496 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 52E69110ABE0402CBC274CD9 /* Poppins-ExtraBold.ttf */; };
+		E943E7DCC1D542E88E29B129 /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 35EF2746A1C2462C9237DBBE /* Poppins-Black.ttf */; };
+		E9B8480C80EC4B4ABC124E83 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FAD4C6F864B4728B757A4A3 /* logo.png */; };
+		ECE86E41E4B243BB8FD4284F /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D376E7BCAF1B4D63B676CED4 /* Poppins-Medium.ttf */; };
+		A9C97A1D67424D02A78EBDED /* Raleway-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B7C94921D0CD4A2EA3DC7E40 /* Raleway-Black.ttf */; };
+		1FC19D37BF3C4659B5793B2D /* Raleway-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C9BDBB7138D24044B235B96D /* Raleway-BlackItalic.ttf */; };
+		B0098F430B394ED1A0A02C9A /* Raleway-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 115393E6CE3D4A1E8B646D96 /* Raleway-Bold.ttf */; };
+		7FEE41CDC43E451E9535B873 /* Raleway-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3D3722F0DBB540CCB9181591 /* Raleway-BoldItalic.ttf */; };
+		E0C9B0780D6C4EC18C5E901C /* Raleway-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8154C5692CEA4EBC87FD165D /* Raleway-ExtraBold.ttf */; };
+		FC683E21BC61462383777A6E /* Raleway-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C494E5D1385848D88E843D27 /* Raleway-ExtraBoldItalic.ttf */; };
+		1E8768C4C868421C8CF2F274 /* Raleway-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9074454A283B4544843C902A /* Raleway-ExtraLight.ttf */; };
+		51E4A3A3330547C0BB092634 /* Raleway-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EF6E83CBF7B54437BB92F24C /* Raleway-ExtraLightItalic.ttf */; };
+		9AA59EBF40824D1D9B3424E1 /* Raleway-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E84C6684AC54417694DB5CC8 /* Raleway-Italic.ttf */; };
+		82CBA79BFE0E42269EB24F92 /* Raleway-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F6C459F63AAC4D4CBCC294BF /* Raleway-Light.ttf */; };
+		D06E31C1B83D424CA1620CC8 /* Raleway-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DB6EF4BA6E9B415E8E07E5F7 /* Raleway-LightItalic.ttf */; };
+		D3E0C900E6EC4F36B37986B0 /* Raleway-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8863EC4DDD9947DDABCD5420 /* Raleway-Medium.ttf */; };
+		8F10DF62D9E4484082C8B4A9 /* Raleway-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C7196DB86E1A42BEB00B1A8A /* Raleway-MediumItalic.ttf */; };
+		B9F54F15E3754A9A811D17A8 /* Raleway-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2C9BE37A8CA42E7B3F2B480 /* Raleway-Regular.ttf */; };
+		9B8AA579A3124B2BA0110AA9 /* Raleway-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F8DC91438B954BD2AD0C16E5 /* Raleway-SemiBold.ttf */; };
+		519A90E3198744C983E7DB32 /* Raleway-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E62702F4E8049DFAE6A9B14 /* Raleway-SemiBoldItalic.ttf */; };
+		264F8CDF030945D7AE636644 /* Raleway-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0C3BD9152AA14801908B46A5 /* Raleway-Thin.ttf */; };
+		D24F808068D84CF5BFFC47A0 /* Raleway-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24F7DC7C35694866AC5BE145 /* Raleway-ThinItalic.ttf */; };
+		78373BDF58BF42C0BED1EA3F /* index.ts in Resources */ = {isa = PBXBuildFile; fileRef = 2F5FBE77D68441AA9DACD45E /* index.ts */; };
+		F78D95F4FD984C1297E9F6F1 /* building.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D256051E2FF444EA36B9A53 /* building.png */; };
+		653C90D203DA43FBAD388293 /* logo-account.png in Resources */ = {isa = PBXBuildFile; fileRef = A60A437D11794FC49621F0A5 /* logo-account.png */; };
+		4434F17033794CA58E814F4E /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = B345B0C56CB44C3FAFFA2580 /* map.png */; };
+		6B2A62A6E3044C2388398301 /* mapPiece.png in Resources */ = {isa = PBXBuildFile; fileRef = EF6CCA99A3894B36B5836F83 /* mapPiece.png */; };
+		5A4296FFEA74495D963BEF21 /* ag1.png in Resources */ = {isa = PBXBuildFile; fileRef = 76C6DAA4D9434BDEAF2904BE /* ag1.png */; };
+		A47E1F6E17D5425BB85BD73D /* ag2.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F8FC41D6D18404093AC09A3 /* ag2.png */; };
+		9AF0E439CE7E4C159ACBB0B8 /* ag3.png in Resources */ = {isa = PBXBuildFile; fileRef = 16D914C58096441D89E80D10 /* ag3.png */; };
+		DA4735F0BC9B446185099E3B /* ag4.png in Resources */ = {isa = PBXBuildFile; fileRef = B0FDB7DA972343D4995A04C0 /* ag4.png */; };
+		48B0FEC1C4084B47B279AA60 /* ag5.png in Resources */ = {isa = PBXBuildFile; fileRef = EFA4BA399A5440BEA4D7977D /* ag5.png */; };
+		AF96B950206E4ABA94648494 /* ag6.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF10348E55E4FA69E700333 /* ag6.png */; };
+		B87141F3C0074AA98DFF313A /* ag7.png in Resources */ = {isa = PBXBuildFile; fileRef = 6288002E3CE94EB391741DC9 /* ag7.png */; };
+		A13BD99C8FA342728EFD4BC6 /* CallIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 76E24FC6A097454DBBFD0133 /* CallIcon.png */; };
+		02C4D31637EB42FDAF557FDB /* MailIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 51BF534FB290426A80D7AC10 /* MailIcon.png */; };
+		F5CDAC0FA4804C709551AF1E /* WhatsappIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3E2C24A25FD849FFA6A29324 /* WhatsappIcon.png */; };
+		A48C5D4E21D845B3BF9A1644 /* floormap.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B89F9AB696A4655BAA0DAE3 /* floormap.png */; };
+		9963D7643F81408C9E0E93E4 /* onboarding1.png in Resources */ = {isa = PBXBuildFile; fileRef = FD45D6E6DCB145E1BC7EE94A /* onboarding1.png */; };
+		B95E4231010049A1B9AE255D /* onboarding2.png in Resources */ = {isa = PBXBuildFile; fileRef = 23312C72E73141BFBF076F64 /* onboarding2.png */; };
+		FEC159440AC44B7CA9EC996F /* card.png in Resources */ = {isa = PBXBuildFile; fileRef = AD22F1FA7C664D20A3AA85EC /* card.png */; };
+		196F9F3A69F24920A6EE97A8 /* house.png in Resources */ = {isa = PBXBuildFile; fileRef = B3C82D638882416193D6614C /* house.png */; };
+		171D12DFA57E4B979864267B /* mapsearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 5ED2C96C1E7A4579B16B0F18 /* mapsearch.png */; };
+		2E444D220F1C4615A427CFFB /* launch_screen.png in Resources */ = {isa = PBXBuildFile; fileRef = EDC6B2CBB0F949B58D0B9E86 /* launch_screen.png */; };
+		F3E53C44B4E04BF9806D93A4 /* manzil.png in Resources */ = {isa = PBXBuildFile; fileRef = 1BCB62DE86584FBE92231C36 /* manzil.png */; };
+		761E08B3F34A4205AEE1D3F4 /* manzil2.png in Resources */ = {isa = PBXBuildFile; fileRef = 758F2831FAF24DC9B1386355 /* manzil2.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		00E356F41AD99517003FC87E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
+			remoteInfo = Manzil;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00E356EE1AD99517003FC87E /* ManzilTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ManzilTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		00E356F21AD99517003FC87E /* ManzilTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManzilTests.m; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* Manzil.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Manzil.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Manzil/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Manzil/AppDelegate.mm; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Manzil/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Manzil/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Manzil/main.m; sourceTree = "<group>"; };
+		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Manzil/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		242692000E4A4F8282F08FFE /* Poppins-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Italic.ttf"; path = "../src/assets/fonts/Poppins-Italic.ttf"; sourceTree = "<group>"; };
+		35EF2746A1C2462C9237DBBE /* Poppins-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Black.ttf"; path = "../src/assets/fonts/Poppins-Black.ttf"; sourceTree = "<group>"; };
+		3FAD4C6F864B4728B757A4A3 /* logo.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = logo.png; path = ../src/assets/images/welcome/logo.png; sourceTree = "<group>"; };
+		42E29A031D97422DBB3396A7 /* Poppins-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-BlackItalic.ttf"; path = "../src/assets/fonts/Poppins-BlackItalic.ttf"; sourceTree = "<group>"; };
+		46A9E613764FBE0855959B09 /* libPods-Manzil-ManzilTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Manzil-ManzilTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B0349459F07F0FE7A176D8C /* Pods-Manzil.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Manzil.release.xcconfig"; path = "Target Support Files/Pods-Manzil/Pods-Manzil.release.xcconfig"; sourceTree = "<group>"; };
+		52E69110ABE0402CBC274CD9 /* Poppins-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBold.ttf"; path = "../src/assets/fonts/Poppins-ExtraBold.ttf"; sourceTree = "<group>"; };
+		5620136F280062111B3F9E28 /* Pods-Manzil-ManzilTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Manzil-ManzilTests.release.xcconfig"; path = "Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests.release.xcconfig"; sourceTree = "<group>"; };
+		6317E31F604642D68E62E7E5 /* Poppins-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Thin.ttf"; path = "../src/assets/fonts/Poppins-Thin.ttf"; sourceTree = "<group>"; };
+		631AE2A4685F45B496E8D4C3 /* Poppins-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-MediumItalic.ttf"; path = "../src/assets/fonts/Poppins-MediumItalic.ttf"; sourceTree = "<group>"; };
+		6665711F5A88AC13E730101D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Manzil/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7877AE7FB1034F12A5E8F670 /* Poppins-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBoldItalic.ttf"; path = "../src/assets/fonts/Poppins-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		7A774795FBC142B89CF2A92A /* Poppins-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-SemiBoldItalic.ttf"; path = "../src/assets/fonts/Poppins-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		7D4DC146E9584EF58A01FD8E /* Poppins-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Light.ttf"; path = "../src/assets/fonts/Poppins-Light.ttf"; sourceTree = "<group>"; };
+		7E80CF26035644B79FE04964 /* Poppins-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraLightItalic.ttf"; path = "../src/assets/fonts/Poppins-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Manzil/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		83495DDD8A104AB5BAC13B7B /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-SemiBold.ttf"; path = "../src/assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; };
+		9A081C411DDB4360864BCF80 /* Quicksand_Bold_Oblique.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Bold_Oblique.otf; path = ../src/assets/fonts/Quicksand_Bold_Oblique.otf; sourceTree = "<group>"; };
+		A1FB559B6E9E42F39157C187 /* Quicksand_Dash.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Dash.otf; path = ../src/assets/fonts/Quicksand_Dash.otf; sourceTree = "<group>"; };
+		AB3F1A98F90841679BC0B3BD /* Quicksand_Book_Oblique.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Book_Oblique.otf; path = ../src/assets/fonts/Quicksand_Book_Oblique.otf; sourceTree = "<group>"; };
+		B45F7C878A03CBD211231D04 /* libPods-Manzil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Manzil.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2C2A8CD04DD412FADFED626 /* Poppins-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-BoldItalic.ttf"; path = "../src/assets/fonts/Poppins-BoldItalic.ttf"; sourceTree = "<group>"; };
+		D32BB4885F7FDD495EB7F7D7 /* Pods-Manzil-ManzilTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Manzil-ManzilTests.debug.xcconfig"; path = "Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D376E7BCAF1B4D63B676CED4 /* Poppins-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Medium.ttf"; path = "../src/assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
+		D82163EA2DFC4113B86B7C1E /* Quicksand_Book.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Book.otf; path = ../src/assets/fonts/Quicksand_Book.otf; sourceTree = "<group>"; };
+		D90E336BC5C34AB49D454DC8 /* Poppins-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-LightItalic.ttf"; path = "../src/assets/fonts/Poppins-LightItalic.ttf"; sourceTree = "<group>"; };
+		E86593747318483886244075 /* Quicksand_Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Bold.otf; path = ../src/assets/fonts/Quicksand_Bold.otf; sourceTree = "<group>"; };
+		E8A9046E53834C529105E0DC /* Poppins-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ThinItalic.ttf"; path = "../src/assets/fonts/Poppins-ThinItalic.ttf"; sourceTree = "<group>"; };
+		E8FB00B45C1D4BAA9B5117E1 /* Poppins-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraLight.ttf"; path = "../src/assets/fonts/Poppins-ExtraLight.ttf"; sourceTree = "<group>"; };
+		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F0E14C74A46C4ACFA0228E90 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Bold.ttf"; path = "../src/assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; };
+		F278EC81C348425089B566EA /* Quicksand_Light_Oblique.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Light_Oblique.otf; path = ../src/assets/fonts/Quicksand_Light_Oblique.otf; sourceTree = "<group>"; };
+		F2BC3C7AD42B4319876C0535 /* Quicksand_Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Quicksand_Light.otf; path = ../src/assets/fonts/Quicksand_Light.otf; sourceTree = "<group>"; };
+		FCB553959885EDF0FBFEAAD5 /* Pods-Manzil.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Manzil.debug.xcconfig"; path = "Target Support Files/Pods-Manzil/Pods-Manzil.debug.xcconfig"; sourceTree = "<group>"; };
+		FE1A08024A1F459395F447BA /* Poppins-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Regular.ttf"; path = "../src/assets/fonts/Poppins-Regular.ttf"; sourceTree = "<group>"; };
+		B7C94921D0CD4A2EA3DC7E40 /* Raleway-Black.ttf */ = {isa = PBXFileReference; name = "Raleway-Black.ttf"; path = "../src/assets/fonts/Raleway-Black.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C9BDBB7138D24044B235B96D /* Raleway-BlackItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-BlackItalic.ttf"; path = "../src/assets/fonts/Raleway-BlackItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		115393E6CE3D4A1E8B646D96 /* Raleway-Bold.ttf */ = {isa = PBXFileReference; name = "Raleway-Bold.ttf"; path = "../src/assets/fonts/Raleway-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		3D3722F0DBB540CCB9181591 /* Raleway-BoldItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-BoldItalic.ttf"; path = "../src/assets/fonts/Raleway-BoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		8154C5692CEA4EBC87FD165D /* Raleway-ExtraBold.ttf */ = {isa = PBXFileReference; name = "Raleway-ExtraBold.ttf"; path = "../src/assets/fonts/Raleway-ExtraBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C494E5D1385848D88E843D27 /* Raleway-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-ExtraBoldItalic.ttf"; path = "../src/assets/fonts/Raleway-ExtraBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		9074454A283B4544843C902A /* Raleway-ExtraLight.ttf */ = {isa = PBXFileReference; name = "Raleway-ExtraLight.ttf"; path = "../src/assets/fonts/Raleway-ExtraLight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EF6E83CBF7B54437BB92F24C /* Raleway-ExtraLightItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-ExtraLightItalic.ttf"; path = "../src/assets/fonts/Raleway-ExtraLightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E84C6684AC54417694DB5CC8 /* Raleway-Italic.ttf */ = {isa = PBXFileReference; name = "Raleway-Italic.ttf"; path = "../src/assets/fonts/Raleway-Italic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F6C459F63AAC4D4CBCC294BF /* Raleway-Light.ttf */ = {isa = PBXFileReference; name = "Raleway-Light.ttf"; path = "../src/assets/fonts/Raleway-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DB6EF4BA6E9B415E8E07E5F7 /* Raleway-LightItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-LightItalic.ttf"; path = "../src/assets/fonts/Raleway-LightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		8863EC4DDD9947DDABCD5420 /* Raleway-Medium.ttf */ = {isa = PBXFileReference; name = "Raleway-Medium.ttf"; path = "../src/assets/fonts/Raleway-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C7196DB86E1A42BEB00B1A8A /* Raleway-MediumItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-MediumItalic.ttf"; path = "../src/assets/fonts/Raleway-MediumItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		D2C9BE37A8CA42E7B3F2B480 /* Raleway-Regular.ttf */ = {isa = PBXFileReference; name = "Raleway-Regular.ttf"; path = "../src/assets/fonts/Raleway-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F8DC91438B954BD2AD0C16E5 /* Raleway-SemiBold.ttf */ = {isa = PBXFileReference; name = "Raleway-SemiBold.ttf"; path = "../src/assets/fonts/Raleway-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2E62702F4E8049DFAE6A9B14 /* Raleway-SemiBoldItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-SemiBoldItalic.ttf"; path = "../src/assets/fonts/Raleway-SemiBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0C3BD9152AA14801908B46A5 /* Raleway-Thin.ttf */ = {isa = PBXFileReference; name = "Raleway-Thin.ttf"; path = "../src/assets/fonts/Raleway-Thin.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		24F7DC7C35694866AC5BE145 /* Raleway-ThinItalic.ttf */ = {isa = PBXFileReference; name = "Raleway-ThinItalic.ttf"; path = "../src/assets/fonts/Raleway-ThinItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2F5FBE77D68441AA9DACD45E /* index.ts */ = {isa = PBXFileReference; name = "index.ts"; path = "../src/assets/fonts/index.ts"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		4D256051E2FF444EA36B9A53 /* building.png */ = {isa = PBXFileReference; name = "building.png"; path = "../src/assets/images/account/building.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A60A437D11794FC49621F0A5 /* logo-account.png */ = {isa = PBXFileReference; name = "logo-account.png"; path = "../src/assets/images/account/logo-account.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B345B0C56CB44C3FAFFA2580 /* map.png */ = {isa = PBXFileReference; name = "map.png"; path = "../src/assets/images/addproperty/map.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EF6CCA99A3894B36B5836F83 /* mapPiece.png */ = {isa = PBXFileReference; name = "mapPiece.png"; path = "../src/assets/images/addproperty/mapPiece.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		76C6DAA4D9434BDEAF2904BE /* ag1.png */ = {isa = PBXFileReference; name = "ag1.png"; path = "../src/assets/images/agencies/ag1.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		7F8FC41D6D18404093AC09A3 /* ag2.png */ = {isa = PBXFileReference; name = "ag2.png"; path = "../src/assets/images/agencies/ag2.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		16D914C58096441D89E80D10 /* ag3.png */ = {isa = PBXFileReference; name = "ag3.png"; path = "../src/assets/images/agencies/ag3.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B0FDB7DA972343D4995A04C0 /* ag4.png */ = {isa = PBXFileReference; name = "ag4.png"; path = "../src/assets/images/agencies/ag4.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EFA4BA399A5440BEA4D7977D /* ag5.png */ = {isa = PBXFileReference; name = "ag5.png"; path = "../src/assets/images/agencies/ag5.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2CF10348E55E4FA69E700333 /* ag6.png */ = {isa = PBXFileReference; name = "ag6.png"; path = "../src/assets/images/agencies/ag6.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6288002E3CE94EB391741DC9 /* ag7.png */ = {isa = PBXFileReference; name = "ag7.png"; path = "../src/assets/images/agencies/ag7.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		76E24FC6A097454DBBFD0133 /* CallIcon.png */ = {isa = PBXFileReference; name = "CallIcon.png"; path = "../src/assets/images/landpropertydetails/CallIcon.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		51BF534FB290426A80D7AC10 /* MailIcon.png */ = {isa = PBXFileReference; name = "MailIcon.png"; path = "../src/assets/images/landpropertydetails/MailIcon.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		3E2C24A25FD849FFA6A29324 /* WhatsappIcon.png */ = {isa = PBXFileReference; name = "WhatsappIcon.png"; path = "../src/assets/images/landpropertydetails/WhatsappIcon.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5B89F9AB696A4655BAA0DAE3 /* floormap.png */ = {isa = PBXFileReference; name = "floormap.png"; path = "../src/assets/images/landpropertydetails/floormap.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		FD45D6E6DCB145E1BC7EE94A /* onboarding1.png */ = {isa = PBXFileReference; name = "onboarding1.png"; path = "../src/assets/images/onboarding/onboarding1.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		23312C72E73141BFBF076F64 /* onboarding2.png */ = {isa = PBXFileReference; name = "onboarding2.png"; path = "../src/assets/images/onboarding/onboarding2.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		AD22F1FA7C664D20A3AA85EC /* card.png */ = {isa = PBXFileReference; name = "card.png"; path = "../src/assets/images/paymenthistory/card.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B3C82D638882416193D6614C /* house.png */ = {isa = PBXFileReference; name = "house.png"; path = "../src/assets/images/paymenthistory/house.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5ED2C96C1E7A4579B16B0F18 /* mapsearch.png */ = {isa = PBXFileReference; name = "mapsearch.png"; path = "../src/assets/images/savedproperties/mapsearch.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EDC6B2CBB0F949B58D0B9E86 /* launch_screen.png */ = {isa = PBXFileReference; name = "launch_screen.png"; path = "../src/assets/images/splash/launch_screen.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1BCB62DE86584FBE92231C36 /* manzil.png */ = {isa = PBXFileReference; name = "manzil.png"; path = "../src/assets/images/welcome/manzil.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		758F2831FAF24DC9B1386355 /* manzil2.png */ = {isa = PBXFileReference; name = "manzil2.png"; path = "../src/assets/images/welcome/manzil2.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		00E356EB1AD99517003FC87E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EE74BD4DB94054A6A01296E /* libPods-Manzil-ManzilTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				828AC717EA2C5EF01AA05FE1 /* libPods-Manzil.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00E356EF1AD99517003FC87E /* ManzilTests */ = {
+			isa = PBXGroup;
+			children = (
+				00E356F21AD99517003FC87E /* ManzilTests.m */,
+				00E356F01AD99517003FC87E /* Supporting Files */,
+			);
+			path = ManzilTests;
+			sourceTree = "<group>";
+		};
+		00E356F01AD99517003FC87E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				00E356F11AD99517003FC87E /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		137468E49FFB473BBA4436D7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E86593747318483886244075 /* Quicksand_Bold.otf */,
+				9A081C411DDB4360864BCF80 /* Quicksand_Bold_Oblique.otf */,
+				D82163EA2DFC4113B86B7C1E /* Quicksand_Book.otf */,
+				AB3F1A98F90841679BC0B3BD /* Quicksand_Book_Oblique.otf */,
+				A1FB559B6E9E42F39157C187 /* Quicksand_Dash.otf */,
+				F2BC3C7AD42B4319876C0535 /* Quicksand_Light.otf */,
+				F278EC81C348425089B566EA /* Quicksand_Light_Oblique.otf */,
+				35EF2746A1C2462C9237DBBE /* Poppins-Black.ttf */,
+				42E29A031D97422DBB3396A7 /* Poppins-BlackItalic.ttf */,
+				F0E14C74A46C4ACFA0228E90 /* Poppins-Bold.ttf */,
+				C2C2A8CD04DD412FADFED626 /* Poppins-BoldItalic.ttf */,
+				52E69110ABE0402CBC274CD9 /* Poppins-ExtraBold.ttf */,
+				7877AE7FB1034F12A5E8F670 /* Poppins-ExtraBoldItalic.ttf */,
+				E8FB00B45C1D4BAA9B5117E1 /* Poppins-ExtraLight.ttf */,
+				7E80CF26035644B79FE04964 /* Poppins-ExtraLightItalic.ttf */,
+				242692000E4A4F8282F08FFE /* Poppins-Italic.ttf */,
+				7D4DC146E9584EF58A01FD8E /* Poppins-Light.ttf */,
+				D90E336BC5C34AB49D454DC8 /* Poppins-LightItalic.ttf */,
+				D376E7BCAF1B4D63B676CED4 /* Poppins-Medium.ttf */,
+				631AE2A4685F45B496E8D4C3 /* Poppins-MediumItalic.ttf */,
+				FE1A08024A1F459395F447BA /* Poppins-Regular.ttf */,
+				83495DDD8A104AB5BAC13B7B /* Poppins-SemiBold.ttf */,
+				7A774795FBC142B89CF2A92A /* Poppins-SemiBoldItalic.ttf */,
+				6317E31F604642D68E62E7E5 /* Poppins-Thin.ttf */,
+				E8A9046E53834C529105E0DC /* Poppins-ThinItalic.ttf */,
+				3FAD4C6F864B4728B757A4A3 /* logo.png */,
+				B7C94921D0CD4A2EA3DC7E40 /* Raleway-Black.ttf */,
+				C9BDBB7138D24044B235B96D /* Raleway-BlackItalic.ttf */,
+				115393E6CE3D4A1E8B646D96 /* Raleway-Bold.ttf */,
+				3D3722F0DBB540CCB9181591 /* Raleway-BoldItalic.ttf */,
+				8154C5692CEA4EBC87FD165D /* Raleway-ExtraBold.ttf */,
+				C494E5D1385848D88E843D27 /* Raleway-ExtraBoldItalic.ttf */,
+				9074454A283B4544843C902A /* Raleway-ExtraLight.ttf */,
+				EF6E83CBF7B54437BB92F24C /* Raleway-ExtraLightItalic.ttf */,
+				E84C6684AC54417694DB5CC8 /* Raleway-Italic.ttf */,
+				F6C459F63AAC4D4CBCC294BF /* Raleway-Light.ttf */,
+				DB6EF4BA6E9B415E8E07E5F7 /* Raleway-LightItalic.ttf */,
+				8863EC4DDD9947DDABCD5420 /* Raleway-Medium.ttf */,
+				C7196DB86E1A42BEB00B1A8A /* Raleway-MediumItalic.ttf */,
+				D2C9BE37A8CA42E7B3F2B480 /* Raleway-Regular.ttf */,
+				F8DC91438B954BD2AD0C16E5 /* Raleway-SemiBold.ttf */,
+				2E62702F4E8049DFAE6A9B14 /* Raleway-SemiBoldItalic.ttf */,
+				0C3BD9152AA14801908B46A5 /* Raleway-Thin.ttf */,
+				24F7DC7C35694866AC5BE145 /* Raleway-ThinItalic.ttf */,
+				2F5FBE77D68441AA9DACD45E /* index.ts */,
+				4D256051E2FF444EA36B9A53 /* building.png */,
+				A60A437D11794FC49621F0A5 /* logo-account.png */,
+				B345B0C56CB44C3FAFFA2580 /* map.png */,
+				EF6CCA99A3894B36B5836F83 /* mapPiece.png */,
+				76C6DAA4D9434BDEAF2904BE /* ag1.png */,
+				7F8FC41D6D18404093AC09A3 /* ag2.png */,
+				16D914C58096441D89E80D10 /* ag3.png */,
+				B0FDB7DA972343D4995A04C0 /* ag4.png */,
+				EFA4BA399A5440BEA4D7977D /* ag5.png */,
+				2CF10348E55E4FA69E700333 /* ag6.png */,
+				6288002E3CE94EB391741DC9 /* ag7.png */,
+				76E24FC6A097454DBBFD0133 /* CallIcon.png */,
+				51BF534FB290426A80D7AC10 /* MailIcon.png */,
+				3E2C24A25FD849FFA6A29324 /* WhatsappIcon.png */,
+				5B89F9AB696A4655BAA0DAE3 /* floormap.png */,
+				FD45D6E6DCB145E1BC7EE94A /* onboarding1.png */,
+				23312C72E73141BFBF076F64 /* onboarding2.png */,
+				AD22F1FA7C664D20A3AA85EC /* card.png */,
+				B3C82D638882416193D6614C /* house.png */,
+				5ED2C96C1E7A4579B16B0F18 /* mapsearch.png */,
+				EDC6B2CBB0F949B58D0B9E86 /* launch_screen.png */,
+				1BCB62DE86584FBE92231C36 /* manzil.png */,
+				758F2831FAF24DC9B1386355 /* manzil2.png */,
+			);
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
+		13B07FAE1A68108700A75B9A /* Manzil */ = {
+			isa = PBXGroup;
+			children = (
+				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
+				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
+				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
+				13B07FB71A68108700A75B9A /* main.m */,
+				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				6665711F5A88AC13E730101D /* PrivacyInfo.xcprivacy */,
+			);
+			name = Manzil;
+			sourceTree = "<group>";
+		};
+		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
+				B45F7C878A03CBD211231D04 /* libPods-Manzil.a */,
+				46A9E613764FBE0855959B09 /* libPods-Manzil-ManzilTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		83CBB9F61A601CBA00E9B192 = {
+			isa = PBXGroup;
+			children = (
+				13B07FAE1A68108700A75B9A /* Manzil */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				00E356EF1AD99517003FC87E /* ManzilTests */,
+				83CBBA001A601CBA00E9B192 /* Products */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				137468E49FFB473BBA4436D7 /* Resources */,
+			);
+			indentWidth = 2;
+			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
+		};
+		83CBBA001A601CBA00E9B192 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				13B07F961A680F5B00A75B9A /* Manzil.app */,
+				00E356EE1AD99517003FC87E /* ManzilTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				FCB553959885EDF0FBFEAAD5 /* Pods-Manzil.debug.xcconfig */,
+				4B0349459F07F0FE7A176D8C /* Pods-Manzil.release.xcconfig */,
+				D32BB4885F7FDD495EB7F7D7 /* Pods-Manzil-ManzilTests.debug.xcconfig */,
+				5620136F280062111B3F9E28 /* Pods-Manzil-ManzilTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		00E356ED1AD99517003FC87E /* ManzilTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ManzilTests" */;
+			buildPhases = (
+				962F0B17373E099A945DE793 /* [CP] Check Pods Manifest.lock */,
+				00E356EA1AD99517003FC87E /* Sources */,
+				00E356EB1AD99517003FC87E /* Frameworks */,
+				00E356EC1AD99517003FC87E /* Resources */,
+				6BD6C077EB1DCDF41BB08BE3 /* [CP] Embed Pods Frameworks */,
+				5FDDC2A7CBDA91465F5FF894 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				00E356F51AD99517003FC87E /* PBXTargetDependency */,
+			);
+			name = ManzilTests;
+			productName = ManzilTests;
+			productReference = 00E356EE1AD99517003FC87E /* ManzilTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		13B07F861A680F5B00A75B9A /* Manzil */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Manzil" */;
+			buildPhases = (
+				E2F7FDDAFA506E0CEA721B8F /* [CP] Check Pods Manifest.lock */,
+				13B07F871A680F5B00A75B9A /* Sources */,
+				13B07F8C1A680F5B00A75B9A /* Frameworks */,
+				13B07F8E1A680F5B00A75B9A /* Resources */,
+				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				FF2359F17DD56D87FC67A423 /* [CP] Embed Pods Frameworks */,
+				1DBA8C439EBE1EF4FA073669 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Manzil;
+			productName = Manzil;
+			productReference = 13B07F961A680F5B00A75B9A /* Manzil.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83CBB9F71A601CBA00E9B192 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1210;
+				TargetAttributes = {
+					00E356ED1AD99517003FC87E = {
+						CreatedOnToolsVersion = 6.2;
+						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					13B07F861A680F5B00A75B9A = {
+						LastSwiftMigration = 1120;
+					};
+				};
+			};
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Manzil" */;
+			compatibilityVersion = "Xcode 12.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 83CBB9F61A601CBA00E9B192;
+			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				13B07F861A680F5B00A75B9A /* Manzil */,
+				00E356ED1AD99517003FC87E /* ManzilTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		00E356EC1AD99517003FC87E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		13B07F8E1A680F5B00A75B9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				6F4F6C0E5F5AD2A747029C10 /* PrivacyInfo.xcprivacy in Resources */,
+				539E7655C27E40E1AE4A9AF6 /* Quicksand_Bold.otf in Resources */,
+				127EF314BBF6430BAD86304C /* Quicksand_Bold_Oblique.otf in Resources */,
+				5A0774FE994C4B1CBC8E5A92 /* Quicksand_Book.otf in Resources */,
+				E2744C343CC940D58AB02244 /* Quicksand_Book_Oblique.otf in Resources */,
+				65AEEA0078014DF793C7C606 /* Quicksand_Dash.otf in Resources */,
+				24A2E51117934DCDB60850C3 /* Quicksand_Light.otf in Resources */,
+				2DF0EC5DFC02442C8CB5F15A /* Quicksand_Light_Oblique.otf in Resources */,
+				E943E7DCC1D542E88E29B129 /* Poppins-Black.ttf in Resources */,
+				87670240D93B41C3AF0AA6BC /* Poppins-BlackItalic.ttf in Resources */,
+				B11E576BC5284128A6493DD6 /* Poppins-Bold.ttf in Resources */,
+				52DD1FA7CB004B2D9CB13899 /* Poppins-BoldItalic.ttf in Resources */,
+				E4E44FDF90284C5B929DC496 /* Poppins-ExtraBold.ttf in Resources */,
+				39F01ED73441452386CEAE09 /* Poppins-ExtraBoldItalic.ttf in Resources */,
+				102E89CB5591421497EFB588 /* Poppins-ExtraLight.ttf in Resources */,
+				1B8070E51A314A259AB782E3 /* Poppins-ExtraLightItalic.ttf in Resources */,
+				24C58E956BCD43D3A4610B7F /* Poppins-Italic.ttf in Resources */,
+				68CF411FFB1C43ABAF8AFCE1 /* Poppins-Light.ttf in Resources */,
+				8C0B183EABFF4B8382564055 /* Poppins-LightItalic.ttf in Resources */,
+				ECE86E41E4B243BB8FD4284F /* Poppins-Medium.ttf in Resources */,
+				800798F87B2D4F5C8CD4220A /* Poppins-MediumItalic.ttf in Resources */,
+				99F5C2962ABD4D1AA525F56B /* Poppins-Regular.ttf in Resources */,
+				1B6CA06468D14EFC8569C46F /* Poppins-SemiBold.ttf in Resources */,
+				194BF0DEC8214C488BDA932C /* Poppins-SemiBoldItalic.ttf in Resources */,
+				8C6B4494D24D4C1E820D1A75 /* Poppins-Thin.ttf in Resources */,
+				A933C1A4A5BD47C5AF5BAA84 /* Poppins-ThinItalic.ttf in Resources */,
+				E9B8480C80EC4B4ABC124E83 /* logo.png in Resources */,
+				A9C97A1D67424D02A78EBDED /* Raleway-Black.ttf in Resources */,
+				1FC19D37BF3C4659B5793B2D /* Raleway-BlackItalic.ttf in Resources */,
+				B0098F430B394ED1A0A02C9A /* Raleway-Bold.ttf in Resources */,
+				7FEE41CDC43E451E9535B873 /* Raleway-BoldItalic.ttf in Resources */,
+				E0C9B0780D6C4EC18C5E901C /* Raleway-ExtraBold.ttf in Resources */,
+				FC683E21BC61462383777A6E /* Raleway-ExtraBoldItalic.ttf in Resources */,
+				1E8768C4C868421C8CF2F274 /* Raleway-ExtraLight.ttf in Resources */,
+				51E4A3A3330547C0BB092634 /* Raleway-ExtraLightItalic.ttf in Resources */,
+				9AA59EBF40824D1D9B3424E1 /* Raleway-Italic.ttf in Resources */,
+				82CBA79BFE0E42269EB24F92 /* Raleway-Light.ttf in Resources */,
+				D06E31C1B83D424CA1620CC8 /* Raleway-LightItalic.ttf in Resources */,
+				D3E0C900E6EC4F36B37986B0 /* Raleway-Medium.ttf in Resources */,
+				8F10DF62D9E4484082C8B4A9 /* Raleway-MediumItalic.ttf in Resources */,
+				B9F54F15E3754A9A811D17A8 /* Raleway-Regular.ttf in Resources */,
+				9B8AA579A3124B2BA0110AA9 /* Raleway-SemiBold.ttf in Resources */,
+				519A90E3198744C983E7DB32 /* Raleway-SemiBoldItalic.ttf in Resources */,
+				264F8CDF030945D7AE636644 /* Raleway-Thin.ttf in Resources */,
+				D24F808068D84CF5BFFC47A0 /* Raleway-ThinItalic.ttf in Resources */,
+				78373BDF58BF42C0BED1EA3F /* index.ts in Resources */,
+				F78D95F4FD984C1297E9F6F1 /* building.png in Resources */,
+				653C90D203DA43FBAD388293 /* logo-account.png in Resources */,
+				4434F17033794CA58E814F4E /* map.png in Resources */,
+				6B2A62A6E3044C2388398301 /* mapPiece.png in Resources */,
+				5A4296FFEA74495D963BEF21 /* ag1.png in Resources */,
+				A47E1F6E17D5425BB85BD73D /* ag2.png in Resources */,
+				9AF0E439CE7E4C159ACBB0B8 /* ag3.png in Resources */,
+				DA4735F0BC9B446185099E3B /* ag4.png in Resources */,
+				48B0FEC1C4084B47B279AA60 /* ag5.png in Resources */,
+				AF96B950206E4ABA94648494 /* ag6.png in Resources */,
+				B87141F3C0074AA98DFF313A /* ag7.png in Resources */,
+				A13BD99C8FA342728EFD4BC6 /* CallIcon.png in Resources */,
+				02C4D31637EB42FDAF557FDB /* MailIcon.png in Resources */,
+				F5CDAC0FA4804C709551AF1E /* WhatsappIcon.png in Resources */,
+				A48C5D4E21D845B3BF9A1644 /* floormap.png in Resources */,
+				9963D7643F81408C9E0E93E4 /* onboarding1.png in Resources */,
+				B95E4231010049A1B9AE255D /* onboarding2.png in Resources */,
+				FEC159440AC44B7CA9EC996F /* card.png in Resources */,
+				196F9F3A69F24920A6EE97A8 /* house.png in Resources */,
+				171D12DFA57E4B979864267B /* mapsearch.png in Resources */,
+				2E444D220F1C4615A427CFFB /* launch_screen.png in Resources */,
+				F3E53C44B4E04BF9806D93A4 /* manzil.png in Resources */,
+				761E08B3F34A4205AEE1D3F4 /* manzil2.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/.xcode.env",
+			);
+			name = "Bundle React Native code and images";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+		};
+		1DBA8C439EBE1EF4FA073669 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5FDDC2A7CBDA91465F5FF894 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6BD6C077EB1DCDF41BB08BE3 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Manzil-ManzilTests/Pods-Manzil-ManzilTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		962F0B17373E099A945DE793 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Manzil-ManzilTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E2F7FDDAFA506E0CEA721B8F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Manzil-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FF2359F17DD56D87FC67A423 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Manzil/Pods-Manzil-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		00E356EA1AD99517003FC87E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00E356F31AD99517003FC87E /* ManzilTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		13B07F871A680F5B00A75B9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				13B07FC11A68108700A75B9A /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 13B07F861A680F5B00A75B9A /* Manzil */;
+			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		00E356F61AD99517003FC87E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D32BB4885F7FDD495EB7F7D7 /* Pods-Manzil-ManzilTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = ManzilTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lc++",
+					"$(inherited)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Manzil.app/Manzil";
+			};
+			name = Debug;
+		};
+		00E356F71AD99517003FC87E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5620136F280062111B3F9E28 /* Pods-Manzil-ManzilTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COPY_PHASE_STRIP = NO;
+				INFOPLIST_FILE = ManzilTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lc++",
+					"$(inherited)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Manzil.app/Manzil";
+			};
+			name = Release;
+		};
+		13B07F941A680F5B00A75B9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FCB553959885EDF0FBFEAAD5 /* Pods-Manzil.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Manzil/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Manzil;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		13B07F951A680F5B00A75B9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4B0349459F07F0FE7A176D8C /* Pods-Manzil.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Manzil/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Manzil;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		83CBBA201A601CBA00E9B192 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CC = "";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CXX = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD = "";
+				LDPLUSPLUS = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
+					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
+					"\"$(inherited)\"",
+				);
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = iphoneos;
+				USE_HERMES = true;
+			};
+			name = Debug;
+		};
+		83CBBA211A601CBA00E9B192 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CC = "";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				CXX = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD = "";
+				LDPLUSPLUS = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
+					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
+					"\"$(inherited)\"",
+				);
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = iphoneos;
+				USE_HERMES = true;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ManzilTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00E356F61AD99517003FC87E /* Debug */,
+				00E356F71AD99517003FC87E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Manzil" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13B07F941A680F5B00A75B9A /* Debug */,
+				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Manzil" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83CBBA201A601CBA00E9B192 /* Debug */,
+				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
+}
