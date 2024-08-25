@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {CustomButton, HeaderBackButtonTitle, TopSpace} from '@components';
 import {
@@ -15,6 +16,7 @@ import {fonts} from '@fonts';
 import {globalStyles} from '@globalStyles';
 import {useIntl} from '@context';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 export const Checkout = () => {
   const data = [1, 2];
@@ -48,42 +50,47 @@ export const Checkout = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[globalStyles.wrap, {paddingHorizontal: 20, paddingTop: 20}]}>
-      <HeaderBackButtonTitle text={''} />
-      <TouchableOpacity style={{alignSelf: 'flex-end'}}>
-        {/*  */}
-        <Text style={styles.editItemText}>
-          {intl.formatMessage({id: 'paymentScreen.edit-item'})?.toUpperCase()}
-        </Text>
-      </TouchableOpacity>
-      <View style={{flex: 1}}>
-        <FlatList
-          data={data}
-          renderItem={renderItems}
-          //   contentContainerStyle={{height: height / 2}}
-        />
-      </View>
+    <SafeAreaView style={[globalStyles.wrap, {paddingTop: 20}]}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          flex: 1,
+          paddingHorizontal: 20,
+        }}>
+        <HeaderBackButtonTitle text={''} />
+        <TouchableOpacity style={{alignSelf: 'flex-end'}}>
+          {/*  */}
+          <Text style={styles.editItemText}>
+            {intl.formatMessage({id: 'paymentScreen.edit-item'})?.toUpperCase()}
+          </Text>
+        </TouchableOpacity>
+        <View style={{flex: 1}}>
+          <FlatList
+            data={data}
+            renderItem={renderItems}
+            //   contentContainerStyle={{height: height / 2}}
+          />
+        </View>
 
-      <View style={styles.bottomRoundWrap}>
-        <Text style={styles.placeOrder}>Place your order</Text>
-        <TopSpace top={15} />
-        <Text style={styles.promoCode}>Promo Code</Text>
-        <TextInput placeholder="Promo " style={styles.promoInput} />
-        <TopSpace top={15} />
-        <Text style={styles.promoCode}>Total: 750 SAR</Text>
+        <View style={styles.bottomRoundWrap}>
+          <Text style={styles.placeOrder}>Place your order</Text>
+          <TopSpace top={15} />
+          <Text style={styles.promoCode}>Promo Code</Text>
+          <TextInput placeholder="Promo " style={styles.promoInput} />
+          <TopSpace top={15} />
+          <Text style={styles.promoCode}>Total: 750 SAR</Text>
 
-        <TopSpace top={25} />
-        <CustomButton
-          btnWidth={'100%'}
-          disabled={false}
-          borderRadius={30}
-          handleClick={handleCard}
-          title={intl.formatMessage({id: 'buttons.next'})}
-          showRightIconButton={false}
-        />
-        <TopSpace top={25} />
-      </View>
+          <TopSpace top={25} />
+          <CustomButton
+            btnWidth={'100%'}
+            disabled={false}
+            borderRadius={30}
+            handleClick={handleCard}
+            title={intl.formatMessage({id: 'buttons.next'})}
+            showRightIconButton={false}
+          />
+          <TopSpace top={25} />
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
@@ -139,7 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderRadius: 25,
     height: 45,
-    lineHeight: 35,
+    lineHeight: 20,
     // justifyContent: 'center',
     paddingHorizontal: 20,
     color: Colors.light.headingTitle,

@@ -15,10 +15,9 @@ import {useIntl} from '@context';
 const FilterHeader = ({handleFilter, onFocusInput}: any) => {
   const {intl} = useIntl();
   return (
-    <View style={globalStyles.simpleRow}>
-      <View style={styles.exploreWrap}>
+    <View style={[globalStyles.simpleRow]}>
+      <View style={[styles.exploreWrap]}>
         <ExploreIcon width={30} height={30} />
-
         <TextInput
           numberOfLines={2}
           multiline
@@ -47,9 +46,9 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     flex: 1,
+    height: 50,
     flexDirection: 'row',
     alignItems: 'center',
-    // paddingVertical: 12,
     backgroundColor: Colors.light.inputBg,
   },
   exploreText: {
@@ -69,9 +68,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inputStyle: {
+    // width: '100%',
     flex: 1,
-    fontSize: 12,
-    paddingHorizontal: 4,
+
+    height: '100%',
+    fontSize: 11,
+    lineHeight: 20,
+    // paddingHorizontal: 4,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
   },

@@ -5,7 +5,14 @@ import {globalStyles} from '@globalStyles';
 import {CloseIcon} from '@svgs';
 import {width} from '@useDimension';
 import React from 'react';
-import {Dimensions, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Dimensions,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import {TopSpace} from '../atoms';
 
@@ -24,6 +31,7 @@ type GenericModalType = {
   modalBg?: any;
   borderBottomRightRadius?: any;
   borderBottomLeftRadius?: any;
+  fontFamily?: any;
 };
 
 const GenericModalComponent: React.FC<GenericModalType> = ({
@@ -41,6 +49,9 @@ const GenericModalComponent: React.FC<GenericModalType> = ({
   showTopLine = false,
   modalBg = Colors.light.offWhite,
   modalWidth = Math.round(Dimensions.get('window').width),
+  fontFamily = Platform.OS === 'ios'
+    ? fonts.tertiary.bold
+    : fonts.secondary.bold,
 }) => {
   return (
     <Modal
@@ -89,6 +100,7 @@ const GenericModalComponent: React.FC<GenericModalType> = ({
             style={[
               styles.modalTitleStyle,
               {
+                fontFamily: fontFamily,
                 textAlign: showCloseButton
                   ? 'center'
                   : centerText

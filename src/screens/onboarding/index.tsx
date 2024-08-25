@@ -1,12 +1,20 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState} from 'react';
-import {ImageBackground, Pressable, Text, View} from 'react-native';
+import {
+  ImageBackground,
+  Platform,
+  Pressable,
+  StatusBar,
+  Text,
+  View,
+} from 'react-native';
 import {CustomButton, TopSpace} from '@components';
 import {useIntl} from '@context';
 import {styles} from './styles';
 import {useNavigation} from '@react-navigation/native';
 import {onboarding1, onboarding2} from '@assets';
 import {fonts} from '@fonts';
+import {height} from '@useDimension';
 
 export const Onboarding = () => {
   const {intl} = useIntl();
@@ -26,10 +34,13 @@ export const Onboarding = () => {
   };
   return (
     <ImageBackground
+      resizeMode="cover"
       source={current === 1 ? onboarding1 : onboarding2}
       style={{
         flexGrow: 1,
       }}>
+      <StatusBar barStyle="light-content" />
+      <TopSpace top={Platform.OS === 'ios' ? 20 : 0} />
       <Pressable onPress={handleSkip} style={styles.skipBtn}>
         <Text style={styles.skipBtnText}>
           {intl.formatMessage({id: 'buttons.skip'})}

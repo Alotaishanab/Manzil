@@ -1,25 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  FlatList,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import {View, StyleSheet, FlatList, ScrollView} from 'react-native';
 import {fonts} from '../../../../src/assets/fonts';
 import {Colors} from '@colors';
 import AuthorizedHeader from './AuthorizedHeader';
-import {
-  CustomTabButtons,
-  DropDownPicker,
-  PropertyCard,
-  TabButtons,
-  TopSpace,
-} from '@components';
+import {DropDownPicker, PropertyCard, TabButtons, TopSpace} from '@components';
 // import {useIntl} from '@context';
-import PropertiesCard from './PropertiesCard';
 import {useIntl} from '@context';
 import SavedCardSkeleton from './SavedCardSkeleton';
 import {useNavigation} from '@react-navigation/native';
@@ -42,7 +28,14 @@ const AuthorizedContent = ({sortList}) => {
     navigation.navigate('ExploreProperty');
   };
   const renderProperty = ({item}: any) => {
-    return <PropertyCard item={item} handleClick={handleCard} />;
+    return (
+      <PropertyCard
+        sliderWidth={'90%'}
+        marginBottom={8}
+        item={item}
+        handleClick={handleCard}
+      />
+    );
   };
   useEffect(() => {
     setTimeout(() => {
@@ -52,13 +45,16 @@ const AuthorizedContent = ({sortList}) => {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{flexGrow: 1}}>
+      contentContainerStyle={{
+        flexGrow: 1,
+      }}>
       <AuthorizedHeader />
       <View
         style={[
           styles.innerWrap,
           {
             paddingTop: 5,
+            overflow: 'hidden',
           },
         ]}>
         <TabButtons
@@ -155,9 +151,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
   },
   footer: {
-    height: 40,
+    height: 10,
   },
   flatListContentContainerStyle: {
-    paddingHorizontal: 2,
+    width: '100%',
+    // paddingHorizontal: 2,
+    paddingHorizontal: 3,
+    overflow: 'hidden',
   },
 });

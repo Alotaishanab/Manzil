@@ -21,6 +21,7 @@ import {AppleIcon, card, PlusIcon} from '@assets';
 import {fonts} from '@fonts';
 import {globalStyles} from '@globalStyles';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 export const AddCards = () => {
   const {intl} = useIntl();
@@ -45,68 +46,74 @@ export const AddCards = () => {
   };
   return (
     <SafeAreaView style={[globalStyles.wrap, styles.mainWrap]}>
-      <HeaderBackButtonTitle
-        text={intl.formatMessage({id: 'paymentScreen.payment'})}
-      />
-      <ScrollView contentContainerStyle={styles.innerWrap}>
-        <View style={styles.cardWrap}>
-          <TopSpace top={20} />
-          <Image source={card} resizeMode="contain" style={styles.cardImg} />
-          <TopSpace top={20} />
-          <Text style={styles.noCardAddText}>
-            {intl.formatMessage({id: 'paymentScreen.no-card-added'})}
-          </Text>
-          <TopSpace top={20} />
-
-          <Text style={styles.saveLater}>
-            {intl.formatMessage({id: 'paymentScreen.save-later'})}
-          </Text>
-          <TopSpace top={20} />
-        </View>
-        <TopSpace top={20} />
-
-        <TouchableOpacity onPress={handlePayConfirm} style={styles.addCard}>
-          <PlusIcon width={25} height={25} />
-          <Text style={styles.addCardText}>
-            {intl.formatMessage({id: 'paymentScreen.add-card'})}
-          </Text>
-        </TouchableOpacity>
-
-        <TopSpace top={25} />
-
-        <Pressable style={styles.payBtn}>
-          <AppleIcon width={25} height={25} />
-          <Text style={styles.payBtnText}>
-            {/*  */}
-            {intl.formatMessage({id: 'paymentScreen.pay'})}
-          </Text>
-        </Pressable>
-        <TopSpace top={30} />
-
-        <View style={globalStyles.simpleRow}>
-          <Text style={styles.total}>
-            {intl.formatMessage({id: 'paymentScreen.total'})?.toUpperCase()}:{' '}
-          </Text>
-          <Text style={styles.totalAmount}>750 SAR</Text>
-        </View>
-        <TopSpace top={20} />
-        <CustomButton
-          btnWidth={'100%'}
-          borderRadius={30}
-          disabled={false}
-          handleClick={handlePayConfirm}
-          title={intl
-            .formatMessage({id: 'paymentScreen.pay-and-confirm'})
-            ?.toUpperCase()}
-          showRightIconButton={false}
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          flexGrow: 1,
+        }}>
+        <HeaderBackButtonTitle
+          text={intl.formatMessage({id: 'paymentScreen.payment'})}
         />
-      </ScrollView>
+        <ScrollView contentContainerStyle={styles.innerWrap}>
+          <View style={styles.cardWrap}>
+            <TopSpace top={20} />
+            <Image source={card} resizeMode="contain" style={styles.cardImg} />
+            <TopSpace top={20} />
+            <Text style={styles.noCardAddText}>
+              {intl.formatMessage({id: 'paymentScreen.no-card-added'})}
+            </Text>
+            <TopSpace top={20} />
 
-      <AddCardModal
-        isVisible={showAddCard}
-        toggleVisible={toggleCard}
-        handleAddMakePayment={handleAddMakePayment}
-      />
+            <Text style={styles.saveLater}>
+              {intl.formatMessage({id: 'paymentScreen.save-later'})}
+            </Text>
+            <TopSpace top={20} />
+          </View>
+          <TopSpace top={20} />
+
+          <TouchableOpacity onPress={handlePayConfirm} style={styles.addCard}>
+            <PlusIcon width={25} height={25} />
+            <Text style={styles.addCardText}>
+              {intl.formatMessage({id: 'paymentScreen.add-card'})}
+            </Text>
+          </TouchableOpacity>
+
+          <TopSpace top={25} />
+
+          <Pressable style={styles.payBtn}>
+            <AppleIcon width={25} height={25} />
+            <Text style={styles.payBtnText}>
+              {/*  */}
+              {intl.formatMessage({id: 'paymentScreen.pay'})}
+            </Text>
+          </Pressable>
+          <TopSpace top={30} />
+
+          <View style={globalStyles.simpleRow}>
+            <Text style={styles.total}>
+              {intl.formatMessage({id: 'paymentScreen.total'})?.toUpperCase()}:{' '}
+            </Text>
+            <Text style={styles.totalAmount}>750 SAR</Text>
+          </View>
+          <TopSpace top={20} />
+          <CustomButton
+            btnWidth={'100%'}
+            borderRadius={30}
+            disabled={false}
+            handleClick={handlePayConfirm}
+            title={intl
+              .formatMessage({id: 'paymentScreen.pay-and-confirm'})
+              ?.toUpperCase()}
+            showRightIconButton={false}
+          />
+        </ScrollView>
+
+        <AddCardModal
+          isVisible={showAddCard}
+          toggleVisible={toggleCard}
+          handleAddMakePayment={handleAddMakePayment}
+        />
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

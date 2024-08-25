@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  Dimensions,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 import {globalStyles} from '../../styles/globalStyles';
@@ -17,15 +18,18 @@ import {
   AreaIcon,
   BathroomIcon,
   BedIcon,
-  FavoriteIcon,
   GalleryIcon,
   HeartIcon,
   ShareIcon,
 } from '@svgs';
 import {useIntl} from '@context';
-import {width} from '@useDimension';
 
-export const PropertyCard = ({item, handleClick = () => {}}) => {
+export const PropertyCard = ({
+  item,
+  marginBottom = 5,
+  sliderWidth = '95%',
+  handleClick = () => {},
+}) => {
   const {intl} = useIntl();
   const [currentIndex, setCurrentIndex] = React.useState(0); // state to track the current index
   const images = [
@@ -46,43 +50,56 @@ export const PropertyCard = ({item, handleClick = () => {}}) => {
         err && console.log(err);
       });
   };
+
   return (
-    <View style={styles.mainWrapper}>
-      <View>
-        <Swiper
-          style={styles.wrapper}
-          showsButtons={false}
-          loop={false}
-          // width={width}
-          height={300}
-          index={currentIndex}
-          onIndexChanged={index => setCurrentIndex(index)} // update index on change
-          paginationStyle={styles.pagination}
-          renderPagination={(index, total) => (
-            <View style={styles.pagination}>
-              <GalleryIcon width={18} height={18} />
-              <Text style={styles.paginationText}>
-                {images?.length > 0 ? index + 1 : 0}
-                {images?.length === 0 ? `/${total - 1}` : `/${total}`}
-              </Text>
-            </View>
-          )}>
-          {images?.map((image, index) => (
-            <View key={index} style={styles.slide}>
-              <ImageBackground
-                resizeMode="cover"
-                source={{uri: image.uri}}
-                imageStyle={{borderRadius: 30}}
-                style={styles.imageBgStyle}>
-                <TouchableOpacity
-                  style={{margin: 12, marginRight: 30, alignSelf: 'flex-end'}}>
-                  <HeartIcon width={30} height={30} />
-                </TouchableOpacity>
-              </ImageBackground>
-            </View>
-          ))}
-        </Swiper>
-      </View>
+    <View
+      style={[
+        styles.mainWrapper,
+        {
+          marginBottom: marginBottom,
+        },
+      ]}>
+      <Swiper
+        style={styles.wrapper}
+        showsButtons={false}
+        loop={false}
+        // width={width}
+        height={300}
+        width={Dimensions.get('screen').width}
+        index={currentIndex}
+        onIndexChanged={index => setCurrentIndex(index)} // update index on change
+        paginationStyle={styles.pagination}
+        renderPagination={(index, total) => (
+          <View style={styles.pagination}>
+            <GalleryIcon width={18} height={18} />
+            <Text style={styles.paginationText}>
+              {images?.length > 0 ? index + 1 : 0}
+              {images?.length === 0 ? `/${total - 1}` : `/${total}`}
+            </Text>
+          </View>
+        )}>
+        {images?.map((image, index) => (
+          <View
+            key={index}
+            style={[
+              styles.slide,
+              {
+                width: sliderWidth,
+              },
+            ]}>
+            <ImageBackground
+              resizeMode="cover"
+              source={{uri: image.uri}}
+              imageStyle={{borderRadius: 30}}
+              style={styles.imageBgStyle}>
+              <TouchableOpacity
+                style={{margin: 12, marginRight: 30, alignSelf: 'flex-end'}}>
+                <HeartIcon width={30} height={30} />
+              </TouchableOpacity>
+            </ImageBackground>
+          </View>
+        ))}
+      </Swiper>
 
       <TouchableOpacity activeOpacity={0.8} onPress={handleClick}>
         <TopSpace top={10} />
@@ -160,13 +177,14 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 3,
-    marginBottom: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+    marginBottom: 5,
     width: '100%',
+    // overflow: 'hidden',
   },
   wrapper: {
     // zIndex: 1000, overflow: 'visible'
@@ -174,10 +192,11 @@ export const styles = StyleSheet.create({
   slide: {
     justifyContent: 'center',
     alignItems: 'center',
-    // width: '100%',
+    width: '95%',
     // marginRight: 5,
     height: 300,
     borderRadius: 25,
+    // overflow: 'hidden',
 
     // height: 300, // Set the height of the slider
   },

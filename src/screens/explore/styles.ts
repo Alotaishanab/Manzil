@@ -17,6 +17,8 @@ export const styles = StyleSheet.create({
   firstFlatListContentContainerStyle: {
     paddingHorizontal: 2,
     marginBottom: 4,
+    overflow: 'hidden',
+    width: '100%',
     backgroundColor: Colors.light.background,
   },
   mapBtn: {

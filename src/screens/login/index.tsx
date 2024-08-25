@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Pressable, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import {
   CustomButton,
   CustomTextInput,
@@ -7,28 +7,31 @@ import {
   Screen,
   TopSpace,
 } from '@components';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {useIntl} from '@context';
-import {styles} from './styles';
-import {useValidations} from '../../../src/validations/useValidations';
-import {useForm} from 'react-hook-form';
-import {globalStyles} from '../../../src/styles/globalStyles';
-import {useNavigation} from '@react-navigation/native';
-// import {useLogin} from '@services';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useIntl } from '@context';
+import { styles } from './styles';
+import { useValidations } from '../../../src/validations/useValidations';
+import { useForm } from 'react-hook-form';
+import { globalStyles } from '../../../src/styles/globalStyles';
+import { useNavigation } from '@react-navigation/native';
+import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
+// import { useLogin } from '@services';
 
 export const Login = () => {
-  const {intl} = useIntl();
-  // const {mutate: login} = useLogin();
+  const { intl } = useIntl();
+  // const { mutate: login } = useLogin();
   const navigation: any = useNavigation();
-  const {loginSchema} = useValidations();
+  const { loginSchema } = useValidations();
+
   type FormData = {
     email: string | number | any;
     password: string | number | any;
   };
+
   const {
     control,
     handleSubmit,
-    formState: {isValid},
+    formState: { isValid },
   } = useForm<FormData>({
     defaultValues: {
       email: 'khawajfaisal981@gmail.com',
@@ -39,33 +42,37 @@ export const Login = () => {
   });
 
   const handleLogin = (data: FormData) => {
-    console.log('data', data);
-    const {email, password} = data;
+    // Your login logic here
+    const { email, password } = data;
     if (isValid) {
+      // For now, let's assume login is successful and navigate to 'Explore'
       navigation.navigate('BottomTabNavigator');
+      showCustomFlashMessage('Login successful');
     }
   };
+
   const [hidePassword, setHidePassword] = useState(true);
   const togglePassword = () => {
     setHidePassword(!hidePassword);
   };
+  
   const handleGoogleLogin = () => {};
   const handleAppleLogin = () => {};
   const handleRegister = () => {
     navigation.navigate('Signup');
   };
+  
   const handleForgot = () => {
     navigation.navigate('ForgotPassword');
   };
+
   return (
     <Screen showKeyboardAware={true}>
-      <HeaderBackButtonTitle
-        text={intl.formatMessage({id: 'signinScreen.header'})}
-      />
-
+      <HeaderBackButtonTitle text={intl.formatMessage({ id: 'signinScreen.header' })} />
       <TopSpace top={50} />
+      
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({id: 'signinScreen.email-address'})}
+        {intl.formatMessage({ id: 'signinScreen.email-address' })}
       </Text>
 
       <CustomTextInput
@@ -84,7 +91,7 @@ export const Login = () => {
       <TopSpace top={30} />
 
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({id: 'signinScreen.password'})}
+        {intl.formatMessage({ id: 'signinScreen.password' })}
       </Text>
 
       <CustomTextInput
@@ -109,19 +116,24 @@ export const Login = () => {
         disabled={false}
         borderRadius={30}
         handleClick={handleSubmit(handleLogin)}
-        title={intl.formatMessage({id: 'buttons.sign-in'})}
+        title={intl.formatMessage({ id: 'buttons.sign-in' })}
         showRightIconButton={true}
       />
+      
       <TopSpace top={20} />
+      
       <TouchableOpacity onPress={handleForgot} style={globalStyles.centeredBtn}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({id: 'buttons.forgot-password?'})}
+          {intl.formatMessage({ id: 'buttons.forgot-password?' })}
         </Text>
       </TouchableOpacity>
+      
       <TopSpace top={10} />
+      
       <Text style={styles.orText}>
-        {intl.formatMessage({id: 'signinScreen.or'})}
+        {intl.formatMessage({ id: 'signinScreen.or' })}
       </Text>
+      
       <TopSpace top={10} />
 
       <View
@@ -130,7 +142,8 @@ export const Login = () => {
           {
             marginVertical: 20,
           },
-        ]}>
+        ]}
+      >
         <CustomButton
           iconName="GoogleIcon"
           showSocialButton={true}
@@ -147,14 +160,16 @@ export const Login = () => {
           disabled={false}
         />
       </View>
+      
       <TopSpace top={50} />
-      <View style={[globalStyles.simpleRow, {justifyContent: 'center'}]}>
+      
+      <View style={[globalStyles.simpleRow, { justifyContent: 'center' }]}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({id: 'signinScreen.no-account'})}
+          {intl.formatMessage({ id: 'signinScreen.no-account' })}
         </Text>
         <Pressable onPress={handleRegister}>
           <Text style={styles.forgotPasswordText}>
-            {intl.formatMessage({id: 'buttons.register'})}
+            {intl.formatMessage({ id: 'buttons.register' })}
           </Text>
         </Pressable>
       </View>

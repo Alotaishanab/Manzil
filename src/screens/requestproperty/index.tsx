@@ -1,6 +1,14 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState} from 'react';
 import {HeaderBackButtonTitle, TopSpace} from '@components';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {useIntl} from '@context';
 import {Colors} from '@colors';
 import {fonts} from '@fonts';
@@ -18,36 +26,42 @@ export const RequestProperty = () => {
 
   return (
     <SafeAreaView style={[globalStyles.wrapScreen, {}]}>
-      <HeaderBackButtonTitle text={''} />
-      <TopSpace top={10} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
+        }}>
+        <HeaderBackButtonTitle text={''} />
+        <TopSpace top={10} />
 
-      {/* Request Propery step content starts */}
-      <View style={globalStyles.rowSpaceBetween}>
-        <Text style={styles.heading}>
-          {intl.formatMessage({id: 'requestPropertyScreen.header'})}
-        </Text>
-
-        <View style={globalStyles.simpleRow}>
-          <Text style={styles.stepText}>
-            {intl.formatMessage({id: 'requestPropertyScreen.step'})}{' '}
-            {step === 1
-              ? intl.formatMessage({id: 'requestPropertyScreen.step-1'})
-              : intl.formatMessage({id: 'requestPropertyScreen.step-2'})}{' '}
-            {'/'}
-            {intl.formatMessage({id: 'requestPropertyScreen.step-2'})}
+        {/* Request Propery step content starts */}
+        <View style={globalStyles.rowSpaceBetween}>
+          <Text style={styles.heading}>
+            {intl.formatMessage({id: 'requestPropertyScreen.header'})}
           </Text>
+
+          <View style={globalStyles.simpleRow}>
+            <Text style={styles.stepText}>
+              {intl.formatMessage({id: 'requestPropertyScreen.step'})}{' '}
+              {step === 1
+                ? intl.formatMessage({id: 'requestPropertyScreen.step-1'})
+                : intl.formatMessage({id: 'requestPropertyScreen.step-2'})}{' '}
+              {'/'}
+              {intl.formatMessage({id: 'requestPropertyScreen.step-2'})}
+            </Text>
+          </View>
         </View>
-      </View>
-      {/* Request Propery step content ends */}
-      <TopSpace top={10} />
-      {step === 1 && (
-        <Step1
-          selectedProperty={selectedProperty}
-          setSelectedProperty={setSelectedProperty}
-          handleNext={handleNext}
-        />
-      )}
-      {step === 2 && <Step2 selectedProperty={selectedProperty} />}
+        {/* Request Propery step content ends */}
+        <TopSpace top={10} />
+        {step === 1 && (
+          <Step1
+            selectedProperty={selectedProperty}
+            setSelectedProperty={setSelectedProperty}
+            handleNext={handleNext}
+          />
+        )}
+        {step === 2 && <Step2 selectedProperty={selectedProperty} />}
+      </ScrollView>
     </SafeAreaView>
   );
 };

@@ -22,6 +22,11 @@ export const fonts = {
     boldOblique: 'Quicksand_Bold_Oblique',
     bold: 'Quicksand_Bold',
     light: 'Quicksand_Light',
+    lightOblique: 'Quicksand_Light_Oblique',
+    dash: 'Quicksand_Dash',
+    book: 'Quicksand_Book',
+    bookOlique: 'Quicksand_Bold_Oblique',
+    regular: 'Quicksand_Regular',
   },
   tertiary: {
     black: 'Raleway-Black',

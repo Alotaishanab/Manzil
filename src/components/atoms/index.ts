@@ -4,3 +4,4 @@ export * from './CustomTextInput';
 export * from './CustomButton';
 export * from './SearchBar';
 export * from './InputFieldCode';
+export * from './CustomFlashMessage';

@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   Image,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -35,65 +36,72 @@ export const PropertiesRequestStatus = () => {
   console.log('orderStatus', orderStatus);
   return (
     <SafeAreaView style={[globalStyles.wrapScreen, {}]}>
-      <HeaderBackButtonTitle text={''} />
-      <TopSpace top={20} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
+        }}>
+        <HeaderBackButtonTitle text={''} />
+        <TopSpace top={20} />
 
-      <Text style={styles.title}>
-        {intl.formatMessage({id: 'requestStatus.request-recieved'})}
-      </Text>
-      <TopSpace top={15} />
+        <Text style={styles.title}>
+          {intl.formatMessage({id: 'requestStatus.request-recieved'})}
+        </Text>
+        <TopSpace top={15} />
 
-      <View style={globalStyles.simpleRow}>
-        <View style={{flex: 1}}>
-          <Pressable
-            onPress={() => {
-              navigation.navigate('RequestList');
-            }}>
-            <Text style={styles.status}>
-              {intl.formatMessage({id: 'requestStatus.order-status'})}
-            </Text>
-          </Pressable>
+        <View style={globalStyles.simpleRow}>
+          <View style={{flex: 1}}>
+            <Pressable
+              onPress={() => {
+                navigation.navigate('RequestList');
+              }}>
+              <Text style={styles.status}>
+                {intl.formatMessage({id: 'requestStatus.order-status'})}
+              </Text>
+            </Pressable>
 
-          <TopSpace top={20} />
-          <View style={styles.progressLine} />
-        </View>
-
-        <View style={{marginLeft: 20, flex: 1}}>
-          {orderStatus === intl.formatMessage({id: 'requestStatus.ongoing'}) ? (
-            <Text style={styles.status}>
-              {intl.formatMessage({id: 'requestStatus.ongoing'})}
-            </Text>
-          ) : (
-            <Text style={styles.status}>
-              {intl.formatMessage({id: 'requestStatus.complete'})}
-            </Text>
-          )}
-          <TopSpace top={20} />
-          {orderStatus !==
-            intl.formatMessage({id: 'requestStatus.ongoing'}) && (
+            <TopSpace top={20} />
             <View style={styles.progressLine} />
-          )}
+          </View>
+
+          <View style={{marginLeft: 20, flex: 1}}>
+            {orderStatus ===
+            intl.formatMessage({id: 'requestStatus.ongoing'}) ? (
+              <Text style={styles.status}>
+                {intl.formatMessage({id: 'requestStatus.ongoing'})}
+              </Text>
+            ) : (
+              <Text style={styles.status}>
+                {intl.formatMessage({id: 'requestStatus.complete'})}
+              </Text>
+            )}
+            <TopSpace top={20} />
+            {orderStatus !==
+              intl.formatMessage({id: 'requestStatus.ongoing'}) && (
+              <View style={styles.progressLine} />
+            )}
+          </View>
         </View>
-      </View>
 
-      {orderStatus !== intl.formatMessage({id: 'requestStatus.ongoing'}) && (
-        <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-          <Text style={styles.status}>
-            {intl.formatMessage({id: 'requestStatus.received-properties'})}
-          </Text>
-          <TopSpace top={10} />
+        {orderStatus !== intl.formatMessage({id: 'requestStatus.ongoing'}) && (
+          <>
+            <Text style={styles.status}>
+              {intl.formatMessage({id: 'requestStatus.received-properties'})}
+            </Text>
+            <TopSpace top={10} />
 
-          <PropertyCard handleClick={handleCard} />
-          <PropertyCard handleClick={handleCard} />
-          <PropertyCard handleClick={handleCard} />
-        </ScrollView>
-      )}
+            <View style={{overflow: 'hidden'}}>
+              <PropertyCard handleClick={handleCard} />
+            </View>
+          </>
+        )}
 
-      {orderStatus === intl.formatMessage({id: 'requestStatus.ongoing'}) && (
-        <View style={{flex: 1, justifyContent: 'flex-end'}}>
-          <Image source={manzil} style={styles.img} />
-        </View>
-      )}
+        {orderStatus === intl.formatMessage({id: 'requestStatus.ongoing'}) && (
+          <View style={{flex: 1, justifyContent: 'flex-end'}}>
+            <Image source={manzil} style={styles.img} />
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };

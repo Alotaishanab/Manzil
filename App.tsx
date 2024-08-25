@@ -13,9 +13,15 @@ import {NavigationContainer} from '@react-navigation/native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {PaperProvider} from 'react-native-paper';
 import ErrorBoundary from 'react-native-error-boundary';
+import FlashMessage from 'react-native-flash-message';
+
 import {CustomFallback} from '@components';
 // import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {enableScreens} from 'react-native-screens';
+import {HideWarnings} from '@helpers';
+import {fonts} from '@fonts';
+import {Colors} from '@colors';
+import {View} from 'react-native';
 
 function App(): React.JSX.Element {
   const [locale, setLocale] = useState('en'); // Default locale is French
@@ -31,6 +37,7 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     determineLocale();
+    HideWarnings();
   }, []);
   // const queryClient = new QueryClient();
   enableScreens(true);
@@ -43,6 +50,19 @@ function App(): React.JSX.Element {
             {/* <QueryClientProvider client={queryClient}> */}
             <NavigationContainer>
               <AuthNavigator />
+              {/* <FlashMessage
+                position="top"
+                // MessageComponent={
+                //   <View style={{borderRadius: 25, padding: 20}} />
+                // }
+                autoHide={true}
+                textStyle={{
+                  fontFamily: fonts.secondary.bold,
+                  color: Colors.dark.headingTitle,
+                  fontSize: 12,
+                }}
+              /> */}
+              <FlashMessage position="top" hideStatusBar={false} />
             </NavigationContainer>
             {/* </QueryClientProvider> */}
           </IntlProvider>

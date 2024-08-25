@@ -91,4 +91,3 @@ To learn more about React Native, take a look at the following resources:
 
 <img width="358" alt="Screenshot 2024-06-29 at 6 49 53 PM" src="https://github.com/FaisalKhawaj/Manzil/assets/56731703/40351701-e299-40b0-a254-af2baa110efe">
 
-# Manzil

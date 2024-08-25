@@ -66,7 +66,7 @@ export const ListedProperties = () => {
       style={[
         globalStyles.wrapScreen,
         {
-          paddingHorizontal: 20,
+          // paddingHorizontal: 20,
         },
       ]}>
       <View

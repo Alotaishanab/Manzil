@@ -74,6 +74,10 @@
       "sha1": "fb8fccca21550e71135f92bbaf8a2e8a12c90465"
     },
     {
+      "path": "src/assets/fonts/Quicksand-Regular.otf",
+      "sha1": "cd44de2b69b723902d81f2a53613b7e94adda1ec"
+    },
+    {
       "path": "src/assets/fonts/Quicksand_Bold.otf",
       "sha1": "931cde819d5c3057923620f72ba8a5cdf53a6ba1"
     },
@@ -175,22 +179,26 @@
     },
     {
       "path": "src/assets/fonts/index.ts",
-      "sha1": "94d9ca8efee4e5de76830933dfb5cdf40c2a94b3"
+      "sha1": "05b5b032fb7248d3c449b2f96736b09acd4646af"
     },
     {
       "path": "src/assets/images/account/building.png",
       "sha1": "b383ca0338a27a503d0b81386e112217f48f51e0"
     },
     {
-      "path": "src/assets/images/account/logo-account.png",
+      "path": "src/assets/images/account/logoaccount.png",
       "sha1": "9418c910552b3c74f271dc493974ea9bbbfd6136"
+    },
+    {
+      "path": "src/assets/images/account/logoaccount2.png",
+      "sha1": "7e2b4e1ffb101dc3ecf65635aaae0e6432d3b01e"
     },
     {
       "path": "src/assets/images/addproperty/map.png",
       "sha1": "e075a7fa3d01ba69664278412fc28fd821d098fa"
     },
     {
-      "path": "src/assets/images/addproperty/mapPiece.png",
+      "path": "src/assets/images/addproperty/mappiece.png",
       "sha1": "79727721333e8ebc5a16b9923a98595213b568c6"
     },
     {
@@ -222,20 +230,20 @@
       "sha1": "8c841bf875b02978a9e8eab55471d2399d6d89ad"
     },
     {
-      "path": "src/assets/images/landpropertydetails/CallIcon.png",
+      "path": "src/assets/images/landpropertydetails/callicon.png",
       "sha1": "6e85d0612a4e8f8828e506df3789a5b2e51ab385"
-    },
-    {
-      "path": "src/assets/images/landpropertydetails/MailIcon.png",
-      "sha1": "c2b336a12c53893564668ff202d9e846e9228888"
-    },
-    {
-      "path": "src/assets/images/landpropertydetails/WhatsappIcon.png",
-      "sha1": "8779a25da94afa8f44e96f12e2dbcfdf0abe9cd5"
     },
     {
       "path": "src/assets/images/landpropertydetails/floormap.png",
       "sha1": "96cceb179c79a888d2da479c03ec68578859887b"
+    },
+    {
+      "path": "src/assets/images/landpropertydetails/mailicon.png",
+      "sha1": "c2b336a12c53893564668ff202d9e846e9228888"
+    },
+    {
+      "path": "src/assets/images/landpropertydetails/whatsappicon.png",
+      "sha1": "8779a25da94afa8f44e96f12e2dbcfdf0abe9cd5"
     },
     {
       "path": "src/assets/images/onboarding/onboarding1.png",

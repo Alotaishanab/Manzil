@@ -219,7 +219,15 @@ const Step2 = ({selectedProperty}) => {
           {intl.formatMessage({id: 'requestPropertyScreen.size'})}
         </Text>
       </View>
-      <TextInput placeholder="E.g 1300M" style={styles.sizeInputField} />
+      <TextInput
+        placeholder="E.g 1300M"
+        style={[
+          styles.sizeInputField,
+          {
+            height: 50,
+          },
+        ]}
+      />
       <TopSpace top={10} />
 
       <View style={globalStyles.simpleRow}>
@@ -288,7 +296,14 @@ const Step2 = ({selectedProperty}) => {
         placeholder={intl.formatMessage({
           id: 'requestPropertyScreen.description.placeholder',
         })}
-        style={styles.sizeInputField}
+        style={[
+          styles.sizeInputField,
+          {
+            paddingTop: 15,
+            paddingHorizontal: 20,
+            height: 180,
+          },
+        ]}
       />
       <TopSpace top={15} />
       <CustomButton

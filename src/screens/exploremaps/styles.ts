@@ -32,22 +32,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     width: 45,
     borderRadius: 8,
-    right: 5,
+    right: 10,
     top: 10,
     alignSelf: 'flex-end',
   },
 
-  mapLayerBtn: {
-    backgroundColor: Colors.light.background,
-    height: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 45,
-    borderRadius: 8,
-    right: 5,
-    top: 10,
-    alignSelf: 'flex-end',
-  },
   container: {},
   map: {
     ...StyleSheet.absoluteFillObject,

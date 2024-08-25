@@ -6,7 +6,8 @@ import {height} from '../../hooks/useDimension';
 export const styles = StyleSheet.create({
   skipBtn: {
     alignSelf: 'flex-end',
-    margin: 24,
+    marginTop: 30,
+    marginRight: 30,
   },
   skipBtnText: {
     color: Colors.light.background,
@@ -18,6 +19,7 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     paddingHorizontal: 20,
+    // height: 300,
   },
   onboardingTitle: {
     fontSize: 18,

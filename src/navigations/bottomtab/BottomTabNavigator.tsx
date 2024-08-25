@@ -99,6 +99,9 @@ export const BottomTabNavigator = () => {
         modalTitle={intl.formatMessage({
           id: 'addPropertiesModal.header',
         })}
+        fontFamily={
+          Platform.OS === 'ios' ? fonts.tertiary.bold : fonts.secondary.bold
+        }
         centeredModal={false}
         toggleModal={toggleModal}
         isVisible={modalVisible}>
@@ -230,8 +233,8 @@ export const BottomTabNavigator = () => {
                   alignItems: 'center',
                   flex: 1,
                   padding: 4,
-                  marginTop: 8,
-                  bottom: 8,
+                  marginTop: 10,
+                  bottom: Platform.OS === 'ios' ? 4 : 8,
                 }}>
                 <TouchableOpacity
                   style={styles.roundedCircle}
@@ -297,17 +300,16 @@ const styles = StyleSheet.create({
     margin: 4,
     // flex: 1,
     justifyContent: 'space-between', // Ensure equal spacing between tabs
-    paddingHorizontal: 10,
-    height: Platform.OS === 'ios' ? 55 : 45,
+    paddingHorizontal: 8,
+    height: Platform.OS === 'ios' ? 60 : 45,
   },
   tabBarItemStyle: {
-    height: Platform.OS === 'ios' ? 55 : 45,
+    height: Platform.OS === 'ios' ? 60 : 45,
     padding: 4,
     marginTop: 10,
-    bottom: 8,
+    bottom: Platform.OS === 'ios' ? 14 : 8,
     alignItems: 'center',
     justifyContent: 'center',
-    // justifyContent: 'space-between', // Ensure equal spacing between tabs
   },
   roundedCircle: {
     height: 20,

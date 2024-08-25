@@ -432,6 +432,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.inputBg,
     borderRadius: 10,
     paddingHorizontal: 20,
+    height: 180,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
   },

@@ -387,13 +387,15 @@ export const ExploreMaps = () => {
     }
   };
 
-  console.log('drawing', drawing);
   return (
-    <Screen paddingHorizontal={10} showKeyboardAware={false}>
-      <FilterHeader
-        onFocusInput={onFocusInput}
-        handleFilter={togglePropertyModal}
-      />
+    <Screen padding={0} paddingHorizontal={0} showKeyboardAware={false}>
+      <View style={{paddingHorizontal: 20, paddingTop: 5}}>
+        <FilterHeader
+          onFocusInput={onFocusInput}
+          handleFilter={togglePropertyModal}
+        />
+      </View>
+
       <View>
         <View
           style={[

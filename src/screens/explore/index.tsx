@@ -321,6 +321,7 @@ export const Explore = () => {
           flexGrow: 1,
           backgroundColor: Colors.light.background,
           paddingTop: 20,
+          width: '100%',
         }}>
         <FilterHeader
           onFocusInput={onFocusInput}
@@ -341,7 +342,13 @@ export const Explore = () => {
           // onScrollToTop={onRefresh}
           renderItem={({item, index}: any) => {
             if (index < 1) {
-              return <PropertyCard item={item} handleClick={handleCard} />;
+              return (
+                <PropertyCard
+                  sliderWidth={'100%'}
+                  item={item}
+                  handleClick={handleCard}
+                />
+              );
             }
             return null;
           }}
@@ -413,11 +420,19 @@ export const Explore = () => {
             contentContainerStyle={{
               marginTop: 3,
               paddingHorizontal: 3,
+              overflow: 'hidden',
+              width: '100%',
             }}
             // onScrollToTop={onRefresh}
             renderItem={({item, index}: any) => {
               if (index > 0) {
-                return <PropertyCard item={item} handleClick={handleCard} />;
+                return (
+                  <PropertyCard
+                    sliderWidth={'100%'}
+                    item={item}
+                    handleClick={handleCard}
+                  />
+                );
               }
               return null;
             }}

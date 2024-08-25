@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState} from 'react';
 import {AddCardModal, HeaderBackButtonTitle, TopSpace} from '@components';
 import {useIntl} from '@context';
@@ -9,6 +10,7 @@ import {PlusIcon} from '@svgs';
 import HistoryCard from './component/HistoryCard';
 import {convertCardNumberToMaskDigit} from '@helpers';
 import {useNavigation} from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 export const PaymentMethods = () => {
   const {intl} = useIntl();
@@ -22,33 +24,39 @@ export const PaymentMethods = () => {
   };
   return (
     <SafeAreaView style={globalStyles.wrapScreen}>
-      <HeaderBackButtonTitle
-        text={intl.formatMessage({id: 'paymentMethodScreen.header'})}
-      />
-      <TopSpace top={20} />
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          flexGrow: 1,
+        }}>
+        <HeaderBackButtonTitle
+          text={intl.formatMessage({id: 'paymentMethodScreen.header'})}
+        />
+        <TopSpace top={20} />
 
-      <HistoryCard
-        cardNumber={convertCardNumberToMaskDigit('123123213123213')}
-      />
-      <HistoryCard
-        cardNumber={convertCardNumberToMaskDigit('123123213123213')}
-      />
-      <TopSpace top={10} />
+        <HistoryCard
+          cardNumber={convertCardNumberToMaskDigit('123123213123213')}
+        />
+        <HistoryCard
+          cardNumber={convertCardNumberToMaskDigit('123123213123213')}
+        />
+        <TopSpace top={10} />
 
-      <TouchableOpacity onPress={toggleCard} style={styles.rowBtn}>
-        <PlusIcon fill={Colors.light.primaryBtn} width={20} height={20} />
-        <Text style={styles.addNewText}>
-          {/* */}
-          {intl.formatMessage({id: 'buttons.add-new'})}
-          {/* ADD NEW */}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={toggleCard} style={styles.rowBtn}>
+          <PlusIcon fill={Colors.light.primaryBtn} width={20} height={20} />
+          <Text style={styles.addNewText}>
+            {/* */}
+            {intl.formatMessage({id: 'buttons.add-new'})}
+            {/* ADD NEW */}
+          </Text>
+        </TouchableOpacity>
 
-      <AddCardModal
-        isVisible={showAddCard}
-        toggleVisible={toggleCard}
-        handleAddMakePayment={handleAddMakePayment}
-      />
+        <AddCardModal
+          isVisible={showAddCard}
+          toggleVisible={toggleCard}
+          handleAddMakePayment={handleAddMakePayment}
+        />
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
