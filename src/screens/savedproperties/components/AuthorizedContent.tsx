@@ -25,7 +25,7 @@ const AuthorizedContent = ({sortList}) => {
   const [isFocus, setIsFocus] = useState(false);
 
   const handleCard = () => {
-    navigation.navigate('ExploreProperty');
+    navigation.navigate('PropertyScreen');
   };
   const renderProperty = ({item}: any) => {
     return (

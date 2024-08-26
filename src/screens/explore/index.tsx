@@ -52,7 +52,7 @@ export const Explore = () => {
   //   setShowButton(offsetY > 100);
   // };
   const handleCard = () => {
-    navigation.navigate('ExploreProperty');
+    navigation.navigate('PropertyScreen');
   };
 
   const togglePropertiesFeature = () => {

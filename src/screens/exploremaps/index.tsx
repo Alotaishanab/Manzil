@@ -98,7 +98,7 @@ export const ExploreMaps = () => {
   };
 
   const handleCard = () => {
-    navigation.navigate('ExploreProperty');
+    navigation.navigate('PropertyScreen');
   };
 
   const [showArea, setShowArea] = useState(false);

@@ -4,7 +4,7 @@ import {View, Text} from 'react-native';
 import Share from 'react-native-share';
 import {Colors} from '@colors';
 import {styles} from '../styles';
-import {globalStyles} from '../../../../src/styles/globalStyles';
+import {globalStyles} from '../../../styles/globalStyles';
 import {AreaIcon, LandIcon, LocationPinIcon} from '@svgs';
 import {useIntl} from '@context';
 import {TopSpace} from '@components';

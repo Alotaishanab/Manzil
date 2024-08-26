@@ -20,7 +20,7 @@ const PropertiesCard = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
   const handleCard = () => {
-    navigation.navigate('LandPropertyDetails');
+    navigation.navigate('PropertyScreen');
   };
   return (
     <TouchableOpacity onPress={handleCard} style={styles.cardWrapper}>

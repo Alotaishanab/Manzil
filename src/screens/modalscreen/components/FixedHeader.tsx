@@ -4,8 +4,8 @@ import React from 'react';
 import {StyleSheet, Text} from 'react-native';
 import {TouchableOpacity} from 'react-native';
 import {View} from 'react-native';
-import {fonts} from '../../../../src/assets/fonts';
-import {globalStyles} from '../../../../src/styles/globalStyles';
+import {fonts} from '../../../assets/fonts';
+import {globalStyles} from '../../../styles/globalStyles';
 import {useNavigation} from '@react-navigation/native';
 
 const FixedHeader = () => {

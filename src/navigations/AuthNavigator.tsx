@@ -17,7 +17,7 @@ import {
   ExploreSearch,
   FilterProperty,
   ForgotPassword,
-  LandPropertyDetails,
+  PropertyScreen,
   ListedProperties,
   Login,
   Notifications,
@@ -137,8 +137,8 @@ export const AuthNavigator = () => {
       <AuthStack.Screen name="ExploreSearch" component={ExploreSearch} />
       <AuthStack.Screen name="FilterProperty" component={FilterProperty} />
       <AuthStack.Screen
-        name="LandPropertyDetails"
-        component={LandPropertyDetails}
+        name="PropertyScreen"
+        component={PropertyScreen}
       />
       <AuthStack.Screen name="ExploreProperty" component={ExploreProperty} />
       <AuthStack.Screen name="AddProperties" component={AddProperties} />

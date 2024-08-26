@@ -9,7 +9,7 @@ import {
   ShareIcon,
 } from '@svgs';
 
-import {globalStyles} from '../../../../src/styles/globalStyles';
+import {globalStyles} from '../../../styles/globalStyles';
 import {useNavigation} from '@react-navigation/native';
 
 const TransparentHeader = () => {

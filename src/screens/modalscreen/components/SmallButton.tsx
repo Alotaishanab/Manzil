@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {Colors} from '@colors';
-import {fonts} from '../../../../src/assets/fonts';
+import {fonts} from '../../../assets/fonts';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 import * as SVGs from '../../../assets/svgs';
 
