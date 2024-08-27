@@ -1,12 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import TitleValueRow from '../../agencydetails/components/TitleValueRow';
-import TitleArrowIconWrap from '../../agencydetails/components/TitleArrowIconWrap';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { useIntl } from '@context';
 import { CustomButton, TopSpace } from '@components';
 import { useNavigation } from '@react-navigation/native';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+// Define TitleArrowIconWrap component directly in this file
+const TitleArrowIconWrap: React.FC<{
+  headingTitle: string;
+  showIcon?: boolean;
+  showRightArrowToggle?: boolean;
+  isVisible: boolean;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  style?: object;
+}> = ({ headingTitle, showIcon = true, showRightArrowToggle = true, isVisible, setIsVisible, style }) => {
+  return (
+    <View style={styles.titleWrap}>
+      <Text style={[styles.title, style]}>{headingTitle}</Text>
+    </View>
+  );
+};
+
+// Define TitleValueRow component directly in this file
+const TitleValueRow: React.FC<{ title: string; value: string; style?: { titleStyle?: object; valueStyle?: object } }> = ({ title, value, style }) => {
+  return (
+    <View style={styles.row}>
+      <Text style={[styles.title, style?.titleStyle]}>{title}</Text>
+      <Text style={[styles.value, style?.valueStyle]}>{value}</Text>
+    </View>
+  );
+};
 
 const AgencyDetails: React.FC = () => {
   const { intl } = useIntl();
@@ -35,7 +59,7 @@ const AgencyDetails: React.FC = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <TitleArrowIconWrap
         showIcon={false}
         headingTitle={intl.formatMessage({
@@ -44,25 +68,30 @@ const AgencyDetails: React.FC = () => {
         showRightArrowToggle={false}
         isVisible={showAuthorityInfo}
         setIsVisible={setShowAuthorityInfo}
+        style={styles.titleText} // Apply custom text style to title
       />
 
+      {/* Use the locally defined TitleValueRow component */}
       <TitleValueRow
         title={intl.formatMessage({
           id: 'agencyScreen.advertiser-name',
         })}
         value={'Savills Agency'}
+        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
       />
       <TitleValueRow
         title={intl.formatMessage({
           id: 'agencyScreen.advertiser-type',
         })}
         value={'Agency'}
+        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
       />
       <TitleValueRow
         title={intl.formatMessage({
           id: 'agencyScreen.advertiser-date-registration',
         })}
         value={'2024/06/29'}
+        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
       />
 
       <View style={styles.savisWrap}>
@@ -81,16 +110,14 @@ const AgencyDetails: React.FC = () => {
         borderWidth={2} // Set border width
         textColor={'green'} // Set text color to match the border
       />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
-    width: width, // Ensure it fits the screen width
-    height: height, // Ensure it fits the screen height
     backgroundColor: 'white', // Ensure proper background color
   },
   savisWrap: {
@@ -98,8 +125,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   savisText: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: 'fonts.primary.regular', // Updated to use the primary font
+    color: '#000',
+  },
+  textStyle: {
+    fontSize: 18, // Set the font size to 18
+    fontFamily: 'fonts.primary.regular', // Use the primary font family
+    color: '#000', // Set default text color
+  },
+  titleText: {
+    fontSize: 18, // Update size to 18
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'fonts.primary.regular', // Updated to use the primary font
+  },
+  leftText: {
+    fontSize: 18,
+    fontWeight: 'normal', // Normal weight for left-side text (title)
+    color: '#000',
+    fontFamily: 'fonts.primary.regular',
+  },
+  rightText: {
+    fontSize: 18,
+    fontWeight: 'bold', // Bold weight for right-side text (value)
+    color: '#000',
+    fontFamily: 'fonts.primary.regular',
+  },
+  valueText: {
+    fontSize: 18, // Update size to 18
+    fontWeight: 'bold', // Bold weight for the right side text
+    color: '#000',
+    fontFamily: 'fonts.primary.regular', // Updated to use the primary font
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  titleWrap: {
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 20, // Adjust as needed for your title style
+    fontFamily: 'fonts.primary.regular', // Ensure the primary font is used
+    fontWeight: 'bold', // Bold for the main title
+    color: '#000',
   },
 });
 

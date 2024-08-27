@@ -1,27 +1,20 @@
 import * as React from 'react';
-import Svg, {Path} from 'react-native-svg';
+import { Image } from 'react-native';
 
-export const ShareIcon = props => {
-  const {width, height} = props;
+// Assuming send.png is in the same directory
+const sendIcon = require('../images/send.png');
+
+export const ShareIcon = (props) => {
+  const { width, height } = props;
   return (
-    <Svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={width || 227}
-      height={height || 119}
-      fill="none"
-      {...props}>
-      <Svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={119}
-        height={119}
-        x={54}
-        fill="#222"
-        opacity="100%"
-        viewBox="0 0 24 24"
-        {...props}>
-        <Path fill="none" d="M0 0h24v24H0V0z" />
-        <Path d="m16 5-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3a2 2 0 0 1 2 2z" />
-      </Svg>
-    </Svg>
+    <Image
+      source={sendIcon} // Use the PNG image
+      style={{
+        width: width || 24, // Set a default width if not provided
+        height: height || 24, // Set a default height if not provided
+        resizeMode: 'contain', // Ensures the image maintains aspect ratio
+      }}
+      {...props} // Pass any additional props
+    />
   );
 };

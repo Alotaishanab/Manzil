@@ -37,7 +37,7 @@ export const AgencyDetails = () => {
     setIsModalVisible(!isModalVisible);
   };
   const handleCard = () => {
-    navigation.navigate('ExploreProperty');
+    navigation.navigate('PropertyScreen');
   };
   return (
     <Screen showKeyboardAware={false}>

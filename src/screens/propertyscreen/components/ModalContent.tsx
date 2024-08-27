@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import PropertyDetails from './PropertyDetails';
 import MapComponent from './MapComponent';
 import GreenBar from './GreenBar'; // Import the GreenBar component
 import DescriptionBox from './DescriptionBox'; // Import the DescriptionBox component
 import PropertyFeatures from './PropertyFeatures';
 import AdInfo from './AdInfo';
-import AgencyDetails from './AgencyDetails'
+import AgencyDetails from './AgencyDetails';
+import { fonts } from '../../../assets/fonts/index';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -45,14 +46,15 @@ const ModalContent: React.FC<ModalContentProps> = ({
         <GreenBar />
       </View>
 
-      <PropertyDetails />
-      <DescriptionBox />
-      <MapComponent />
-      <PropertyFeatures />
-      <AdInfo />
-      <AgencyDetails />
-
-     
+      <View style={styles.contentContainer}>
+        <PropertyDetails />
+        <PropertyFeatures style={styles.propertyFeatures} />
+        <DescriptionBox />
+        <MapComponent />
+       
+        <AdInfo />
+        <AgencyDetails />
+      </View>
     </ScrollView>
   );
 };
@@ -70,19 +72,17 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     position: 'relative',
     backgroundColor: 'white',
-    marginTop: -40,
+    marginTop: -55,
   },
   leftText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#fff',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular, // Use Jost Regular
   },
   rightText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#fff',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular, // Use Jost Regular
   },
   priceContainer: {
     paddingVertical: 10,
@@ -90,15 +90,20 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 32,
-    fontWeight: 'bold',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular, // Use Jost Regular
     color: '#000',
   },
   detailsText: {
     fontSize: 16,
     color: '#000',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular, // Use Jost Regular
     marginBottom: 20,
+  },
+  contentContainer: {
+    paddingBottom: 30, // Adjust padding to ensure proper spacing between sections
+  },
+  propertyFeatures: {
+    marginTop: 20, // Add margin to separate from the DescriptionBox if needed
   },
   descriptionBox: {
     marginBottom: 20, // Ensures consistent spacing with detailsText and MapComponent
@@ -106,7 +111,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     marginBottom: 10,
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular, // Use Jost Regular
     color: '#000',
   },
   square: {

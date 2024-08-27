@@ -1,6 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
+  Animated,
+  FlatList,
   ImageBackground,
   Text,
   TouchableOpacity,
@@ -8,7 +10,6 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import Swiper from 'react-native-swiper';
 import {globalStyles} from '../../styles/globalStyles';
 import {fonts} from '../../../src/assets/fonts';
 import {Colors} from '@colors';
@@ -24,31 +25,43 @@ import {
 } from '@svgs';
 import {useIntl} from '@context';
 
+const {width: screenWidth} = Dimensions.get('window');
+const ITEM_WIDTH = screenWidth * 0.8;
+const SPACING = 20;
+const STACK_OFFSET = 60;
+
 export const PropertyCard = ({
   item,
-  marginBottom = 5,
-  sliderWidth = '95%',
+  marginBottom = 15,
   handleClick = () => {},
 }) => {
   const {intl} = useIntl();
-  const [currentIndex, setCurrentIndex] = React.useState(0); // state to track the current index
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const scrollX = React.useRef(new Animated.Value(0)).current;
+
   const images = [
-    {uri: 'https://picsum.photos/200/300', id: 1},
-    {uri: 'https://picsum.photos/200/301', id: 2},
-    {uri: 'https://picsum.photos/200/302', id: 3},
-    {uri: 'https://picsum.photos/200/303', id: 4},
+    {uri: 'https://picsum.photos/500/300', id: 1},
+    {uri: 'https://picsum.photos/500/301', id: 2},
+    {uri: 'https://picsum.photos/500/302', id: 3},
+    {uri: 'https://picsum.photos/500/303', id: 4},
   ];
+
   const options = {
-    title: 'Here is title',
+    title: 'Share this property',
+    message: 'Check out this property!',
+    url: images[currentIndex]?.uri,
   };
+
   const handleShare = () => {
     Share.open(options)
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
+      .then((res) => console.log(res))
+      .catch((err) => {
         err && console.log(err);
       });
+  };
+
+  const handleImageChange = (index) => {
+    setCurrentIndex(index);
   };
 
   return (
@@ -59,109 +72,109 @@ export const PropertyCard = ({
           marginBottom: marginBottom,
         },
       ]}>
-      <Swiper
-        style={styles.wrapper}
-        showsButtons={false}
-        loop={false}
-        // width={width}
-        height={300}
-        width={Dimensions.get('screen').width}
-        index={currentIndex}
-        onIndexChanged={index => setCurrentIndex(index)} // update index on change
-        paginationStyle={styles.pagination}
-        renderPagination={(index, total) => (
-          <View style={styles.pagination}>
-            <GalleryIcon width={18} height={18} />
-            <Text style={styles.paginationText}>
-              {images?.length > 0 ? index + 1 : 0}
-              {images?.length === 0 ? `/${total - 1}` : `/${total}`}
-            </Text>
-          </View>
-        )}>
-        {images?.map((image, index) => (
-          <View
-            key={index}
-            style={[
-              styles.slide,
-              {
-                width: sliderWidth,
-              },
-            ]}>
-            <ImageBackground
-              resizeMode="cover"
-              source={{uri: image.uri}}
-              imageStyle={{borderRadius: 30}}
-              style={styles.imageBgStyle}>
-              <TouchableOpacity
-                style={{margin: 12, marginRight: 30, alignSelf: 'flex-end'}}>
-                <HeartIcon width={30} height={30} />
-              </TouchableOpacity>
-            </ImageBackground>
-          </View>
-        ))}
-      </Swiper>
+      <View style={styles.carouselContainer}>
+        <Animated.FlatList
+          data={images}
+          horizontal
+          keyExtractor={(item) => item.id.toString()}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={ITEM_WIDTH + SPACING}
+          decelerationRate="fast"
+          pagingEnabled
+          onScroll={Animated.event(
+            [{nativeEvent: {contentOffset: {x: scrollX}}}],
+            {useNativeDriver: false},
+          )}
+          style={{overflow: 'visible'}}
+          contentContainerStyle={{paddingHorizontal: SPACING}}
+          renderItem={({item, index}) => {
+            const inputRange = [
+              (index - 1) * (ITEM_WIDTH + SPACING),
+              index * (ITEM_WIDTH + SPACING),
+              (index + 1) * (ITEM_WIDTH + SPACING),
+            ];
 
-      <TouchableOpacity activeOpacity={0.8} onPress={handleClick}>
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.8, 1, 0.8],
+              extrapolate: 'clamp',
+            });
+
+            const translateX = scrollX.interpolate({
+              inputRange,
+              outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
+              extrapolate: 'clamp',
+            });
+
+            return (
+              <Animated.View
+                style={[
+                  styles.imageContainer,
+                  {
+                    transform: [{scale}, {translateX}],
+                  },
+                ]}>
+                <ImageBackground
+                  source={{uri: item.uri}}
+                  style={styles.imageBgContainer}
+                  imageStyle={styles.imageBgStyle}>
+                  {/* Save Button on Image */}
+                  <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.8}>
+                    <HeartIcon width={30} height={30} />
+                  </TouchableOpacity>
+                </ImageBackground>
+              </Animated.View>
+            );
+          }}
+        />
+      </View>
+
+      <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
         <TopSpace top={10} />
-        <Text style={styles.serialNoText}>
-          {intl.formatMessage({
-            id: 'explore.serial',
-          })}{' '}
-          799,997
-        </Text>
-        <View style={{marginHorizontal: 8}}>
-          <Text style={styles.descriptionText}>
-            {intl.formatMessage({
-              id: 'explore.2-bed-flat-rent',
-            })}
+        
+        {/* Price and Location */}
+        <View style={styles.priceLocationContainer}>
+          <Text style={styles.priceText}>
+          {item.price ? item.price.toLocaleString() : '799,997'}﷼
           </Text>
-          <TopSpace top={3} />
           <Text style={styles.placeText}>
-            {intl.formatMessage({
-              id: 'explore.riyadh-saudia',
-            })}
+            Riyadh, Saudi Arabia
           </Text>
-          <TopSpace top={15} />
-          <View style={globalStyles.simpleRow}>
-            <View
-              style={[
-                globalStyles.simpleRow,
-                {
-                  marginRight: 20,
-                },
-              ]}>
-              <BedIcon width={25} height={25} />
-              <Text style={styles.countText}>2</Text>
+        </View>
+        
+        <TopSpace top={5} />
+        <View style={styles.infoContainer}>
+          <Text style={styles.descriptionText}>
+            2 bed flat to rent
+          </Text>
+          
+          {/* Adjusted TopSpace value here */}
+          <TopSpace top={5} />
+          <View style={styles.iconRow}>
+            <View style={styles.iconWrapper}>
+              <BedIcon width={20} height={20} />
+              <Text style={styles.countText}>2 Beds</Text>
             </View>
 
-            <View
-              style={[
-                globalStyles.simpleRow,
-                {
-                  marginRight: 20,
-                },
-              ]}>
-              <AreaIcon width={25} height={25} />
+            <View style={styles.iconWrapper}>
+              <BathroomIcon width={28} height={28} />
+              <Text style={styles.countText}>2 Baths</Text>
+            </View>
+
+            <View style={styles.iconWrapper}>
+              <AreaIcon width={24} height={24} />
               <Text style={styles.countText}>819 sq ft</Text>
-            </View>
-
-            <View style={globalStyles.simpleRow}>
-              <BathroomIcon width={25} height={25} />
-              <Text style={styles.countText}>2</Text>
             </View>
           </View>
         </View>
 
-        <TopSpace top={15} />
+        <TopSpace top={20} />
         <View style={styles.footerWrap}>
           <Text style={styles.dateText}>
-            {intl.formatMessage({
-              id: 'explore.added-on',
-            })}{' '}
-            09/05/2024
+            Added on 09/05/2024
           </Text>
           <TouchableOpacity activeOpacity={0.8} onPress={handleShare}>
-            <ShareIcon width={32} height={32} />
+            <ShareIcon width={28} height={28} />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -169,78 +182,72 @@ export const PropertyCard = ({
   );
 };
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   mainWrapper: {
-    paddingBottom: 10,
-    borderRadius: 25,
-    shadowColor: '#000',
+    paddingVertical: 15,
+    borderRadius: 20,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
     backgroundColor: Colors.light.background,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-    marginBottom: 5,
+    shadowRadius: 8,
+    elevation: 5,
+    marginBottom: 15,
     width: '100%',
-    // overflow: 'hidden',
+    overflow: 'hidden',
   },
-  wrapper: {
-    // zIndex: 1000, overflow: 'visible'
-  },
-  slide: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '95%',
-    // marginRight: 5,
+  carouselContainer: {
     height: 300,
-    borderRadius: 25,
-    // overflow: 'hidden',
-
-    // height: 300, // Set the height of the slider
+    alignItems: 'center',
   },
-  pagination: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    height: 40,
-    width: '25%',
-    borderRadius: 25,
-    flexDirection: 'row',
+  imageContainer: {
+    width: ITEM_WIDTH,
+    height: 300,
+    marginHorizontal: SPACING / 2,
+    borderRadius: 20,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  imageBgContainer: {
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.light.background,
-  },
-  paginationText: {
-    color: Colors.light.primaryBtn,
-    fontFamily: fonts.primary.regular,
-    marginLeft: 10,
-    fontSize: 12,
   },
   imageBgStyle: {
-    width: '100%',
-    borderRadius: 25,
-    overflow: 'hidden',
-    height: '100%', // Match the height of the slider
-    // alignItems: 'flex-end',
-    // padding: 15,
+    borderRadius: 20,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 15,
+    padding: 5,
+  },
+  priceLocationContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+  },
+  priceText: {
+    color: Colors.light.headingTitle,
+    fontSize: 28,
+    fontFamily: fonts.primary.bold,
+    marginBottom: 5,
+  },
+  infoContainer: {
+    paddingHorizontal: 20,
   },
   placeText: {
     color: Colors.light.serialNoGreen,
-    fontSize: 14,
-    fontFamily: fonts.primary.regular,
-  },
-  serialNoText: {
-    marginLeft: 20,
-    color: Colors.light.headingTitle,
-    fontSize: 22,
-    fontFamily: fonts.primary.regular,
+    fontSize: 18,
+    fontFamily: fonts.primary.medium,
   },
   descriptionText: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
-    fontSize: 14,
+    fontSize: 16,
   },
   countText: {
     marginLeft: 5,
@@ -248,14 +255,25 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     fontSize: 14,
   },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 5,  // Adjusted marginTop here to move icons up
+  },
+  iconWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footerWrap: {
     flexDirection: 'row',
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   dateText: {
     color: Colors.light.serialNoGreen,
     fontFamily: fonts.primary.regular,
-    fontSize: 11,
+    fontSize: 12,
   },
 });

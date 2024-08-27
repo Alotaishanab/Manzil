@@ -1,11 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { SafeAreaView, Animated, PanResponder, TouchableOpacity, Image, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  SafeAreaView,
+  Animated,
+  PanResponder,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Alert
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import ModalHeader from './components/ModalHeader';
 import ImageGallery from './components/ImageGallery';
 import TopIcons from './components/TopIcons';
 import ModalContent from './components/ModalContent';
+import { GenericModal } from '@components'; // Ensure the path is correct if GenericModal is still needed
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -16,6 +26,7 @@ export const PropertyScreen: React.FC = () => {
   const expandedHeight = screenHeight * 0.80;
   const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
   const scrollOffsetY = useRef(0).current;
 
   const panResponder = useRef(
@@ -44,20 +55,6 @@ export const PropertyScreen: React.FC = () => {
     console.log(`Placeholder ${index + 1} clicked`);
   };
 
-  const handleReport = () => {
-    Alert.alert("Report", "Would you like to report this property?", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      { text: "OK", onPress: () => console.log("Reported") }
-    ]);
-  };
-
-  const handleSave = () => {
-    Alert.alert("Save", "Property has been saved.");
-  };
-
   const handleShare = () => {
     Alert.alert("Share", "Share this property with others.");
   };
@@ -66,16 +63,15 @@ export const PropertyScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={[styles.closeButton, { top: insets.top + 15 }]}
-        onPress={() => navigation.goBack()} // Logic for X button to navigate back
+        onPress={() => navigation.goBack()} 
       >
         <Image source={require('./assets/icons/close.png')} style={styles.closeIconImage} />
       </TouchableOpacity>
 
       <TopIcons 
         topInset={insets.top} 
-        onReportPress={handleReport}  // Connect report button
-        onSavePress={handleSave}      // Connect save button
-        onSharePress={handleShare}    // Connect share button
+        onSavePress={() => Alert.alert("Save", "Save functionality is not implemented yet.")}
+        onSharePress={handleShare}    
       />
 
       <ImageGallery imagesCount={9} onPlaceholderClick={handlePlaceholderClick} expandedHeight={expandedHeight} />
@@ -89,6 +85,12 @@ export const PropertyScreen: React.FC = () => {
           scrollOffsetY={scrollOffsetY}
         />
       </Animated.View>
+
+      {/* If Generic Modal is still needed, otherwise remove it */}
+      <GenericModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };

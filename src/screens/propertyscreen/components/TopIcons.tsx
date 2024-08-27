@@ -1,4 +1,3 @@
-// components/TopIcons.tsx
 import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import heartIcon from '../assets/icons/heart.png';
@@ -7,16 +6,17 @@ import sendIcon from '../assets/icons/send.png';
 
 interface TopIconsProps {
   topInset: number;
+  onReportPress: () => void;  // Handler for the report modal
 }
 
-const TopIcons: React.FC<TopIconsProps> = ({ topInset }) => {
+const TopIcons: React.FC<TopIconsProps> = ({ topInset, onReportPress }) => {
   return (
     <View style={[styles.topRightContainer, { top: topInset + 15 }]}>
       <View style={styles.iconGroupContainer}>
         <TouchableOpacity style={styles.iconButton}>
           <Image source={heartIcon} style={styles.iconImage} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={onReportPress}>
           <Image source={forbiddenIcon} style={styles.iconImage} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconButton}>

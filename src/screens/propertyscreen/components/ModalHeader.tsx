@@ -57,13 +57,11 @@ const styles = StyleSheet.create({
   },
   leftText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#fff',
     fontFamily: 'Jost',
   },
   rightText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#fff',
     fontFamily: 'Jost',
   },
@@ -81,14 +79,13 @@ const styles = StyleSheet.create({
   contactButton: {
     backgroundColor: 'green',
     paddingVertical: 15,
-    borderRadius: 20,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
   contactButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
     fontFamily: 'Jost',
   },
 });

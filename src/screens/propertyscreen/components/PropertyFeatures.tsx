@@ -50,12 +50,6 @@ const PropertyFeatures: React.FC = () => {
 
   return (
     <View>
-      <Text style={styles.propertiesFeatues}>
-        {intl.formatMessage({
-          id: 'addpropertyScreen.property-features',
-        })}
-      </Text>
-
       <FlatList
         data={propertiesFeatures}
         horizontal
