@@ -1,7 +1,7 @@
-import {StyleSheet} from 'react-native';
-import {Colors} from '@colors';
-import {width} from '../../hooks/useDimension';
-import {fonts} from '../../../src/assets/fonts';
+import { StyleSheet } from 'react-native';
+import { Colors } from '@colors';
+import { width } from '../../hooks/useDimension';
+import { fonts } from '../../../src/assets/fonts';
 
 export const styles = StyleSheet.create({
   filterSquareBtn: {
@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   firstFlatListContentContainerStyle: {
-    paddingHorizontal: 2,
+    paddingHorizontal: 10, // Increased padding for better spacing
     marginBottom: 4,
     overflow: 'hidden',
     width: '100%',
@@ -29,7 +29,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
     borderRadius: 15,
     elevation: 5,
     position: 'absolute',
@@ -51,11 +50,12 @@ export const styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
   },
   topAgencyWrap: {
-    backgroundColor: Colors.light.greyBg,
+    backgroundColor: 'white',
     borderRadius: 30,
     paddingTop: 20,
     paddingHorizontal: 10,
     marginHorizontal: 0,
+    paddingBottom: 20, // Added padding for bottom
   },
   topAgencyText: {
     color: Colors.light.headingTitle,
@@ -68,16 +68,37 @@ export const styles = StyleSheet.create({
     fontSize: 13,
   },
   agencyBtn: {
-    width: 100,
-    height: 150,
-    // backgroundColor: 'red',
-    borderRadius: 10,
-    marginRight: 10,
-    // marginBottom: 1,
+    width: width * 0.45, // Set a fixed width for each card
+    height: 180, // Adjusted height for card size
+    borderRadius: 15, // Border radius for smooth edges
+    marginRight: 15, // Margin for spacing between cards
+    overflow: 'hidden', // Ensure content doesn't spill over rounded corners
+    backgroundColor: '#fff',
+    borderColor: '#ccc', // Light gray border color for distinction
+    borderWidth: 1, // Thickness of the border
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15, // Increased shadow opacity for more depth
+    shadowRadius: 6, // Increased shadow radius for a softer shadow
+    elevation: 4, // Slightly increased elevation for better depth
   },
   agencyImg: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
+    width: '100%', // Full width to cover the card
+    height: '100%', // Full height to cover the card
+    resizeMode: 'contain', // Contain image within card dimensions
+    position: 'absolute', // Position absolutely to ensure it covers the entire card
+    top: 0, // Align the top of the image with the top of the card
+    left: 0, // Align the left of the image with the left of the card
+  },
+  agencyNameText: {
+    fontSize: 16, // Font size for readability
+    fontFamily: fonts.primary.medium,
+    color: Colors.light.background, // White text for better contrast
+    textAlign: 'center',
+    position: 'absolute', // Position text absolutely
+    bottom: 0, // Position text at the bottom of the card
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for text
+    width: '100%', // Full width for text background
+    paddingVertical: 5, // Padding for text
   },
 });

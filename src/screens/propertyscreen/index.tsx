@@ -7,7 +7,9 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  Alert
+  Alert,
+  ScrollView,
+  View, // Import View if not already imported
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -15,7 +17,7 @@ import ModalHeader from './components/ModalHeader';
 import ImageGallery from './components/ImageGallery';
 import TopIcons from './components/TopIcons';
 import ModalContent from './components/ModalContent';
-import { GenericModal } from '@components'; // Ensure the path is correct if GenericModal is still needed
+import { GenericModal, ReportAdModal } from '@components'; // Ensure the path is correct
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -27,7 +29,9 @@ export const PropertyScreen: React.FC = () => {
   const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isReportAdModalVisible, setReportAdModalVisible] = useState(false); // State for ReportAdModal
   const scrollOffsetY = useRef(0).current;
+  const scrollViewRef = useRef<ScrollView | null>(null); // Reference for the ScrollView
 
   const panResponder = useRef(
     PanResponder.create({
@@ -46,6 +50,10 @@ export const PropertyScreen: React.FC = () => {
           friction: 5,
         }).start(() => {
           setIsExpanded(toValue === expandedHeight);
+          if (toValue === collapsedHeight && scrollViewRef.current) {
+            // Reset scroll to top when the modal collapses
+            scrollViewRef.current.scrollTo({ y: 0, animated: true });
+          }
         });
       },
     })
@@ -57,6 +65,15 @@ export const PropertyScreen: React.FC = () => {
 
   const handleShare = () => {
     Alert.alert("Share", "Share this property with others.");
+  };
+
+  const handleTermsClick = () => {
+    navigation.navigate('TermsOfUse'); // Navigate to the Terms of Use screen
+  };
+
+  // Function to toggle ReportAdModal visibility
+  const toggleReportAdModal = () => {
+    setReportAdModalVisible(!isReportAdModalVisible);
   };
 
   return (
@@ -71,11 +88,13 @@ export const PropertyScreen: React.FC = () => {
       <TopIcons 
         topInset={insets.top} 
         onSavePress={() => Alert.alert("Save", "Save functionality is not implemented yet.")}
-        onSharePress={handleShare}    
+        onSharePress={handleShare}
+        onReportPress={toggleReportAdModal} // Pass the toggle function to TopIcons
       />
 
       <ImageGallery imagesCount={9} onPlaceholderClick={handlePlaceholderClick} expandedHeight={expandedHeight} />
 
+      {/* Render your animated modal content */}
       <Animated.View style={[styles.modalView, { height: animatedHeight }]}>
         <ModalHeader panHandlers={panResponder.panHandlers} />
         <ModalContent
@@ -83,14 +102,30 @@ export const PropertyScreen: React.FC = () => {
           expandedHeight={expandedHeight}
           onPlaceholderClick={handlePlaceholderClick}
           scrollOffsetY={scrollOffsetY}
+          scrollViewRef={scrollViewRef} // Pass the ScrollView ref to ModalContent
+          isExpanded={isExpanded} // Pass the isExpanded state to ModalContent
+          handleTermsClick={handleTermsClick} // Pass the handleTermsClick function to ModalContent
         />
       </Animated.View>
 
-      {/* If Generic Modal is still needed, otherwise remove it */}
-      <GenericModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-      />
+      {/* ReportAdModal for reporting ads */}
+      {isReportAdModalVisible && (
+        <View style={styles.reportAdModalOverlay}>
+          <ReportAdModal
+            isVisible={isReportAdModalVisible}
+            toggleVisible={toggleReportAdModal}
+            style={styles.reportAdModalVisible}
+          />
+        </View>
+      )}
+
+      {/* Generic Modal, if still needed */}
+      {isModalVisible && (
+        <GenericModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -126,7 +161,21 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 10,
     paddingBottom: 110,
-    zIndex: 100,
+    zIndex: 100, // Adjust the zIndex to control stacking order
+  },
+  reportAdModalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Backdrop effect
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 200, // Higher than any other component
+  },
+  reportAdModalVisible: {
+    zIndex: 201, // Even higher than the overlay to be safe
   },
 });
 

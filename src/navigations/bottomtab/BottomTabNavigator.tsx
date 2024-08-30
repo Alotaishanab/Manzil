@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React from 'react';
-import {Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import React, { useRef, useEffect } from 'react';
+import { Animated, Easing, Platform, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   Account,
   AddOptions,
@@ -15,7 +15,7 @@ import {
   Saved,
   SavedProperties,
 } from '@screens';
-import {Colors} from '@colors';
+import { Colors } from '@colors';
 import {
   ExploreIcon,
   FarmHouseIcon,
@@ -28,12 +28,11 @@ import {
   UserIcon,
   YardIcon,
 } from '@svgs';
-import {Text} from 'react-native';
-import {fonts} from '../../../src/assets/fonts';
-import {ExploreStack} from '../explorestack';
-import {useIntl} from '@context';
-import {AddPropertiesContent, GenericModal, TopSpace} from '@components';
-import {useNavigation} from '@react-navigation/native';
+import { fonts } from '../../../src/assets/fonts';
+import { ExploreStack } from '../explorestack';
+import { useIntl } from '@context';
+import { AddPropertiesContent, GenericModal, TopSpace } from '@components';
+import { useNavigation } from '@react-navigation/native';
 
 type TabStackParamList = {
   Account: undefined;
@@ -49,7 +48,7 @@ type TabStackParamList = {
 const Tab = createBottomTabNavigator<TabStackParamList>();
 
 export const BottomTabNavigator = () => {
-  const {intl} = useIntl();
+  const { intl } = useIntl();
   const navigation: any = useNavigation();
   const [modalVisible, setModalVisible] = React.useState(false);
   const toggleModal = () => {
@@ -68,14 +67,62 @@ export const BottomTabNavigator = () => {
     navigation.navigate('RequestProperty');
   };
 
-  const customText = ({text, focused}: any) => {
-    console.log('text', text);
+  // Animated values for scaling, rotating, and fading
+  const animations = {
+    ExploreStack: {
+      scale: useRef(new Animated.Value(1)).current,
+      rotate: useRef(new Animated.Value(0)).current,
+      opacity: useRef(new Animated.Value(1)).current,
+    },
+    ExploreMaps: {
+      scale: useRef(new Animated.Value(1)).current,
+      rotate: useRef(new Animated.Value(0)).current,
+      opacity: useRef(new Animated.Value(1)).current,
+    },
+    SavedProperties: {
+      scale: useRef(new Animated.Value(1)).current,
+      rotate: useRef(new Animated.Value(0)).current,
+      opacity: useRef(new Animated.Value(1)).current,
+    },
+    Account: {
+      scale: useRef(new Animated.Value(1)).current,
+      rotate: useRef(new Animated.Value(0)).current,
+      opacity: useRef(new Animated.Value(1)).current,
+    },
+    AddOptions: {
+      scale: useRef(new Animated.Value(1)).current,
+      rotate: useRef(new Animated.Value(0)).current,
+      opacity: useRef(new Animated.Value(1)).current,
+    },
+  };
+
+  const animateIcon = (routeName, focused) => {
+    console.log(`Animating ${routeName} - Focused: ${focused}`);
+    Animated.parallel([
+      Animated.timing(animations[routeName].scale, {
+        toValue: focused ? 1.5 : 1,
+        duration: 300,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animations[routeName].rotate, {
+        toValue: focused ? 1 : 0,
+        duration: 300,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animations[routeName].opacity, {
+        toValue: focused ? 1 : 0.7,
+        duration: 300,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const customText = ({ text, focused }: any) => {
     const colorSelectionText = () => {
-      if (focused) {
-        return Colors.light.primaryBtn;
-      } else {
-        return Colors.light.headingTitle;
-      }
+      return focused ? Colors.light.primaryBtn : Colors.light.headingTitle;
     };
 
     return (
@@ -119,16 +166,32 @@ export const BottomTabNavigator = () => {
     <>
       <Tab.Navigator
         detachInactiveScreens={true}
-        screenOptions={({route}) => ({
+        screenOptions={({ route }) => ({
           headerShown: false,
           lazy: true,
           tabBarShowLabel: true,
           tabBarStyle: [styles.tabBarStyle],
-
           tabBarItemStyle: styles.tabBarItemStyle,
           tabBarLabelPosition: 'below-icon',
-          tabBarIcon: ({color, focused}: any) => {
-            var Icon: any;
+          tabBarIcon: ({ color, focused }: any) => {
+            let Icon: any;
+            const animatedStyle = {
+              transform: [
+                { scale: animations[route.name].scale },
+                {
+                  rotate: animations[route.name].rotate.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+              ],
+              opacity: animations[route.name].opacity,
+            };
+
+            useEffect(() => {
+              animateIcon(route.name, focused);
+            }, [focused]);
+
             switch (route.name) {
               case 'ExploreStack':
                 Icon = ExploreIcon;
@@ -139,28 +202,25 @@ export const BottomTabNavigator = () => {
               case 'SavedProperties':
                 Icon = FavoriteIcon;
                 break;
-
               case 'AddOptions':
                 Icon = PlusIcon;
                 break;
               case 'AllAgencies':
                 Icon = YardIcon;
                 break;
-              // case 'Land':
-              //   Icon = LandTabIcon;
-              //   break;
               case 'Account':
-                // icon = "Discovery";
                 Icon = UserIcon;
                 break;
               default:
                 break;
             }
+
             return (
               <>
                 {route?.name === 'AddOptions' ? (
-                  <View
+                  <Animated.View
                     style={[
+                      animatedStyle,
                       styles.roundedCircle,
                       {
                         borderColor:
@@ -178,27 +238,30 @@ export const BottomTabNavigator = () => {
                           : Colors.light.headingTitle
                       }
                     />
-                  </View>
+                  </Animated.View>
                 ) : (
-                  <Icon
-                    width={22}
-                    height={22}
-                    fill={
-                      focused
-                        ? Colors.light.primaryBtn
-                        : Colors.light.headingTitle
-                    }
-                  />
+                  <Animated.View style={animatedStyle}>
+                    <Icon
+                      width={22}
+                      height={22}
+                      fill={
+                        focused
+                          ? Colors.light.primaryBtn
+                          : Colors.light.headingTitle
+                      }
+                    />
+                  </Animated.View>
                 )}
               </>
             );
           },
-        })}>
+        })}
+      >
         <Tab.Screen
           name="ExploreStack"
           component={ExploreStack}
           options={{
-            tabBarLabel: ({color, focused}) =>
+            tabBarLabel: ({ color, focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.explore',
@@ -212,7 +275,7 @@ export const BottomTabNavigator = () => {
           name="ExploreMaps"
           component={ExploreMaps}
           options={{
-            tabBarLabel: ({color, focused}) =>
+            tabBarLabel: ({ color, focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'addpropertyScreen.map',
@@ -227,7 +290,7 @@ export const BottomTabNavigator = () => {
           component={() => null}
           options={{
             tabBarLabel: () => null,
-            tabBarButton: ({color, focused}) => (
+            tabBarButton: ({ color, focused }) => (
               <View
                 style={{
                   alignItems: 'center',
@@ -239,11 +302,15 @@ export const BottomTabNavigator = () => {
                 <TouchableOpacity
                   style={styles.roundedCircle}
                   onPress={toggleModal}>
-                  <PlusIcon
-                    width={20}
-                    height={20}
-                    fill={Colors.light.headingTitle}
-                  />
+                  <Animated.View
+                    style={{ transform: [{ scale: animations['AddOptions'].scale }] }}
+                  >
+                    <PlusIcon
+                      width={20}
+                      height={20}
+                      fill={Colors.light.headingTitle}
+                    />
+                  </Animated.View>
                 </TouchableOpacity>
                 {customText({
                   text: intl.formatMessage({
@@ -259,7 +326,7 @@ export const BottomTabNavigator = () => {
           name="SavedProperties"
           component={SavedProperties}
           options={{
-            tabBarLabel: ({color, focused}) =>
+            tabBarLabel: ({ color, focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.saved',
@@ -273,7 +340,7 @@ export const BottomTabNavigator = () => {
           name="Account"
           component={Account}
           options={{
-            tabBarLabel: ({color, focused}) =>
+            tabBarLabel: ({ color, focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.account',
@@ -298,8 +365,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 20,
     margin: 4,
-    // flex: 1,
-    justifyContent: 'space-between', // Ensure equal spacing between tabs
+    marginBottom: 15,
+    justifyContent: 'space-between',
     paddingHorizontal: 8,
     height: Platform.OS === 'ios' ? 60 : 45,
   },
@@ -321,3 +388,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
 });
+
+export default BottomTabNavigator;

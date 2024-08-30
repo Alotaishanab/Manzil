@@ -26,8 +26,8 @@ const TitleArrowIconWrap: React.FC<{
 const TitleValueRow: React.FC<{ title: string; value: string; style?: { titleStyle?: object; valueStyle?: object } }> = ({ title, value, style }) => {
   return (
     <View style={styles.row}>
-      <Text style={[styles.title, style?.titleStyle]}>{title}</Text>
-      <Text style={[styles.value, style?.valueStyle]}>{value}</Text>
+      <Text style={[styles.titleText, style?.titleStyle]}>{title}</Text>
+      <Text style={[styles.valueText, style?.valueStyle]}>{value}</Text>
     </View>
   );
 };
@@ -68,7 +68,7 @@ const AgencyDetails: React.FC = () => {
         showRightArrowToggle={false}
         isVisible={showAuthorityInfo}
         setIsVisible={setShowAuthorityInfo}
-        style={styles.titleText} // Apply custom text style to title
+        style={{ titleStyle: styles.textStyle }} // Apply custom text style to title
       />
 
       {/* Use the locally defined TitleValueRow component */}
@@ -77,21 +77,21 @@ const AgencyDetails: React.FC = () => {
           id: 'agencyScreen.advertiser-name',
         })}
         value={'Savills Agency'}
-        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
+        style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }} // Pass the correct style prop
       />
       <TitleValueRow
         title={intl.formatMessage({
           id: 'agencyScreen.advertiser-type',
         })}
         value={'Agency'}
-        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
+        style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }} // Pass the correct style prop
       />
       <TitleValueRow
         title={intl.formatMessage({
           id: 'agencyScreen.advertiser-date-registration',
         })}
         value={'2024/06/29'}
-        style={{ titleStyle: styles.leftText, valueStyle: styles.rightText }} // Set the correct style for title and value
+        style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }} // Pass the correct style prop
       />
 
       <View style={styles.savisWrap}>
@@ -117,8 +117,17 @@ const AgencyDetails: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
+    width: width - 40, // Match the width with the AdInfo container
+    alignSelf: 'center', // Center the container horizontally
     padding: 20,
     backgroundColor: 'white', // Ensure proper background color
+    borderRadius: 20, // Add rounded corners for visual consistency
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+    marginVertical: 20,
   },
   savisWrap: {
     marginTop: 20,
@@ -126,36 +135,22 @@ const styles = StyleSheet.create({
   },
   savisText: {
     fontSize: 25,
-    fontWeight: 'bold',
     fontFamily: 'fonts.primary.regular', // Updated to use the primary font
     color: '#000',
   },
   textStyle: {
     fontSize: 18, // Set the font size to 18
+    alignItems: 'center',
     fontFamily: 'fonts.primary.regular', // Use the primary font family
     color: '#000', // Set default text color
   },
   titleText: {
     fontSize: 18, // Update size to 18
-    fontWeight: 'bold',
     color: '#000',
     fontFamily: 'fonts.primary.regular', // Updated to use the primary font
   },
-  leftText: {
-    fontSize: 18,
-    fontWeight: 'normal', // Normal weight for left-side text (title)
-    color: '#000',
-    fontFamily: 'fonts.primary.regular',
-  },
-  rightText: {
-    fontSize: 18,
-    fontWeight: 'bold', // Bold weight for right-side text (value)
-    color: '#000',
-    fontFamily: 'fonts.primary.regular',
-  },
   valueText: {
     fontSize: 18, // Update size to 18
-    fontWeight: 'bold', // Bold weight for the right side text
     color: '#000',
     fontFamily: 'fonts.primary.regular', // Updated to use the primary font
   },
@@ -164,14 +159,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 10,
+    paddingVertical: 10, // Add vertical padding for better spacing
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0', // Add bottom border for row separation
   },
   titleWrap: {
     marginBottom: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   title: {
     fontSize: 20, // Adjust as needed for your title style
     fontFamily: 'fonts.primary.regular', // Ensure the primary font is used
-    fontWeight: 'bold', // Bold for the main title
     color: '#000',
   },
 });

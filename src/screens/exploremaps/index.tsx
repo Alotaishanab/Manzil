@@ -6,6 +6,7 @@ import {
   PropertiesFeaturesModal,
   PropertyTypeModal,
   Screen,
+  PropertyCardSimple,
   TopSpace,
 } from '@components';
 import FilterHeader from '../../../src/components/molecules/FilterHeader';
@@ -21,9 +22,11 @@ import {TouchableOpacity} from 'react-native';
 // import {building} from '@assets';
 import {useIntl} from '@context';
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
-import MapProperty from './components/MapProperty';
+import {PropertyCard} from '@components';
 import {useNavigation} from '@react-navigation/native';
 import {ag1, ag2, ag5, ag6, ag7} from '@assets';
+import { throttle } from 'lodash';
+import { LatLng } from 'react-native-maps';
 
 export const ExploreMaps = () => {
   const {intl} = useIntl();
@@ -60,42 +63,49 @@ export const ExploreMaps = () => {
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
-  const handleMapPress = e => {
-    if (drawing) {
-      const newCoordinate = e.nativeEvent.coordinate;
-      setCoordinates(prevCoords => [...prevCoords, newCoordinate]);
-      setShowDrawMessage(false);
-    }
-  };
+  
 
-  const handleToggleDrawing = () => {
-    if (
-      drawing &&
-      coordinates.length > 1 &&
-      coordinates[0] !== coordinates[coordinates.length - 1]
-    ) {
-      setCoordinates([...coordinates, coordinates[0]]); // Close the loop when finishing drawing
-      handleViewProperties();
-    }
-    setDrawing(!drawing);
-    setShowDrawMessage(!drawing);
-  };
+  const throttledHandleMapPress = useCallback(
+    throttle((newCoordinate) => {
+      setCoordinates((prevCoords) => [...prevCoords, newCoordinate]);
+    }, 50), // Adjust this delay to tune responsiveness vs. performance
+    []
+  );
+  
+  const handleMapPress = useCallback(
+    (e) => {
+      if (drawing) {
+        const newCoordinate = e.nativeEvent.coordinate;
+        throttledHandleMapPress(newCoordinate);
+      }
+    },
+    [drawing, throttledHandleMapPress] // Include throttled function in the dependency array
+  );
 
-  const handleDeleteDrawing = () => {
-    setCoordinates([]);
-    setShowDrawMessage(false);
-  };
+const handleToggleDrawing = useCallback(() => {
+  if (drawing && coordinates.length > 1 && coordinates[0] !== coordinates[coordinates.length - 1]) {
+    setCoordinates((prevCoords) => [...prevCoords, prevCoords[0]]); // Close the loop
+    handleViewProperties();
+  }
+  setDrawing((prev) => !prev);
+  setShowDrawMessage((prev) => !prev);
+}, [drawing, coordinates]);
 
-  const handleViewProperties = () => {
-    if (
-      coordinates.length > 1 &&
-      coordinates[0] !== coordinates[coordinates.length - 1]
-    ) {
-      setCoordinates([...coordinates, coordinates[0]]); // Close the loop
-    }
-    setLoading(true); // Show loading screen
-    queryProperties(coordinates);
-  };
+
+const handleDeleteDrawing = useCallback(() => {
+  setCoordinates([]);
+  setShowDrawMessage(false);
+}, []);
+
+
+const handleViewProperties = useCallback(() => {
+  if (coordinates.length > 1 && coordinates[0] !== coordinates[coordinates.length - 1]) {
+    setCoordinates((prevCoords) => [...prevCoords, prevCoords[0]]); // Close the loop
+  }
+  setLoading(true);
+  queryProperties(coordinates);
+}, [coordinates]);
+  
 
   const handleCard = () => {
     navigation.navigate('PropertyScreen');
@@ -353,7 +363,7 @@ export const ExploreMaps = () => {
         setShowDrawArea(false);
       }, 1000);
   }, [drawing]);
-  console.log('drawe', drawing);
+  
   useEffect(() => {
     setSelectedAmenitiesItems(null);
   }, [selectedPropertyType]);
@@ -362,7 +372,7 @@ export const ExploreMaps = () => {
     setAminities(null);
   }, [selectedPropertyType]);
 
-  const queryProperties = async (coords: any) => {
+  const queryProperties = useCallback(async (coords: LatLng[]) => {
     try {
       console.log('Sending coordinates to the backend...', coords);
       const response = await fetch('YOUR_BACKEND_ENDPOINT', {
@@ -370,14 +380,13 @@ export const ExploreMaps = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({coordinates: coords}),
+        body: JSON.stringify({ coordinates: coords }),
       });
       const data = await response.json(); // Assumes the backend sends back JSON
-      // Process your data here
       console.log('Properties loaded:', data);
       Alert.alert(
         'Properties Loaded',
-        'Properties within the selected area have been loaded.',
+        'Properties within the selected area have been loaded.'
       );
     } catch (error) {
       console.error('Failed to load properties:', error);
@@ -385,42 +394,31 @@ export const ExploreMaps = () => {
     } finally {
       setLoading(false); // Ensure loading state is turned off whether the fetch succeeds or fails
     }
-  };
+  }, []);
 
   return (
     <Screen padding={0} paddingHorizontal={0} showKeyboardAware={false}>
-      <View style={{paddingHorizontal: 20, paddingTop: 5}}>
+      <View style={{ paddingHorizontal: 20, paddingTop: 5 }}>
         <FilterHeader
           onFocusInput={onFocusInput}
-          handleFilter={togglePropertyModal}
+          handleFilter={() => setShowPropertiesModal(true)}
         />
       </View>
 
       <View>
-        <View
-          style={[
-            StyleSheet.absoluteFillObject,
-            styles.container,
-            {
-              // height: height,
-              height: isFullScreen ? Dimensions.get('window').height : height,
-            },
-          ]}>
+        <View style={[StyleSheet.absoluteFillObject, styles.container, { height: isFullScreen ? Dimensions.get('window').height : height }]}>
           {showDrawArea && (
             <View style={styles.drawYourSearchAreaView}>
               <Text style={styles.drawSearchText}>
-                {intl.formatMessage({
-                  id: 'explore-search.draw-search-area',
-                })}
+                {intl.formatMessage({ id: 'explore-search.draw-search-area' })}
               </Text>
             </View>
           )}
 
           <MapView
             ref={mapRef}
-            provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+            provider={PROVIDER_GOOGLE}
             style={styles.map}
-            // style={isFullScreen ? styles.flex1 : styles.map}
             mapType={mapType}
             onMarkerDragEnd={handleToggleDrawing}
             onPanDrag={drawing ? handleMapPress : () => null}
@@ -431,83 +429,54 @@ export const ExploreMaps = () => {
               longitudeDelta: 0.0121,
             }}
             scrollEnabled={!drawing}
-            zoomEnabled={!drawing}>
-            {coordinates?.length > 0 && (
+            zoomEnabled={!drawing}
+          >
+            {coordinates.length > 0 && (
               <>
-                <Polyline
-                  coordinates={coordinates}
-                  strokeColor="#307e20"
-                  strokeWidth={4}
-                />
-                <Marker
-                  coordinate={coordinates[coordinates.length - 1]}
-                  pinColor="#307e20"
-                />
+                <Polyline coordinates={coordinates} strokeColor="#307e20" strokeWidth={4} />
+                <Marker coordinate={coordinates[coordinates.length - 1]} pinColor="#307e20" />
               </>
             )}
           </MapView>
         </View>
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => {
-            if (mapType === 'standard') {
-              setMapType('satellite');
-            } else {
-              setMapType('standard');
-            }
-          }}
-          style={styles.mapLayerBtn}>
+          onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
+          style={styles.mapLayerBtn}
+        >
           <MapLayerIcon width={30} height={30} />
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={handleToggleDrawing}
-          style={[
-            styles.mapLayerBtn,
-            {
-              top: 20,
-            },
-          ]}>
+          style={[styles.mapLayerBtn, { top: 20 }]}
+        >
           <PenIcon width={30} height={30} />
         </TouchableOpacity>
       </View>
       <BottomSheet
         snapPoints={snapPoints}
         ref={bottomSheetRef}
-        style={{
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-        onChange={handleSheetChanges}>
-        <BottomSheetScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            alignItems: 'center',
-          }}>
+        style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+        onChange={handleSheetChanges}
+      >
+        <BottomSheetScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center' }}>
           <TopSpace top={10} />
           <View style={globalStyles.simpleRow}>
-            <TouchableOpacity
-              onPress={handleDeleteDrawing}
-              style={styles.drawSketchBtn}>
+            <TouchableOpacity onPress={handleDeleteDrawing} style={styles.drawSketchBtn}>
               <PenIcon width={20} height={20} />
               <Text style={styles.drawSketchText}>
-                {intl.formatMessage({
-                  id: 'explore-search.draw-scratch',
-                })}
+                {intl.formatMessage({ id: 'explore-search.draw-scratch' })}
               </Text>
             </TouchableOpacity>
-            <View style={{marginHorizontal: 5}} />
+            <View style={{ marginHorizontal: 5 }} />
             <TouchableOpacity style={styles.searchBtn}>
               <Text style={styles.searchBtnText}>Search</Text>
             </TouchableOpacity>
           </View>
           <TopSpace top={10} />
-
-          <MapProperty handleClick={handleCard} />
-          <MapProperty handleClick={handleCard} />
-          <MapProperty handleClick={handleCard} />
-          <TopSpace top={10} />
+          < PropertyCard />
         </BottomSheetScrollView>
       </BottomSheet>
 

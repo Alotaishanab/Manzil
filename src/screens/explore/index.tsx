@@ -183,7 +183,7 @@ export const Explore = () => {
     setShowFloor(!showFloor);
   };
   const allPrices = [
-    {label: '100 SAR', value: '100 SAR'},
+    {label: '100,000 SAR', value: '100 SAR'},
     {label: '150 SAR', value: '150 SAR'},
     {label: '200 SAR', value: '200 SAR'},
     {label: '250 SAR', value: '250 SAR'},
@@ -399,9 +399,6 @@ export const Explore = () => {
                   }}
                   style={[
                     styles.agencyBtn,
-                    {
-                      width: (width - 40) / agencies?.length,
-                    },
                   ]}>
                   <Image source={item} style={styles.agencyImg} />
                 </TouchableOpacity>
@@ -409,6 +406,7 @@ export const Explore = () => {
             }}
           />
         </View>
+        <TopSpace top={30} />
 
         <View>
           <FlatList

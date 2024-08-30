@@ -1,196 +1,203 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
-  ImageBackground,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
+  ScrollView,
   StyleSheet,
+  Dimensions,
+  FlatList,
 } from 'react-native';
-import {globalStyles} from '../../../styles/globalStyles';
-import {fonts} from '../../../../src/assets/fonts';
-import {Colors} from '@colors';
-import Share from 'react-native-share';
-import {TopSpace} from '@components';
-import {AreaIcon, BathroomIcon, BedIcon, FavoriteIcon, ShareIcon} from '@svgs';
-import {useIntl} from '@context';
-import {building} from '@assets';
+import PropertyCard from '../../../components/molecules/PropertyCard'; // Import PropertyCard
+import { fonts } from '../../../assets/fonts/index';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
 
-const MapProperty = ({handleClick = () => {}}) => {
-  const {intl} = useIntl();
-  const options = {
-    title: 'Here is title',
+const { width: screenWidth } = Dimensions.get('window');
+
+interface ModalContentProps {
+  expandedHeight: number;
+  scrollOffsetY: any;
+}
+
+const ModalContent: React.FC<ModalContentProps> = ({
+  expandedHeight,
+  scrollOffsetY,
+}) => {
+  const navigation = useNavigation(); // Initialize navigation
+
+  // Sample data for similar homes
+  const similarHomesData = [
+    {
+      id: '1',
+      title: 'Luxury Villa',
+      price: 3500000,
+      location: 'Al Olaya, Riyadh',
+      beds: 5,
+      baths: 3,
+      size: '2,500 sqft',
+      imageUrl: 'https://via.placeholder.com/150',
+      dateAdded: '09/05/2024',
+    },
+    {
+      id: '2',
+      title: 'Modern Apartment',
+      price: 1800000,
+      location: 'King Abdullah District, Riyadh',
+      beds: 3,
+      baths: 2,
+      size: '1,200 sqft',
+      imageUrl: 'https://via.placeholder.com/150',
+      dateAdded: '08/10/2024',
+    },
+    {
+      id: '3',
+      title: 'Cozy House',
+      price: 2000000,
+      location: 'Al Nakheel, Riyadh',
+      beds: 4,
+      baths: 3,
+      size: '1,800 sqft',
+      imageUrl: 'https://via.placeholder.com/150',
+      dateAdded: '07/12/2024',
+    },
+    // Add more similar homes data as needed
+  ];
+
+  // Navigation handler for PropertyCard clicks
+  const handleCard = () => {
+    navigation.navigate('PropertyScreen');
   };
-  const handleShare = () => {
-    Share.open(options)
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        err && console.log(err);
-      });
-  };
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={handleClick}
-      style={styles.mainWrapper}>
-      <ImageBackground
-        source={building}
-        imageStyle={{
-          // borderRadius: 10,
-          borderRadius: 25,
-        }}
-        style={styles.imageBgStyle}>
-        <View style={styles.dayBtn}>
-          <Text style={styles.dayBtnText}>290 days on Zillow</Text>
+    <ScrollView
+      style={[styles.modalScrollView, { maxHeight: expandedHeight - 110 }]}
+      contentContainerStyle={styles.scrollViewContent}
+      showsVerticalScrollIndicator={true}
+      onScroll={(event) => {
+        scrollOffsetY.current = event.nativeEvent.contentOffset.y;
+      }}
+      scrollEventThrottle={16}
+    >
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <View style={styles.dragIcon}></View>
+        <View style={styles.slipSection}>
+          <Text style={styles.leftText}>House</Text>
+          <Text style={styles.rightText}>For Sale</Text>
         </View>
-        <TouchableOpacity activeOpacity={0.8}>
-          <FavoriteIcon
-            // fill={Colors.light.primaryButton}
-            width={30}
-            height={30}
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceText}>﷼2,949,000</Text>
+          <Text style={styles.detailsText}>4 beds | 2 baths | 1,863 sqft</Text>
+          <Text style={styles.detailsText}>AlMalga, Riyadh</Text>
+        </View>
+
+        <GreenBar />
+      </View>
+
+      <View style={styles.contentContainer}>
+        <PropertyDetails />
+        <PropertyFeatures style={styles.propertyFeatures} />
+        <DescriptionBox />
+        <MapComponent />
+        <AdInfo />
+        <AgencyDetails />
+
+        {/* FlatList to render similar homes */}
+        <View style={styles.similarHomesSection}>
+          <Text style={styles.sectionTitle}>Similar Homes</Text>
+          <FlatList
+            data={similarHomesData}
+            renderItem={({ item }) => (
+              <PropertyCard 
+                item={item} 
+                handleClick={handleCard} // Pass the navigation handler
+              />
+            )}
+            keyExtractor={(item) => item.id}
+            horizontal={true} // Display the list horizontally
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.flatListContent}
           />
-        </TouchableOpacity>
-      </ImageBackground>
-      <TopSpace top={10} />
-      <View style={globalStyles.rowSpaceBetween}>
-        <Text style={styles.serialNoText}>
-          {intl.formatMessage({
-            id: 'explore.serial',
-          })}{' '}
-          799,997
-        </Text>
-      </View>
-
-      <View style={{marginHorizontal: 8}}>
-        <Text style={styles.descriptionText}>
-          {intl.formatMessage({
-            id: 'explore.2-bed-flat-rent',
-          })}
-        </Text>
-        <TopSpace top={3} />
-        <Text style={styles.placeText}>
-          {intl.formatMessage({
-            id: 'explore.riyadh-saudia',
-          })}
-        </Text>
-        <TopSpace top={15} />
-        <View style={globalStyles.simpleRow}>
-          <View
-            style={[
-              globalStyles.simpleRow,
-              {
-                marginRight: 20,
-              },
-            ]}>
-            <BedIcon width={25} height={25} />
-            <Text style={styles.countText}>2</Text>
-          </View>
-
-          <View
-            style={[
-              globalStyles.simpleRow,
-              {
-                marginRight: 20,
-              },
-            ]}>
-            <AreaIcon width={25} height={25} />
-            <Text style={styles.countText}>819 sq ft</Text>
-          </View>
-
-          <View style={globalStyles.simpleRow}>
-            <BathroomIcon width={25} height={25} />
-            <Text style={styles.countText}>2</Text>
-          </View>
         </View>
       </View>
-
-      <TopSpace top={15} />
-    </TouchableOpacity>
+    </ScrollView>
   );
 };
 
-export default MapProperty;
-
-export const styles = StyleSheet.create({
-  mainWrapper: {
-    marginTop: 15,
-    paddingBottom: 10,
-    // borderBottomLeftRadius: 5,
-    borderRadius: 25,
-    // borderBottomRightRadius: 5,
-    shadowColor: '#000',
-    backgroundColor: Colors.light.background,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    width: '90%',
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+const styles = StyleSheet.create({
+  modalScrollView: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
   },
-  imageBgStyle: {
-    height: 200,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    // alignItems: 'flex-end',
-    padding: 5,
+  scrollViewContent: {
+    paddingBottom: 30,
   },
-  placeText: {
-    color: Colors.light.serialNoGreen,
-    fontSize: 14,
+  headerSection: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    position: 'relative',
+    backgroundColor: 'white',
+    marginTop: -55,
+  },
+  leftText: {
+    fontSize: 16,
+    color: '#fff',
     fontFamily: fonts.primary.regular,
   },
-  serialNoText: {
-    marginLeft: 10,
-    color: Colors.light.headingTitle,
-    fontSize: 20,
+  rightText: {
+    fontSize: 16,
+    color: '#fff',
     fontFamily: fonts.primary.regular,
   },
-  descriptionText: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    fontSize: 14,
-  },
-  countText: {
-    marginLeft: 5,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    fontSize: 14,
-  },
-  footerWrap: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-  },
-  footerLeftView: {
-    flex: 2,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+  priceContainer: {
+    paddingVertical: 10,
     alignItems: 'center',
   },
-  footerRightView: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  dateText: {
-    color: Colors.light.serialNoGreen,
+  priceText: {
+    fontSize: 32,
     fontFamily: fonts.primary.regular,
-    fontSize: 11,
+    color: '#000',
   },
-  dayBtn: {
-    backgroundColor: '#625440',
-    paddingHorizontal: 15,
-    // paddingVertical: 6,
-    height: 30,
-    justifyContent: 'center',
-    borderRadius: 20,
+  detailsText: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: fonts.primary.regular,
+    marginBottom: 20,
   },
-  dayBtnText: {
-    color: Colors.light.background,
-    fontFamily: fonts.primary.medium,
-    fontSize: 12,
+  contentContainer: {
+    paddingBottom: 30,
+  },
+  propertyFeatures: {
+    marginTop: 20,
+  },
+  descriptionBox: {
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    fontFamily: fonts.primary.regular,
+    color: '#000',
+  },
+  square: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#ccc',
+    marginBottom: 10,
+  },
+  similarHomesSection: {
+    marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: fonts.primary.regular,
+    color: '#000',
+    marginBottom: 10,
+  },
+  flatListContent: {
+    paddingLeft: 10,
   },
 });
+
+export default ModalContent;

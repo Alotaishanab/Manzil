@@ -1,119 +1,113 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { useIntl } from '@context';
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { useIntl } from '@context'; // Assuming you're still using useIntl for other purposes
+import LinearGradient from 'react-native-linear-gradient'; // Use for gradient backgrounds if supported
 
 const { width } = Dimensions.get('window');
 
-// Simulating the TitleValueRow and TitleArrowIconWrap components inline
+// Reusable component for title and value rows with interactive feedback
 const TitleValueRow = ({ title, value }) => (
-  <View style={styles.rowContainer}>
+  <TouchableOpacity style={styles.rowContainer} activeOpacity={0.7}>
     <Text style={styles.titleText}>{title}</Text>
     <Text style={styles.valueText}>{value}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
+// Reusable component for heading with an icon to the right
 const TitleArrowIconWrap = ({ headingTitle, textStyle }) => (
   <View style={styles.titleContainer}>
     <Text style={[styles.headingTextStyle, textStyle]}>{headingTitle}</Text>
+    <Image source={require('../../../assets/images/authorityIcon.png')} style={styles.headingIcon} />
   </View>
 );
 
 const AdInfo = () => {
-  const { intl } = useIntl();
-  const [showAuthorityInfo, setShowAuthorityInfo] = useState(true);
+  const intl = useIntl(); // If you still need to use intl for other purposes
 
   return (
-    <View style={styles.container}>
+    <LinearGradient // Use LinearGradient for a modern background
+      colors={['#ffffff', '#e0f7fa']} // Gradient starts from white to blue
+      style={styles.gradientContainer}
+    >
       <TitleArrowIconWrap
-        headingTitle={intl.formatMessage({
-          id: 'agencyScreen.real-estate-authority-info',
-        })}
+        headingTitle="Real Estate Authority Info"
         textStyle={styles.headingTextStyle}
       />
 
-      <TitleValueRow
-        title={intl.formatMessage({
-          id: 'agencyScreen.advertising-license-number',
-        })}
-        value={'321'}
-      />
-      <TitleValueRow
-        title={intl.formatMessage({
-          id: 'agencyScreen.unified-number-establishment',
-        })}
-        value={'25'}
-      />
-      <TitleValueRow
-        title={intl.formatMessage({
-          id: 'agencyScreen.fal-license-no',
-        })}
-        value={'7'}
-      />
-      <TitleValueRow
-        title={intl.formatMessage({
-          id: 'agencyScreen.date-registration',
-        })}
-        value={'2024/06/29'}
-      />
-    </View>
+      {/* Row Items with interactive feedback */}
+      <TitleValueRow title="Advertising License Number" value="321" />
+      <TitleValueRow title="Unified Number Establishment" value="25" />
+      <TitleValueRow title="FAL License No" value="7" />
+      <TitleValueRow title="Date Registration" value="2024/06/29" />
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  gradientContainer: {
     flex: 1,
-    width: width - 30,
-    backgroundColor: '#fff', // White background for a clean look
-    borderRadius: 16, // More rounded corners for a modern feel
-    padding: 25,
+    width: width - 40,
+    borderRadius: 20,
+    padding: 20,
     marginVertical: 20,
+    backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6, // For Android shadow
-    // Adding gradient background
-    backgroundImage: 'linear-gradient(to bottom right, #f8f9fa, #e9ecef)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden', // Ensures the gradient and shadow don't bleed out of rounded corners
+    alignSelf: 'center', // Centers the container horizontally
   },
   headingTextStyle: {
-    fontSize: 22, // Increased font size for main heading
-    fontFamily: 'fonts.primary.bold', // Bold font for headings
-    color: '#222', // Darker color for readability
-    marginBottom: 20, // More spacing below the heading
-    textAlign: 'left', // Align heading to the left for consistency
+    fontSize: 20,
+    fontFamily: 'fonts.primary.bold',
+    color: '#333',
+    textAlign: 'left',
+    flex: 1, // Ensures the text takes the maximum space available
+  },
+  headingIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain', // Maintain aspect ratio of the icon
+    marginLeft: 10, // Add spacing between text and icon
   },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 12, // More space between rows for clarity
-    paddingVertical: 12, // Padding inside each row for better touch targets
-    backgroundColor: '#fafafa', // Slight background color for contrast
-    borderRadius: 10, // Rounded corners for each row
-    shadowColor: '#000', // Subtle shadow for each row
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#aaa',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    width: '100%', // Make sure row container takes full width
   },
   titleContainer: {
-    marginBottom: 20, // Space after the title for separation
-    paddingBottom: 10, // Increased padding inside the title section
+    flexDirection: 'row', // To align text and icon horizontally
+    justifyContent: 'center', // Center the content horizontally
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#e0e0e0',
   },
   titleText: {
-    fontSize: 18, // Larger text size for all labels
-    color: '#555', // Slightly lighter color for label text
-    fontFamily: 'fonts.primary.regular', // Regular weight for labels
-    flex: 1, // Allow text to occupy more space
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'fonts.primary.regular',
+    flex: 1, // Allow text to take up available space
   },
   valueText: {
-    fontSize: 18, // Larger text size for values
-    color: '#000', // Darker color for value text to emphasize importance
-    fontFamily: 'fonts.primary.bold', // Bold weight for value text
-    textAlign: 'right', // Align value text to the right
-    flex: 1, // Flex value to accommodate varying lengths
+    fontSize: 16,
+    color: '#000',
+    fontFamily: 'fonts.primary.bold',
+    textAlign: 'right',
   },
 });
 

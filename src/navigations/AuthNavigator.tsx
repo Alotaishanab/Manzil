@@ -45,6 +45,7 @@ import {
   ChangePasswordOtpVerification,
   RequestList,
   PropertiesRequestStatus,
+  SimilarProperties,
 } from '@screens';
 import {BottomTabNavigator} from './bottomtab/BottomTabNavigator';
 
@@ -101,6 +102,7 @@ type AuthStackParamList = {
   RequestList?: any;
   PropertiesRequestStatus?: any;
   ParentalGate: {nextScreen: keyof AuthStackParamList};
+  SimilarProperties?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -181,6 +183,7 @@ export const AuthNavigator = () => {
         name="PropertiesRequestStatus"
         component={PropertiesRequestStatus}
       />
+      <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
     </AuthStack.Navigator>
   );
 };

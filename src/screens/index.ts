@@ -17,7 +17,8 @@ export * from './signupotpverification/index';
 
 export * from './home/index';
 export * from './land/index';
-export * from './propertyscreen/index';
+export * from './propertyscreen';
+export * from './similarproperties';
 export * from './exploresearch';
 export * from './filterproperty';
 export * from './saved';

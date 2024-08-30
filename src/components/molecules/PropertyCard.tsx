@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
   Animated,
@@ -131,48 +130,59 @@ export const PropertyCard = ({
 
       <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
         <TopSpace top={10} />
-        
+
         {/* Price and Location */}
         <View style={styles.priceLocationContainer}>
-          <Text style={styles.priceText}>
-          {item.price ? item.price.toLocaleString() : '799,997'}﷼
-          </Text>
+          
+            <Text style={styles.priceText}>
+              {item?.price ? item.price.toLocaleString() : '799,997'}﷼
+            </Text>
+          
           <Text style={styles.placeText}>
-            Riyadh, Saudi Arabia
+            {item?.location || 'Riyadh, Saudi Arabia'}
           </Text>
         </View>
-        
+
         <TopSpace top={5} />
         <View style={styles.infoContainer}>
-          <Text style={styles.descriptionText}>
-            2 bed flat to rent
-          </Text>
-          
-          {/* Adjusted TopSpace value here */}
+          <View style={styles.underlineContainer}>
+            <Text style={styles.descriptionText}>
+              {item?.description || 'House for Sale'}
+            </Text>
+          </View>
+
           <TopSpace top={5} />
           <View style={styles.iconRow}>
             <View style={styles.iconWrapper}>
               <BedIcon width={20} height={20} />
-              <Text style={styles.countText}>2 Beds</Text>
+              <Text style={styles.countText}>
+                {item?.beds ? `${item.beds} Beds` : '2 Beds'}
+              </Text>
             </View>
 
             <View style={styles.iconWrapper}>
               <BathroomIcon width={28} height={28} />
-              <Text style={styles.countText}>2 Baths</Text>
+              <Text style={styles.countText}>
+                {item?.baths ? `${item.baths} Baths` : '2 Baths'}
+              </Text>
             </View>
 
             <View style={styles.iconWrapper}>
               <AreaIcon width={24} height={24} />
-              <Text style={styles.countText}>819 sq ft</Text>
+              <Text style={styles.countText}>
+                {item?.size ? item.size : '819 sq ft'}
+              </Text>
             </View>
           </View>
         </View>
 
         <TopSpace top={20} />
         <View style={styles.footerWrap}>
-          <Text style={styles.dateText}>
-            Added on 09/05/2024
-          </Text>
+          <View style={styles.underlineContainer}>
+            <Text style={styles.dateText}>
+              {item?.dateAdded ? `Added on ${item.dateAdded}` : 'Added on 09/05/2024'}
+            </Text>
+          </View>
           <TouchableOpacity activeOpacity={0.8} onPress={handleShare}>
             <ShareIcon width={28} height={28} />
           </TouchableOpacity>
@@ -230,11 +240,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: 20,
   },
+  underlineContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.serialNoGreen,
+    marginBottom: 5,
+    alignSelf: 'flex-start', // Make sure underline is only as wide as text
+  },
   priceText: {
     color: Colors.light.headingTitle,
     fontSize: 28,
     fontFamily: fonts.primary.bold,
-    marginBottom: 5,
   },
   infoContainer: {
     paddingHorizontal: 20,
@@ -259,7 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 5,  // Adjusted marginTop here to move icons up
+    marginTop: 5,
   },
   iconWrapper: {
     flexDirection: 'row',
@@ -277,3 +292,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
+
+export default PropertyCard;
