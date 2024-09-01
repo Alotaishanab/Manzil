@@ -109,7 +109,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 export const AuthNavigator = () => {
   return (
     <AuthStack.Navigator
-      initialRouteName="SplashScreen"
+      initialRouteName="Analytics" // SplashScreen 
       screenOptions={{headerShown: false}}>
       <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
       <AuthStack.Screen name="Onboarding" component={Onboarding} />

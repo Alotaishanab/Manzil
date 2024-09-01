@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Platform,
   SafeAreaView,
@@ -8,24 +8,33 @@ import {
   Text,
   View,
 } from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {Colors} from '@colors';
-import {HeaderBackButtonTitle, TopSpace} from '@components';
-import {fonts} from '@fonts';
-import {globalStyles} from '@globalStyles';
-import {useIntl} from '@context';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { Colors } from '@colors';
+import { HeaderBackButtonTitle, TopSpace } from '@components';
+import { fonts } from '@fonts';
+import { globalStyles } from '@globalStyles';
+import { useIntl } from '@context';
 import PropertyStep1 from './components/PropertyStep1';
 import PropertyStep2 from './components/PropertyStep2';
+import PropertyStep3 from './components/PropertyStep3';
 
 export const AddProperties = () => {
-  const [step, setStep] = React.useState(1);
-  const [photos, setPhotos] = React.useState([]);
+  const [step, setStep] = useState(1);
+  const [photos, setPhotos] = useState([]);
   const [floor, setFloor] = useState('');
   const [selectedPropertyType, setSelectedPropertyType] = useState(null);
-  const {intl} = useIntl();
+  const { intl } = useIntl();
+
+  const totalSteps = 3; // Update this if more steps are added
+
   const handleNext = () => {
-    setStep(2);
+    setStep((prevStep) => (prevStep < totalSteps ? prevStep + 1 : prevStep)); // Increment step by 1 to go to the next step
   };
+
+  const handleBack = () => {
+    setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : 1)); // Decrement step by 1, ensuring it doesn't go below 1
+  };
+
   const handlePicker = async () => {
     try {
       const res: any = await launchImageLibrary({
@@ -34,10 +43,8 @@ export const AddProperties = () => {
         includeBase64: false,
       });
       if (res?.didCancel) {
-        // throw 'user canceled the action';
-        console.log('user canceled the action');
+        console.log('User canceled the action');
       } else if (Array.isArray(res.assets)) {
-        // Ensure res.assets is an array
         const selectedImages: any = res.assets.map((asset: any) => ({
           uri: asset.uri,
         }));
@@ -54,13 +61,12 @@ export const AddProperties = () => {
     try {
       const res: any = await launchImageLibrary({
         mediaType: 'photo',
-        // selectionLimit: 0,
         includeBase64: false,
       });
       if (res?.didCancel) {
         console.log('User canceled the action');
       } else if (Array.isArray(res.assets)) {
-        // setFloor(res?.assets[0]?.uri);
+        setFloor(res.assets[0]?.uri);
       } else {
         console.log('No images selected or response format is incorrect');
       }
@@ -69,98 +75,58 @@ export const AddProperties = () => {
     }
   };
 
-  const farmhouseFeatures = [
-    {
-      id: 1,
-      name: intl.formatMessage({
-        id: 'addpropertyScreen.properties-type.parking',
-      }),
-      icon: 'ParkingIcon',
-    },
-    {
-      id: 2,
-      name: intl.formatMessage({
-        id: 'addpropertyScreen.properties-type.swimming-pool',
-      }),
-      icon: 'SwimmingpoolIcon',
-    },
-    {
-      id: 3,
-      name: intl.formatMessage({
-        id: 'addpropertyScreen.properties-type.balacony',
-      }),
-      icon: 'BalaconyIcon',
-    },
-    {
-      id: 4,
-      name: intl.formatMessage({
-        id: 'addpropertyScreen.properties-type.gym',
-      }),
-      icon: 'GymIcon',
-    },
-    {
-      id: 8,
-      name: intl.formatMessage({
-        id: 'addpropertyScreen.properties-type.basement',
-      }),
-      icon: 'HomeIcon',
-    },
-    {
-      id: 12,
-      name: intl.formatMessage({
-        id: 'filterPropertyScreen.reception',
-      }),
-      icon: 'ReceptionIcon',
-    },
-  ];
-  // console.log('photos', photos);
-  //   const handleNext=()=>{}
   return (
     <SafeAreaView style={globalStyles.wrapScreen}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          // flexGrow: 1,
           paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
         }}>
-        <HeaderBackButtonTitle text={''} />
+        <HeaderBackButtonTitle text={''} onPress={handleBack} />
         <TopSpace top={10} />
-        {/* Request Propery step content starts */}
+        {/* Request Property step content starts */}
         <View style={globalStyles.rowSpaceBetween}>
           <Text style={styles.heading}>
-            {intl.formatMessage({id: 'addpropertyScreen.header'})}
+            {intl.formatMessage({ id: 'addpropertyScreen.header' })}
           </Text>
 
           <View style={globalStyles.simpleRow}>
             <Text style={styles.stepText}>
-              {intl.formatMessage({id: 'addpropertyScreen.step'})}{' '}
-              {step === 1
-                ? intl.formatMessage({id: 'addpropertyScreen.step-1'})
-                : intl.formatMessage({id: 'addpropertyScreen.step-2'})}{' '}
-              {'/'}
-              {intl.formatMessage({id: 'addpropertyScreen.step-2'})}
+              {`Step ${step} / ${totalSteps}`}
             </Text>
           </View>
         </View>
 
         <TopSpace top={10} />
+        
+        {/* Step Components */}
         {step === 1 && (
           <PropertyStep1
             selectedPropertyType={selectedPropertyType}
             setSelectedPropertyType={setSelectedPropertyType}
-            handleNext={handleNext}
+            handleNext={handleNext} // This will navigate to step 2
           />
         )}
+
         {step === 2 && (
           <PropertyStep2
+            handleNext={handleNext} // This will navigate to step 3
+            handleBack={handleBack} // Use the handleBack function to navigate back to step 1
+          />
+        )}
+
+        {step === 3 && (
+          <PropertyStep3
             selectedType={selectedPropertyType}
             images={photos}
             floor={floor}
             handleAddFloorPicker={handleAddFloorPicker}
             handlePicker={handlePicker}
+            handleNext={handleNext} // This will navigate to step 4 (if there is one)
+            handleBack={handleBack} // Use the handleBack function to navigate back to step 2
           />
         )}
-
+        
         <TopSpace top={10} />
       </ScrollView>
     </SafeAreaView>
@@ -168,12 +134,11 @@ export const AddProperties = () => {
 };
 
 const styles = StyleSheet.create({
-  wrap: {backgroundColor: Colors.light.background, flex: 1, padding: 24},
+  wrap: { backgroundColor: Colors.light.background, flex: 1, padding: 24 },
   heading: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.semiBold,
     fontSize: 20,
-    // fontSize:fonts
   },
   stepText: {
     color: Colors.light.primaryBtn,

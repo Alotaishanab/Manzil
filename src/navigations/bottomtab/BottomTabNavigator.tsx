@@ -51,21 +51,28 @@ export const BottomTabNavigator = () => {
   const { intl } = useIntl();
   const navigation: any = useNavigation();
   const [modalVisible, setModalVisible] = React.useState(false);
+
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
+
   const handleAddProperty = () => {
     toggleModal();
     navigation.navigate('AddProperties');
   };
+
   const handlePromoteProperty = () => {
     toggleModal();
     navigation.navigate('PromoteProperty');
   };
+
   const handleRequestProperty = () => {
     toggleModal();
     navigation.navigate('RequestProperty');
   };
+
+  const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
 
   // Animated values for scaling, rotating, and fading
   const animations = {
@@ -96,41 +103,41 @@ export const BottomTabNavigator = () => {
     },
   };
 
-  const animateIcon = (routeName, focused) => {
-    console.log(`Animating ${routeName} - Focused: ${focused}`);
-    Animated.parallel([
+  const animateIcon = (routeName, callback) => {
+    Animated.sequence([
       Animated.timing(animations[routeName].scale, {
-        toValue: focused ? 1.5 : 1,
-        duration: 300,
-        easing: Easing.bounce,
+        toValue: 1.1, // Slight increase in scale
+        duration: 150,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
-      Animated.timing(animations[routeName].rotate, {
-        toValue: focused ? 1 : 0,
-        duration: 300,
-        easing: Easing.bounce,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animations[routeName].opacity, {
-        toValue: focused ? 1 : 0.7,
-        duration: 300,
-        easing: Easing.ease,
+      Animated.timing(animations[routeName].scale, {
+        toValue: 1, // Return to original scale
+        duration: 150,
+        easing: Easing.in(Easing.ease),
         useNativeDriver: true,
       }),
     ]).start();
   };
+  
+
+
+const handleTabPress = (routeName, navigation) => {
+  animateIcon(routeName, () => {
+    navigation.navigate(routeName); // Navigate to the screen after animation
+  });
+};
+
 
   const customText = ({ text, focused }: any) => {
-    const colorSelectionText = () => {
-      return focused ? Colors.light.primaryBtn : Colors.light.headingTitle;
-    };
+    const colorSelectionText = focused ? Colors.light.primaryBtn : Colors.light.headingTitle;
 
     return (
       <Text
         style={[
           styles.tabText,
           {
-            color: colorSelectionText(),
+            color: colorSelectionText,
           },
         ]}>
         {text}
@@ -138,29 +145,25 @@ export const BottomTabNavigator = () => {
     );
   };
 
-  const renderModal = () => {
-    return (
-      <GenericModal
-        showCloseButton={false}
-        centerText={true}
-        modalTitle={intl.formatMessage({
-          id: 'addPropertiesModal.header',
-        })}
-        fontFamily={
-          Platform.OS === 'ios' ? fonts.tertiary.bold : fonts.secondary.bold
-        }
-        centeredModal={false}
-        toggleModal={toggleModal}
-        isVisible={modalVisible}>
-        <TopSpace top={10} />
-        <AddPropertiesContent
-          handleAdd={handleAddProperty}
-          handlePromote={handlePromoteProperty}
-          handleRequest={handleRequestProperty}
-        />
-      </GenericModal>
-    );
-  };
+  const renderModal = () => (
+    <GenericModal
+      showCloseButton={false}
+      centerText={true}
+      modalTitle={intl.formatMessage({
+        id: 'addPropertiesModal.header',
+      })}
+      fontFamily={Platform.OS === 'ios' ? fonts.tertiary.bold : fonts.secondary.bold}
+      centeredModal={false}
+      toggleModal={toggleModal}
+      isVisible={modalVisible}>
+      <TopSpace top={10} />
+      <AddPropertiesContent
+        handleAdd={handleAddProperty}
+        handlePromote={handlePromoteProperty}
+        handleRequest={handleRequestProperty}
+      />
+    </GenericModal>
+  );
 
   return (
     <>
@@ -173,7 +176,7 @@ export const BottomTabNavigator = () => {
           tabBarStyle: [styles.tabBarStyle],
           tabBarItemStyle: styles.tabBarItemStyle,
           tabBarLabelPosition: 'below-icon',
-          tabBarIcon: ({ color, focused }: any) => {
+          tabBarIcon: ({ focused }: any) => {
             let Icon: any;
             const animatedStyle = {
               transform: [
@@ -212,56 +215,27 @@ export const BottomTabNavigator = () => {
                 Icon = UserIcon;
                 break;
               default:
-                break;
+                return null;
             }
 
             return (
-              <>
-                {route?.name === 'AddOptions' ? (
-                  <Animated.View
-                    style={[
-                      animatedStyle,
-                      styles.roundedCircle,
-                      {
-                        borderColor:
-                          route?.name === 'AddOptions' && focused
-                            ? Colors.light.primaryBtn
-                            : Colors.light.headingTitle,
-                      },
-                    ]}>
-                    <Icon
-                      width={15}
-                      height={15}
-                      fill={
-                        focused
-                          ? Colors.light.primaryBtn
-                          : Colors.light.headingTitle
-                      }
-                    />
-                  </Animated.View>
-                ) : (
-                  <Animated.View style={animatedStyle}>
-                    <Icon
-                      width={22}
-                      height={22}
-                      fill={
-                        focused
-                          ? Colors.light.primaryBtn
-                          : Colors.light.headingTitle
-                      }
-                    />
-                  </Animated.View>
-                )}
-              </>
+              <TouchableOpacity onPress={() => handleTabPress(route.name, navigation)}>
+                <Animated.View style={animatedStyle}>
+                  <Icon
+                    width={route.name === 'AddOptions' ? 15 : 22}
+                    height={route.name === 'AddOptions' ? 15 : 22}
+                    fill={focused ? Colors.light.primaryBtn : Colors.light.headingTitle}
+                  />
+                </Animated.View>
+              </TouchableOpacity>
             );
           },
-        })}
-      >
+        })}>
         <Tab.Screen
           name="ExploreStack"
           component={ExploreStack}
           options={{
-            tabBarLabel: ({ color, focused }) =>
+            tabBarLabel: ({ focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.explore',
@@ -275,7 +249,7 @@ export const BottomTabNavigator = () => {
           name="ExploreMaps"
           component={ExploreMaps}
           options={{
-            tabBarLabel: ({ color, focused }) =>
+            tabBarLabel: ({ focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'addpropertyScreen.map',
@@ -290,7 +264,7 @@ export const BottomTabNavigator = () => {
           component={() => null}
           options={{
             tabBarLabel: () => null,
-            tabBarButton: ({ color, focused }) => (
+            tabBarButton: ({ focused }) => (
               <View
                 style={{
                   alignItems: 'center',
@@ -301,10 +275,11 @@ export const BottomTabNavigator = () => {
                 }}>
                 <TouchableOpacity
                   style={styles.roundedCircle}
-                  onPress={toggleModal}>
-                  <Animated.View
-                    style={{ transform: [{ scale: animations['AddOptions'].scale }] }}
-                  >
+                  onPress={() => {
+                    handleTabPress('AddOptions');
+                    toggleModal();
+                  }}>
+                  <Animated.View style={{ transform: [{ scale: animations['AddOptions'].scale }] }}>
                     <PlusIcon
                       width={20}
                       height={20}
@@ -326,7 +301,7 @@ export const BottomTabNavigator = () => {
           name="SavedProperties"
           component={SavedProperties}
           options={{
-            tabBarLabel: ({ color, focused }) =>
+            tabBarLabel: ({ focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.saved',
@@ -340,7 +315,7 @@ export const BottomTabNavigator = () => {
           name="Account"
           component={Account}
           options={{
-            tabBarLabel: ({ color, focused }) =>
+            tabBarLabel: ({ focused }) =>
               customText({
                 text: intl.formatMessage({
                   id: 'buttons.account',

@@ -1,176 +1,156 @@
-/* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import {Image, Text, View} from 'react-native';
-import {HeaderBackButtonTitle, Screen, TopSpace} from '@components';
-import {useIntl} from '@context';
-import {Colors} from '@colors';
-import {styles} from './styles';
-import {ArrowDownIcon, ArrowUpIcon, UserLocationIcon} from '@svgs';
-import {globalStyles} from '@globalStyles';
-import PerformanceCard from './components/PerformanceCard';
-import {FlatList} from 'react-native';
-import {mapPiece} from '@assets';
+import React, { useState, useRef } from 'react';
+import { ScrollView, Animated, View } from 'react-native';
+import { HeaderBackButtonTitle, Screen } from '@components';
+import { styles } from './styles';
+import HeaderComponent from './components/HeaderComponent';
+import ChartComponent from './components/ChartComponent';
+import StatisticsComponent from './components/StatisticsComponent';
+import DataCardsComponent from './components/DataCardsComponent';
+import UserLocationsComponent from './components/UserLocationsComponent';
+import ModalComponent from './components/ModalComponent';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  TouchIcon,
+  ShareIcon,
+  TimerIcon,
+  HeartIcon,
+  InquiryIcon,
+} from '@svgs';
 
-export const Analytics = () => {
-  const {intl} = useIntl();
+export const Analytics: React.FC = () => {
+  const [selectedData, setSelectedData] = useState({ value: 0, label: 'Select a day' });
+  const [totalViews, setTotalViews] = useState(228);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [daysRange, setDaysRange] = useState(7);
+  const slideAnim = useRef(new Animated.Value(300)).current;
+  const [selectedDataLineX, setSelectedDataLineX] = useState<number | null>(null);
+
+  const getChartData = (days: number) => {
+    const today = new Date();
+    const labels: string[] = [];
+    const data: number[] = [];
+
+    for (let i = days - 1; i >= 0; i -= Math.max(Math.ceil(days / 5), 1)) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+      data.push(Math.floor(Math.random() * 100)); // Random data for demonstration
+    }
+
+    return {
+      labels,
+      datasets: [
+        {
+          data,
+          color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+          strokeWidth: 2,
+        },
+      ],
+    };
+  };
+
+  const chartData = getChartData(daysRange);
 
   const data = [
     {
-      id: 1,
-      name: intl.formatMessage({id: 'analyticScreen.views'}),
-      value: '1,200',
-      icon: 'ViewsIcon',
-      increase: true,
-      percent: '9',
-    },
-    {
       id: 2,
-      name: intl.formatMessage({id: 'analyticScreen.clicks'}),
+      name: 'Clicks',
       value: '480',
-      icon: 'TouchIcon',
+      icon: <TouchIcon width={30} height={30} />,
       increase: true,
       percent: '5',
+      style: styles.halfWidthCard,
     },
     {
       id: 3,
-      name: intl.formatMessage({id: 'analyticScreen.shares'}),
-      value: '900',
-      icon: 'Share',
-      increase: false,
-      percent: '20',
+      name: 'Time Spent',
+      value: '1,200 mins',
+      icon: <TimerIcon width={30} height={30} />,
+      increase: true,
+      percent: '9',
+      style: styles.halfWidthCard,
     },
     {
       id: 4,
-      name: intl.formatMessage({id: 'analyticScreen.time-spent'}),
-      value: '1,200 mins',
-      icon: 'TimerIcon',
+      name: 'Inquiries',
+      value: '900',
+      icon: <InquiryIcon width={30} height={30} />,
       increase: true,
-      percent: '9',
+      percent: '5',
+      style: styles.thirdRowCard,
     },
     {
       id: 5,
-      name: intl.formatMessage({id: 'analyticScreen.saves'}),
+      name: 'Saves',
       value: '480',
-      icon: 'HeartIcon',
+      icon: <HeartIcon width={30} height={30} />,
       increase: true,
       percent: '5',
+      style: styles.thirdRowCard,
     },
     {
       id: 6,
-      name: intl.formatMessage({id: 'analyticScreen.inquiries'}),
+      name: 'Shares',
       value: '900',
-      icon: 'InquiryIcon',
-      increase: true,
-      percent: '5',
+      icon: <ShareIcon width={30} height={30} />,
+      increase: false,
+      percent: '20',
+      style: styles.thirdRowCard,
     },
   ];
-
-  const renderData = ({item}: any) => {
-    return <PerformanceCard key={item?.id} item={item} />;
-  };
 
   const userLocations = [
-    {
-      id: 1,
-      name: 'Riyadh',
-      increase: true,
-      val: '60%',
-    },
-    {
-      id: 2,
-      name: 'Jeddash',
-      increase: false,
-      val: '20%',
-    },
-    {
-      id: 3,
-      name: 'Dammamm',
-      increase: true,
-      val: '20%',
-    },
+    { id: 1, name: 'Riyadh', value: '60%' },
+    { id: 2, name: 'Jeddah', value: '20%' },
+    { id: 3, name: 'Dammam', value: '20%' },
   ];
 
-  const renderLocation = ({item}: any) => {
-    return (
-      <View style={{alignItems: 'center'}}>
-        <Image style={styles.imageMapPiece} source={mapPiece} />
-        <TopSpace top={10} />
-        <Text style={styles.locationText}>{item?.name}</Text>
-        <View style={globalStyles.simpleRow}>
-          {item?.increase ? (
-            <ArrowUpIcon width={20} height={20} />
-          ) : (
-            <ArrowDownIcon width={20} height={20} />
-          )}
-          <Text
-            style={[
-              styles.locationNamePercentage,
-              {
-                color: item?.increase
-                  ? Colors.light.increaseArrow
-                  : Colors.light.danger,
-              },
-            ]}>
-            {item?.val}
-          </Text>
-        </View>
-      </View>
-    );
+  const handleDaysRangeChange = (range: number) => {
+    setDaysRange(range);
+    setSelectedData({ value: 0, label: 'Select a day' });
+    hideModal();
   };
 
-  const ListFooter = () => {
-    return (
-      <>
-        <View style={globalStyles.simpleRow}>
-          <UserLocationIcon width={20} height={20} />
-          {/*  */}
-          <Text style={styles.userLocationText}>
-            {intl.formatMessage({id: 'analyticScreen.user-location'})}
-          </Text>
-        </View>
-        <TopSpace top={10} />
-
-        <FlatList
-          data={userLocations}
-          renderItem={renderLocation}
-          horizontal={false}
-          columnWrapperStyle={{justifyContent: 'space-between'}}
-          numColumns={3}
-        />
-
-        <TopSpace top={50} />
-      </>
-    );
+  const showModal = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   };
-  const ListHeader = () => {
-    return (
-      <>
-        <TopSpace top={20} />
 
-        <Text style={styles.mainTitle}>
-          {intl.formatMessage({id: 'analyticScreen.performance'})}
-        </Text>
-
-        <TopSpace top={10} />
-      </>
-    );
+  const hideModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: 300,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => setModalVisible(false));
   };
+
   return (
     <Screen showKeyboardAware={false}>
-      <HeaderBackButtonTitle
-        text={intl.formatMessage({id: 'analyticScreen.header'})}
-      />
-
-      <FlatList
-        data={data}
-        renderItem={renderData}
-        contentContainerStyle={{marginTop: 2}}
-        ListFooterComponent={ListFooter}
-        ListHeaderComponent={ListHeader}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponentStyle={{marginBottom: 100}}
-        keyExtractor={item => item?.id?.toString()}
+      <HeaderBackButtonTitle text="Analytics" />
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <HeaderComponent daysRange={daysRange} showModal={showModal} />
+        <ChartComponent
+          chartData={chartData}
+          setSelectedData={setSelectedData}
+          setSelectedDataLineX={setSelectedDataLineX}
+          selectedDataLineX={selectedDataLineX}
+        />
+        <StatisticsComponent selectedData={selectedData} totalViews={totalViews} />
+        <View style={styles.separatorLine} />
+        {/* Correct Prop Passing */}
+        <DataCardsComponent data={data} daysRange={daysRange} />
+        <UserLocationsComponent userLocations={userLocations} />
+      </ScrollView>
+      <ModalComponent
+        modalVisible={modalVisible}
+        hideModal={hideModal}
+        handleDaysRangeChange={handleDaysRangeChange}
+        slideAnim={slideAnim}
       />
     </Screen>
   );
