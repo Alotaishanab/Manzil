@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, PanResponder, Dimensions, Animated } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { styles } from '../styles';
 
@@ -12,119 +12,121 @@ interface ChartComponentProps {
       strokeWidth: number;
     }>;
   };
-  setSelectedData: React.Dispatch<React.SetStateAction<{ value: number; label: string }>>;
-  setSelectedDataLineX: React.Dispatch<React.SetStateAction<number | null>>;
-  selectedDataLineX: number | null;
+  setSelectedData: (data: { value: number; label: string }) => void;
 }
 
 const ChartComponent: React.FC<ChartComponentProps> = ({
   chartData,
   setSelectedData,
-  setSelectedDataLineX,
-  selectedDataLineX,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const chartHeight = 300; // Adjusted height for better visualization
-  const [scrollX] = useState(new Animated.Value(0)); // State for horizontal scrolling
+  const chartWidth = screenWidth - 40; // Chart width minus padding/margin
+  const totalDays = chartData.labels.length; // Total days based on labels length
+  const stepWidth = chartWidth / (totalDays - 1); // Width per day segment
 
-  // PanResponder to handle horizontal scrolling
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        scrollX.setOffset(scrollX._value); // Initialize offset
-      },
-      onPanResponderMove: (e, gestureState) => {
-        const chartWidth = screenWidth - 40; // Subtract padding/margin if necessary
-        const index = Math.min(
-          chartData.labels.length - 1,
-          Math.max(0, Math.floor((gestureState.moveX / chartWidth) * chartData.labels.length))
-        );
+  // State to track the indicator position
+  const [indicatorPosition, setIndicatorPosition] = useState<{ x: number; y: number } | null>(null);
 
-        // Update selected data dynamically
-        setSelectedData({
-          value: chartData.datasets[0].data[index],
-          label: `Views on ${chartData.labels[index]}`,
-        });
+  // Generate a full date range based on the labels
+  const fullDateRange = chartData.labels;
 
-        // Update the vertical line position
-        setSelectedDataLineX(gestureState.moveX - 20); // Adjust the X offset as needed
-      },
-      onPanResponderRelease: () => {
-        scrollX.flattenOffset(); // Reset scroll offset after release
-      },
-    })
-  ).current;
+  // Function to update selected data and indicator position
+  const updateSelection = (x: number) => {
+    const boundedX = Math.max(0, Math.min(chartWidth, x)); // Keep within chart bounds
+
+    // Calculate the corresponding date index
+    const exactIndex = (boundedX / chartWidth) * (fullDateRange.length - 1);
+    const nearestIndex = Math.round(exactIndex); // Find the nearest index
+
+    // Find the date and value corresponding to the nearest index
+    const selectedDate = fullDateRange[nearestIndex];
+    const selectedValue = chartData.datasets[0].data[nearestIndex];
+
+    // Update the selected data
+    setSelectedData({
+      value: selectedValue,
+      label: `Views on ${selectedDate}`,
+    });
+
+    // Update indicator position
+    const yValue = chartHeight - (selectedValue / Math.max(...chartData.datasets[0].data)) * chartHeight;
+    setIndicatorPosition({ x: boundedX, y: yValue });
+  };
+
+  // Function to handle chart tap
+  const handleTapOnChart = (e: any) => {
+    const xPosition = e.nativeEvent.locationX - 20; // Adjust for padding/margin
+    updateSelection(xPosition);
+  };
 
   return (
     <View style={styles.fullWidthCard}>
       <Text style={[styles.chartTitle, { marginLeft: 40 }]}>Views</Text>
-      <View {...panResponder.panHandlers}>
-        <LineChart
-          data={chartData}
-          width={screenWidth} // Full width of the screen
-          height={chartHeight} // Increased height of the chart
-          chartConfig={{
-            backgroundColor: '#ffffff',
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
-            fillShadowGradient: '#e0ffeb', // Light green for the chart background
-            fillShadowGradientOpacity: 1,
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`, // Matching theme green color
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: { borderRadius: 16 },
-            propsForBackgroundLines: {
-              strokeDasharray: '', // solid background lines with no dashes
-              strokeWidth: 0.5,
-              color: (opacity = 1) => `rgba(200, 200, 200, ${opacity})`,
-            },
-            propsForDots: {
-              r: '6',
-              strokeWidth: '2',
-              stroke: '#228B22', // Dark green color for the dots
-            },
-            propsForLabels: {
-              fontSize: 10,
-              fontWeight: 'bold',
-              color: '#000',
-            },
-          }}
-          bezier
-          verticalLabelRotation={0}
-          withHorizontalLabels={true}
-          withVerticalLines={false}
-          withOuterLines={false}
-          xLabelsOffset={-10}
-          yLabelsOffset={5}
-          segments={5}
-          formatXLabel={(value) => `${value}`}
-          onDataPointClick={({ value, index, x, y }) => {
-            setSelectedData({ value: chartData.datasets[0].data[index], label: `Views on ${chartData.labels[index]}` });
-
-            // Adding a vertical line on data point click
-            setSelectedDataLineX(x);
-          }}
-          style={{
-            marginVertical: 8,
-            borderRadius: 16,
-            marginLeft: -20,
-          }}
-        />
-        {/* Vertical Line Decorator */}
-        {selectedDataLineX !== null && (
-          <View
+      <TouchableWithoutFeedback onPress={handleTapOnChart}>
+        <View style={{ position: 'relative' }}>
+          <LineChart
+            data={{
+              labels: fullDateRange,
+              datasets: [
+                {
+                  data: chartData.datasets[0].data,
+                  color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+                  strokeWidth: 2,
+                },
+              ],
+            }}
+            width={chartWidth} // Set chart width correctly
+            height={chartHeight}
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              style: { borderRadius: 16 },
+              propsForBackgroundLines: {
+                strokeDasharray: '',
+                strokeWidth: 0.5,
+                color: (opacity = 1) => `rgba(200, 200, 200, ${opacity})`,
+              },
+              propsForDots: {
+                r: '0', // Remove default dots
+                strokeWidth: '0',
+                stroke: '#228B22',
+              },
+            }}
+            bezier
+            verticalLabelRotation={0}
+            withHorizontalLabels={true}
+            withVerticalLines={false}
+            withOuterLines={false}
+            xLabelsOffset={-10}
+            yLabelsOffset={5}
+            segments={5}
             style={{
-              position: 'absolute',
-              left: selectedDataLineX,
-              top: 0,
-              bottom: 0,
-              width: 2,
-              backgroundColor: '#228B22',
+              marginVertical: 8,
+              borderRadius: 16,
+              marginLeft: -20,
             }}
           />
-        )}
-      </View>
+          {/* Indicator for the selected point */}
+          {indicatorPosition && (
+            <View
+              style={{
+                position: 'absolute',
+                left: indicatorPosition.x,
+                top: indicatorPosition.y,
+                width: 10,
+                height: 10,
+                backgroundColor: 'red',
+                borderRadius: 5,
+              }}
+            />
+          )}
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

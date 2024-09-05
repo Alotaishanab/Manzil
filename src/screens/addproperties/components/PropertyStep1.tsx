@@ -1,121 +1,143 @@
-import React, {useState} from 'react';
-import {useIntl} from '@context';
-import {CustomCheckbox} from '../../../../src/screens/requestproperty/components/CustomCheckbox';
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {CustomButton, TopSpace} from '@components';
-import {globalStyles} from '@globalStyles';
-import {Colors} from '@colors';
-import {fonts} from '@fonts';
-import * as SVGs from '../../../assets/svgs';
+import React, { useState, useRef } from 'react';
+import { useIntl } from '@context';
+import { CustomButton, TopSpace, PropertyTypeModal } from '@components';
+import { CustomCheckbox } from '../../../components/atoms/CustomCheckbox';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Animated,
+  TouchableWithoutFeedback,
+  Dimensions,
+  Vibration,
+} from 'react-native';
+import { globalStyles } from '@globalStyles';
+import { Colors } from '@colors';
+import { fonts } from '@fonts';
+import { ArrowDownIcon } from '@svgs';
+import { useAddPropertiesProps } from '../useAddPropertiesProps';
 
-import {useAddPropertiesProps} from '../useAddPropertiesProps';
+const { height: screenHeight } = Dimensions.get('window');
 
 const PropertyStep1 = ({
   selectedPropertyType,
   setSelectedPropertyType,
   handleNext,
 }: any) => {
-  const {intl} = useIntl();
-  const {allPropertyType} = useAddPropertiesProps();
-  const [propertyType, setPropertyType] = React.useState(
-    intl.formatMessage({id: 'addpropertyScreen.sell'}),
+  const { intl } = useIntl();
+  const { allPropertyType } = useAddPropertiesProps();
+  const [propertyType, setPropertyType] = useState(
+    intl.formatMessage({ id: 'addpropertyScreen.sell' })
   );
+  const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] = useState(false);
+  const [errors, setErrors] = useState({}); // Track validation errors
 
-  const onValueChange = (val: any) => {
-    setPropertyType(val);
+  const panY = useRef(new Animated.Value(screenHeight)).current;
+
+  const handleOpenPropertyTypeModal = () => {
+    setIsPropertyTypeModalVisible(true);
+    Animated.timing(panY, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const [boost, setBoost] = useState(intl.formatMessage({id: 'buttons.yes'}));
-
-  const onValueChangeBoost = (val: React.SetStateAction<string>) => {
-    setBoost(val);
+  const handleClosePropertyTypeModal = () => {
+    Animated.timing(panY, {
+      toValue: screenHeight,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsPropertyTypeModalVisible(false));
   };
 
-  const renderPropertyType = ({item}: any) => {
-    const Icon = SVGs[item?.icon];
-    return (
-      <TouchableOpacity
-        onPress={() => setSelectedPropertyType(item?.name)}
-        style={[
-          globalStyles.propertTypeCard,
-          {
-            borderColor:
-              selectedPropertyType == item?.name
-                ? Colors.light.primaryBtn
-                : Colors.light.propertyCardLine,
-          },
-        ]}>
-        <Icon width={50} height={50} />
-        <Text style={globalStyles.propertyTypeCardText}>{item?.name}</Text>
-      </TouchableOpacity>
-    );
+  const handlePropertyTypeSelect = (type: string) => {
+    setSelectedPropertyType(type);
+    setErrors((prev) => ({ ...prev, propertyType: null })); // Clear error when a valid selection is made
+    handleClosePropertyTypeModal();
+  };
+
+  const handleSubmit = () => {
+    let valid = true;
+    const newErrors: any = {};
+
+    if (!selectedPropertyType) {
+      newErrors.propertyType = 'Please select a property type.';
+      valid = false;
+    }
+
+    if (!valid) {
+      Vibration.vibrate(50);
+      setErrors(newErrors);
+      return;
+    }
+
+    handleNext();
   };
 
   return (
-    <View style={{flexGrow: 1}}>
+    <View style={{ flexGrow: 1 }}>
+      <TopSpace top={20} />
       <Text style={styles.wantText}>
-        {intl.formatMessage({id: 'addpropertyScreen.want-to'})}
+        {intl.formatMessage({ id: 'addpropertyScreen.want-to' })}
       </Text>
       <TopSpace top={10} />
+      
       {/* Sell Rent */}
       <View style={globalStyles.simpleRow}>
         <CustomCheckbox
-          title={intl.formatMessage({id: 'addpropertyScreen.sell'})}
+          title={intl.formatMessage({ id: 'addpropertyScreen.sell' })}
           selectedOption={propertyType}
-          onValueChange={onValueChange}
+          onValueChange={setPropertyType}
         />
         <CustomCheckbox
-          // title={'Rent'}
-          title={intl.formatMessage({id: 'addpropertyScreen.rent'})}
+          title={intl.formatMessage({ id: 'addpropertyScreen.rent' })}
           selectedOption={propertyType}
-          onValueChange={onValueChange}
+          onValueChange={setPropertyType}
         />
       </View>
       <TopSpace top={10} />
-      <Text style={styles.wantText}>
-        {intl.formatMessage({id: 'addpropertyScreen.feature-property'})}
-      </Text>
 
-      <Text style={styles.boost}>
-        {intl.formatMessage({id: 'addpropertyScreen.boost-property'})}
-      </Text>
-      <TopSpace top={20} />
-      <View style={globalStyles.simpleRow}>
-        <CustomCheckbox
-          title={intl.formatMessage({id: 'buttons.yes'})}
-          selectedOption={boost}
-          onValueChange={onValueChangeBoost}
-        />
-        <CustomCheckbox
-          // title={'Rent'}
-          title={intl.formatMessage({id: 'buttons.no'})}
-          selectedOption={boost}
-          onValueChange={onValueChangeBoost}
-        />
+      {/* Property Type Field */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.propertyTypeLabel}>
+          {intl.formatMessage({ id: 'landPropertyDetailScreen.property-type' })}
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.propertyTypeContainer,
+            errors.propertyType && styles.errorBorder, // Apply error border if there's an error
+          ]}
+          onPress={handleOpenPropertyTypeModal}
+        >
+          <Text style={styles.propertyTypeText}>
+            {selectedPropertyType ? selectedPropertyType : 'Select Property Type'}
+          </Text>
+          <ArrowDownIcon width={20} height={20} fill="black" />
+        </TouchableOpacity>
+        {errors.propertyType && <Text style={styles.errorText}>{errors.propertyType}</Text>}
       </View>
-      <TopSpace top={10} />
-      <Text style={styles.wantText}>
-        {intl.formatMessage({id: 'addpropertyScreen.properties-type'})}
-      </Text>
-      <FlatList
-        data={allPropertyType}
-        renderItem={renderPropertyType}
-        numColumns={3}
-        showsVerticalScrollIndicator={false}
-        horizontal={false}
-        contentContainerStyle={{flexGrow: 1}}
-        // ListHeaderComponent={ListHeader}
-        columnWrapperStyle={styles.propertyColumnWrap}
-      />
+
+      <TopSpace top={250} />
+
       <CustomButton
         btnWidth={'100%'}
         borderRadius={30}
         disabled={false}
-        handleClick={handleNext}
-        title={intl.formatMessage({id: 'buttons.next'})}
+        handleClick={handleSubmit} // Use handleSubmit for validation
+        title={intl.formatMessage({ id: 'buttons.next' })}
         showRightIconButton={true}
       />
-      {/* <TopSpace top={30} /> */}
+
+      {/* Property Type Modal */}
+      <PropertyTypeModal
+        isVisible={isPropertyTypeModalVisible}
+        onRequestClose={handleClosePropertyTypeModal}
+        handleClick={handlePropertyTypeSelect} // Pass the correct prop for handling click
+        panY={panY}
+      />
     </View>
   );
 };
@@ -128,27 +150,40 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: fonts.primary.regular,
   },
-  propertyType: {
+  propertyTypeLabel: {
     color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
+    marginBottom: 5,
     fontSize: 16,
-    fontFamily: fonts.primary.semiBold,
+    marginTop: 30,
   },
-  boost: {
-    fontSize: 10,
-    color: Colors.light.headingTitle,
+  propertyTypeText: {
+    fontSize: 16,
+    color: Colors.light.black,
     fontFamily: fonts.primary.regular,
+    flex: 1,
   },
-  propertTypeCard: {
-    borderWidth: 1,
-    width: 100,
-    height: 100,
-    borderRadius: 5,
-    borderColor: Colors.light.greyDescription,
-    justifyContent: 'center',
+  propertyTypeContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  propertyColumnWrap: {
+    borderColor: Colors.light.inputBg,
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: Colors.light.inputBg,
+    height: 50,
+    paddingHorizontal: 20,
     justifyContent: 'space-between',
-    marginVertical: 10,
+    marginTop: 20,
+  },
+  inputContainer: {
+    marginBottom: 30,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
+  },
+  errorBorder: {
+    borderColor: 'red',
   },
 });

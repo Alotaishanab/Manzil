@@ -14,3 +14,4 @@ export * from './PropertiesFeaturesModal';
 export * from './RowTitleValue';
 export * from './FilterModal';
 export * from './PropertyCard';
+export * from './CompassDirectionModal'

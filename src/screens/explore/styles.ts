@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
   },
   topAgencyText: {
     color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.mediumItalic,
+    fontFamily: fonts.primary.bold,
     fontSize: 20,
   },
   sellAll: {

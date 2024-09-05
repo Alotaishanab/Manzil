@@ -16,7 +16,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({ daysRange, showModal 
         <Text style={[styles.clickableText, { color: 'green', fontWeight: 'bold', fontSize: 18 }]}>{daysRange} Days ▼</Text>
       </TouchableOpacity>
     </View>
-    <View style={styles.separatorLine} />
+    
   </>
 );
 

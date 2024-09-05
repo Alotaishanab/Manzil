@@ -220,4 +220,61 @@ export const modalStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: '500',
   },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  statisticsContainer: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    paddingVertical: 10,
+  },
+  selectedDataContainer: {
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  selectedDataValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#228B22', // Dark green for data value
+  },
+  selectedDataLabel: {
+    fontSize: 14,
+    color: '#666', // Gray for data label
+    marginTop: 4,
+  },
+  totalViewsContainer: {
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  totalViewsValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000', // Black for total views
+  },
+  totalViewsLabel: {
+    fontSize: 14,
+    color: '#666', // Gray for total views label
+    marginTop: 4,
+  },
+  fullWidthCard: {
+    width: '100%',
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // Android shadow
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
 });

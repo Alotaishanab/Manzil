@@ -17,6 +17,8 @@ import { useIntl } from '@context';
 import PropertyStep1 from './components/PropertyStep1';
 import PropertyStep2 from './components/PropertyStep2';
 import PropertyStep3 from './components/PropertyStep3';
+import PropertyStep4 from './components/PropertyStep4';
+import PropertyStep5 from './components/PropertyStep5';
 
 export const AddProperties = () => {
   const [step, setStep] = useState(1);
@@ -25,7 +27,7 @@ export const AddProperties = () => {
   const [selectedPropertyType, setSelectedPropertyType] = useState(null);
   const { intl } = useIntl();
 
-  const totalSteps = 3; // Update this if more steps are added
+  const totalSteps = 5; // Update this if more steps are added
 
   const handleNext = () => {
     setStep((prevStep) => (prevStep < totalSteps ? prevStep + 1 : prevStep)); // Increment step by 1 to go to the next step
@@ -82,7 +84,10 @@ export const AddProperties = () => {
         contentContainerStyle={{
           paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
         }}>
-        <HeaderBackButtonTitle text={''} onPress={handleBack} />
+        <HeaderBackButtonTitle
+          text={''}
+          onPress={handleBack} // Ensure this triggers the handleBack function
+        />
         <TopSpace top={10} />
         {/* Request Property step content starts */}
         <View style={globalStyles.rowSpaceBetween}>
@@ -110,6 +115,11 @@ export const AddProperties = () => {
 
         {step === 2 && (
           <PropertyStep2
+            selectedType={selectedPropertyType}
+            images={photos}
+            floor={floor}
+            handleAddFloorPicker={handleAddFloorPicker}
+            handlePicker={handlePicker}
             handleNext={handleNext} // This will navigate to step 3
             handleBack={handleBack} // Use the handleBack function to navigate back to step 1
           />
@@ -117,15 +127,29 @@ export const AddProperties = () => {
 
         {step === 3 && (
           <PropertyStep3
-            selectedType={selectedPropertyType}
-            images={photos}
-            floor={floor}
-            handleAddFloorPicker={handleAddFloorPicker}
-            handlePicker={handlePicker}
-            handleNext={handleNext} // This will navigate to step 4 (if there is one)
+            handleNext={handleNext} // This will navigate to step 4
             handleBack={handleBack} // Use the handleBack function to navigate back to step 2
           />
         )}
+
+        {/* Add Step 4 Component */}
+        {step === 4 && (
+          <PropertyStep4
+            selectedPropertyType={selectedPropertyType}
+            handleNext={handleNext} // This will navigate to step 5
+            handleBack={handleBack} // Use the handleBack function to navigate back to step 3
+          />
+        )}
+
+        {/* Add Step 5 Component */}
+{step === 5 && (
+  <PropertyStep5
+    selectedType={selectedPropertyType}  // Pass the selected type here
+    handleNext={handleSubmit} // This will handle the final submission
+    handleBack={handleBack} // Use the handleBack function to navigate back to step 4
+  />
+)}
+
         
         <TopSpace top={10} />
       </ScrollView>

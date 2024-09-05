@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { ScrollView, Animated, View } from 'react-native';
 import { HeaderBackButtonTitle, Screen } from '@components';
 import { styles } from './styles';
@@ -26,108 +26,121 @@ export const Analytics: React.FC = () => {
   const slideAnim = useRef(new Animated.Value(300)).current;
   const [selectedDataLineX, setSelectedDataLineX] = useState<number | null>(null);
 
-  const getChartData = (days: number) => {
-    const today = new Date();
-    const labels: string[] = [];
-    const data: number[] = [];
+  // Using useMemo to memoize chart data computation to prevent unnecessary recalculations
+  const chartData = useMemo(() => {
+    const getChartData = (days: number) => {
+      const today = new Date();
+      const labels: string[] = [];
+      const data: number[] = [];
 
-    for (let i = days - 1; i >= 0; i -= Math.max(Math.ceil(days / 5), 1)) {
-      const date = new Date();
-      date.setDate(today.getDate() - i);
-      labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
-      data.push(Math.floor(Math.random() * 100)); // Random data for demonstration
-    }
+      for (let i = days - 1; i >= 0; i -= Math.max(Math.ceil(days / 5), 1)) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+        data.push(Math.floor(Math.random() * 100)); // Random data for demonstration
+      }
 
-    return {
-      labels,
-      datasets: [
-        {
-          data,
-          color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
-          strokeWidth: 2,
-        },
-      ],
+      return {
+        labels,
+        datasets: [
+          {
+            data,
+            color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+            strokeWidth: 2,
+          },
+        ],
+      };
     };
-  };
 
-  const chartData = getChartData(daysRange);
+    return getChartData(daysRange);
+  }, [daysRange]);
 
-  const data = [
-    {
-      id: 2,
-      name: 'Clicks',
-      value: '480',
-      icon: <TouchIcon width={30} height={30} />,
-      increase: true,
-      percent: '5',
-      style: styles.halfWidthCard,
-    },
-    {
-      id: 3,
-      name: 'Time Spent',
-      value: '1,200 mins',
-      icon: <TimerIcon width={30} height={30} />,
-      increase: true,
-      percent: '9',
-      style: styles.halfWidthCard,
-    },
-    {
-      id: 4,
-      name: 'Inquiries',
-      value: '900',
-      icon: <InquiryIcon width={30} height={30} />,
-      increase: true,
-      percent: '5',
-      style: styles.thirdRowCard,
-    },
-    {
-      id: 5,
-      name: 'Saves',
-      value: '480',
-      icon: <HeartIcon width={30} height={30} />,
-      increase: true,
-      percent: '5',
-      style: styles.thirdRowCard,
-    },
-    {
-      id: 6,
-      name: 'Shares',
-      value: '900',
-      icon: <ShareIcon width={30} height={30} />,
-      increase: false,
-      percent: '20',
-      style: styles.thirdRowCard,
-    },
-  ];
+  // Static data, no need to recreate on every render
+  const data = useMemo(
+    () => [
+      {
+        id: 2,
+        name: 'Clicks',
+        value: '480',
+        icon: <TouchIcon width={30} height={30} />,
+        increase: true,
+        percent: '5',
+        style: styles.halfWidthCard,
+      },
+      {
+        id: 3,
+        name: 'Time Spent',
+        value: '1,200 mins',
+        icon: <TimerIcon width={30} height={30} />,
+        increase: true,
+        percent: '9',
+        style: styles.halfWidthCard,
+      },
+      {
+        id: 4,
+        name: 'Inquiries',
+        value: '900',
+        icon: <InquiryIcon width={30} height={30} />,
+        increase: true,
+        percent: '5',
+        style: styles.thirdRowCard,
+      },
+      {
+        id: 5,
+        name: 'Saves',
+        value: '480',
+        icon: <HeartIcon width={30} height={30} />,
+        increase: true,
+        percent: '5',
+        style: styles.thirdRowCard,
+      },
+      {
+        id: 6,
+        name: 'Shares',
+        value: '900',
+        icon: <ShareIcon width={30} height={30} />,
+        increase: false,
+        percent: '20',
+        style: styles.thirdRowCard,
+      },
+    ],
+    []
+  );
 
-  const userLocations = [
-    { id: 1, name: 'Riyadh', value: '60%' },
-    { id: 2, name: 'Jeddah', value: '20%' },
-    { id: 3, name: 'Dammam', value: '20%' },
-  ];
+  const userLocations = useMemo(
+    () => [
+      { id: 1, name: 'Riyadh', value: '60%' },
+      { id: 2, name: 'Jeddah', value: '20%' },
+      { id: 3, name: 'Dammam', value: '20%' },
+    ],
+    []
+  );
 
-  const handleDaysRangeChange = (range: number) => {
-    setDaysRange(range);
-    setSelectedData({ value: 0, label: 'Select a day' });
-    hideModal();
-  };
+  const handleDaysRangeChange = useCallback(
+    (range: number) => {
+      setDaysRange(range);
+      setSelectedData({ value: 0, label: 'Select a day' });
+      hideModal();
+    },
+    [hideModal]
+  );
 
-  const showModal = () => {
+  const showModal = useCallback(() => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: false,
+      useNativeDriver: false, // Ensure the animation is smooth
     }).start();
-  };
+  }, [slideAnim]);
 
-  const hideModal = () => {
+  const hideModal = useCallback(() => {
     Animated.timing(slideAnim, {
       toValue: 300,
       duration: 300,
-      useNativeDriver: false,
+      useNativeDriver: false, // Ensure the animation is smooth
     }).start(() => setModalVisible(false));
-  };
+  }, [slideAnim]);
 
   return (
     <Screen showKeyboardAware={false}>
@@ -142,7 +155,6 @@ export const Analytics: React.FC = () => {
         />
         <StatisticsComponent selectedData={selectedData} totalViews={totalViews} />
         <View style={styles.separatorLine} />
-        {/* Correct Prop Passing */}
         <DataCardsComponent data={data} daysRange={daysRange} />
         <UserLocationsComponent userLocations={userLocations} />
       </ScrollView>

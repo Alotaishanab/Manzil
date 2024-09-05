@@ -4,7 +4,7 @@ import {Dimensions, StyleSheet, Text} from 'react-native';
 import {useIntl} from '@context';
 import {globalStyles} from '@globalStyles';
 import {View} from 'react-native';
-import {CustomCheckbox} from '../../../src/screens/requestproperty/components/CustomCheckbox';
+import {CustomCheckbox} from '../atoms/CustomCheckbox';
 import {CustomButton, TopSpace} from '../atoms';
 import {DropDownPicker} from './DropdownPicker';
 import {fonts} from '@fonts';

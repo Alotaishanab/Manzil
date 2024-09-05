@@ -15,7 +15,7 @@ import {globalStyles} from '@globalStyles';
 
 const {width, height} = Dimensions.get('window');
 
-const ImageCarouselPicker = ({images = [], handlePicker}: any) => {
+export const ImageCarouselPicker = ({images = [], handlePicker}: any) => {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0); // state to track the current index
 

@@ -6,7 +6,7 @@ import {fonts} from '@fonts';
 import {useIntl} from '@context';
 import * as SVGs from '../../../assets/svgs';
 import {useRequestPropertyProps} from '../useRequestPropertyProp';
-import {CustomCheckbox} from './CustomCheckbox';
+import {CustomCheckbox} from '../../../components/atoms/CustomCheckbox';
 import {globalStyles} from '@globalStyles';
 
 const Step1 = ({selectedProperty, setSelectedProperty, handleNext}: any) => {

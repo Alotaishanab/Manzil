@@ -1,21 +1,69 @@
-import React, {useState} from 'react';
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {GenericModal} from './GenericModal';
-import {Colors} from '@colors';
-import {fonts} from '@fonts';
-import * as SVGs from '../../assets/svgs';
-import {useIntl} from '@context';
-import {globalStyles} from '@globalStyles';
+import React, { useRef, useEffect } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Animated,
+  PanResponder,
+  TouchableWithoutFeedback,
+  Dimensions,
+  Modal,
+} from 'react-native';
+import { Colors } from '@colors';
+import { fonts } from '@fonts';
+import * as SVGs from '../../assets/svgs'; // Ensure SVGs are correctly imported
+import { useIntl } from '@context';
+import { globalStyles } from '@globalStyles';
 
-export const PropertyType = ({
+const { height: screenHeight } = Dimensions.get('window');
+
+export const PropertyTypeModal = ({
   isVisible,
-  modalTitle,
   toggleModal = () => {},
-  selectedPropertyType,
   handleClick,
+  panY,
 }: any) => {
-  const {intl} = useIntl();
-  const allPropertyType: any = [
+  const { intl } = useIntl();
+
+  const resetPositionAnim = Animated.timing(panY, {
+    toValue: 0,
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const closeAnim = Animated.timing(panY, {
+    toValue: screenHeight,
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {  // Only allow dragging downwards
+          panY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 150) {  // Trigger closing animation if dragged more than 150 pixels
+          closeAnim.start(() => toggleModal());
+        } else {
+          resetPositionAnim.start();  // Reset to the top if not dragged enough
+        }
+      },
+    })
+  ).current;
+
+  useEffect(() => {
+    if (isVisible) {
+      resetPositionAnim.start();
+    }
+  }, [isVisible]);
+
+  const allPropertyType = [
     {
       id: '1',
       icon: 'HomeIcon',
@@ -28,6 +76,13 @@ export const PropertyType = ({
       icon: 'ApartmentIcon',
       name: intl.formatMessage({
         id: 'requestPropertyScreen.properties-type.appartments',
+      }),
+    },
+    {
+      id: '9',
+      icon: 'LandIcon',
+      name: intl.formatMessage({
+        id: 'requestPropertyScreen.properties-type.land',
       }),
     },
     {
@@ -51,10 +106,9 @@ export const PropertyType = ({
         id: 'requestPropertyScreen.properties-type.farm-house',
       }),
     },
-
     {
       id: '5',
-      icon: 'ChalatIcon',
+      icon: 'ChalatIcon', // Ensure this icon is correctly exported and named
       name: intl.formatMessage({
         id: 'requestPropertyScreen.properties-type.chalet',
       }),
@@ -81,58 +135,107 @@ export const PropertyType = ({
       }),
     },
   ];
-  console.log('PropertyType selectedPropertyType::', selectedPropertyType);
-  const renderPropertyType = ({item}: any) => {
+
+  const renderPropertyType = ({ item }: any) => {
     const Icon = SVGs[item?.icon];
+    if (!Icon) {
+      console.warn(`Icon ${item?.icon} is not found in SVGs.`);
+      return null;
+    }
+
     return (
       <TouchableOpacity
         onPress={() => handleClick(item?.name)}
-        style={globalStyles.propertTypeCard}>
+        style={globalStyles.propertTypeCard}
+      >
         <Icon width={50} height={50} />
         <Text style={globalStyles.propertyTypeCardText}>{item?.name}</Text>
       </TouchableOpacity>
     );
   };
+
   return (
-    <GenericModal
-      isVisible={isVisible}
-      modalTitle={modalTitle}
-      centeredModal={false}
-      borderTopLeftRadius={40}
-      showCloseButton={false}
-      centerText={true}
-      borderTopRightRadius={40}
-      borderBottomLeftRadius={0}
-      borderBottomRightRadius={0}
-      toggleModal={toggleModal}>
-      <FlatList
-        data={allPropertyType}
-        renderItem={renderPropertyType}
-        numColumns={3}
-        showsVerticalScrollIndicator={false}
-        horizontal={false}
-        // style={{marginHorizontal: 6}}
-        // ListHeaderComponent={ListHeader}
-        ListFooterComponent={<View style={{marginBottom: 10}} />}
-        ListFooterComponentStyle={{marginBottom: 20}}
-        columnWrapperStyle={styles.propertyColumnWrap}
-      />
-    </GenericModal>
+    <Modal transparent visible={isVisible} animationType="none">
+      <TouchableWithoutFeedback onPress={toggleModal}>
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalContainer,
+              {
+                transform: [{ translateY: panY }],
+              },
+            ]}
+            {...panResponder.panHandlers}
+          >
+            {/* Draggable Handle */}
+            <View style={styles.dragHandleContainer}>
+              <View style={styles.dragHandle} />
+            </View>
+
+            {/* Modal Title */}
+            <Text style={styles.modalTitle}>Property Type</Text>
+
+            {/* Property Types List */}
+            <FlatList
+              data={allPropertyType}
+              renderItem={renderPropertyType}
+              numColumns={3}
+              showsVerticalScrollIndicator={false}
+              horizontal={false}
+              ListFooterComponent={<View style={{ marginBottom: 10 }} />}
+              ListFooterComponentStyle={{ marginBottom: 20 }}
+              columnWrapperStyle={styles.propertyColumnWrap}
+            />
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
   );
 };
 
-export const PropertyTypeModal = React.memo(PropertyType);
-
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: Colors.light.offWhite,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20, // Reduce padding to remove extra space
+    maxHeight: screenHeight * 0.8,
+  },
+  dragHandleContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  dragHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ccc',
+    borderRadius: 2.5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
   propertyColumnWrap: {
     justifyContent: 'space-between',
     marginVertical: 10,
     marginHorizontal: 5,
   },
-
   propertyType: {
     color: Colors.light.headingTitle,
     fontSize: 16,
     fontFamily: fonts.primary.semiBold,
   },
 });
+
+export default React.memo(PropertyTypeModal);
