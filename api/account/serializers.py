@@ -11,7 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
                   'preferences', 'subscription_plan_id')
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
+    def save(self, **kwargs):
+        validated_data = self.validated_data
         user = User.objects.create_user(
             email=validated_data['email'],
             phone_number=validated_data['phone_number'],
