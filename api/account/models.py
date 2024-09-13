@@ -23,4 +23,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['phone_number']
 
     def __str__(self):
-        return self.email
+        return f"User: {self.user_id}, Email: {self.email}, Phone Verified: {self.phone_verified}, PhoneNumber: {self.phone_number}, Name: {self.name}, subscription_plan_id: {self.subscription_plan_id}"

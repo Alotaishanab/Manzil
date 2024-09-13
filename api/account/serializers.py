@@ -4,41 +4,65 @@ from django.contrib.auth import authenticate
 from .models import User
 from .verify import send_code, check_code
 from .jwt_utils import blacklist_token
+from django.db.models import Q
+from django.utils import timezone
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
+    name = serializers.CharField()
+    subscription_plan_id = serializers.IntegerField(
+        required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = ('email', 'phone_number', 'password', 'name',
                   'preferences', 'subscription_plan_id')
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True},
+                        'subscription_plan_id': {'required': False}}
 
     def validate(self, data):
+
         email = data.get('email')
         phone_number = data.get('phone_number')
 
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                {'email': 'Email is already registered.'})
+        existing_user = User.objects.filter(
+            Q(email=email) | Q(phone_number=phone_number)).first()
 
-        if User.objects.filter(phone_number=phone_number).exists():
-            raise serializers.ValidationError(
-                {'phone_number': 'Phone number is already registered.'})
-            return
+        if existing_user:
+            if existing_user.phone_verified:
+                if existing_user.email == email and existing_user.phone_number == phone_number:
+                    raise serializers.ValidationError(
+                        {'email': 'Email already registered and phone is verified.'}, code='phone_verified'
+                    )
+                elif existing_user.email == email:
+                    raise serializers.ValidationError(
+                        {'email': 'Email already registered against a different mobile number'}, code='phone_verified'
+                    )
+                elif existing_user.phone_number == phone_number:
+                    raise serializers.ValidationError(
+                        {'phone_number': 'Phone number already registered against a different email address'}, code='phone_verified'
+                    )
+            else:
+                raise serializers.ValidationError(
+                    {'phone_number': 'Phone number is already registered.'}
+                )
 
         return data
 
     def save(self, **kwargs):
         validated_data = self.validated_data
+
         user = User.objects.create_user(
             email=validated_data['email'],
             phone_number=validated_data['phone_number'],
             password=validated_data['password'],
             name=validated_data['name'],
             preferences=validated_data.get('preferences'),
-            subscription_plan_id=validated_data.get('subscription_plan_id')
+            subscription_plan_id=validated_data.get('subscription_plan_id'),
+            registration_date=timezone.now()
         )
         send_code(validated_data['phone_number'])
         return user
@@ -51,17 +75,22 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
-        user = authenticate(email=email, password=password)
-        if not user:
-            raise serializers.ValidationError("Invalid credentials")
+        existing_user = User.objects.filter(email=email).first()
 
-        if not user.phone_verified:
-            raise serializers.ValidationError("Phone number is not verified.")
+        if existing_user:
 
-        user.last_login = timezone.now()
-        user.save(update_fields=['last_login'])
+            if not existing_user.phone_verified:
+                raise serializers.ValidationError(
+                    "Phone number is not verified.")
 
-        return user
+            user = authenticate(email=email, password=password)
+            if not user:
+                raise serializers.ValidationError("Invalid credentials")
+
+            existing_user.last_login = timezone.now()
+            existing_user.save(update_fields=['last_login'])
+
+        return existing_user
 
 
 class UserLogoutSerializer(serializers.Serializer):
@@ -90,7 +119,11 @@ class UserVerifyPhoneSerializer(serializers.Serializer):
             user = User.objects.get(phone_number=phone_number)
             if (check_code(phone_number, verification_code)):
                 user.phone_verified = True
-                user.save(update_fields=['phone_verified'])
+                user.save()
+            else:
+                raise serializers.ValidationError(
+                    "Phone number is not verified.")
+            return user
         except User.DoesNotExist:
             raise serializers.ValidationError(
                 "User with this phone number does not exist.")
