@@ -19,12 +19,14 @@ import {globalStyles} from '../../styles/globalStyles';
 import CountryPickerInput from './components/CountryPickerInput';
 import {useNavigation} from '@react-navigation/native';
 import SignupHeader from '../signup/components/SignupHeader';
+import {useRegisterUserPhone} from '@services'
 
 export const CreateAccount = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
-  const {creatAccountSchema} = useValidations();
+  const {createAccountSchema} = useValidations();
   const {handleCategory, selectedCategory} = useCreateAccountProps();
+  const { mutate: registerPhone } = useRegisterUserPhone();
 
   type FormData = {
     email: string | number | any;
@@ -38,7 +40,7 @@ export const CreateAccount = () => {
       email: '',
     },
     mode: 'onSubmit',
-    resolver: zodResolver(creatAccountSchema),
+    resolver: zodResolver(createAccountSchema),
   });
 
   const {
@@ -48,25 +50,48 @@ export const CreateAccount = () => {
     formState: {errors: errorsNumber},
   } = useForm();
 
+  const phoneNumber = phoneWatch('phoneNumber');
+  console.log('phoneNumber', phoneNumber);
+
   const handleSignup = (data: FormData) => {
     console.log('data', data);
     if (isValid) {
-      navigation.navigate('SignupOtpVerification', {
-        type: 'signup',
+
+      registerPhone({phone: phoneNumber}, {
+        onSuccess: () => {
+          // Navigate on success
+          navigation.navigate('SignupOtpVerification', {
+            type: 'signup',
+          });
+          
+        },
+        onError: () => {
+          console.error("Registering phone number failed");
+        }
       });
+
+      
     }
   };
 
   const handleSignupNumber = (data: any) => {
     console.log('data', data);
-    navigation.navigate('SignupOtpVerification');
-    // if (isValid) {
-    // }
+    registerPhone({phone: phoneNumber}, {
+      onSuccess: () => {
+        // Navigate on success
+        navigation.navigate('SignupOtpVerification');
+        
+      },
+      onError: () => {
+        console.error("Registering phone number failed");
+      }
+    });
+    
+    
   };
 
   // console.log('ohone',ph)
-  const phoneNumber = phoneWatch('phoneNumber');
-  console.log('phoneNumber', phoneNumber);
+  
   const handleGoogleLogin = () => {};
   const handleAppleLogin = () => {};
 

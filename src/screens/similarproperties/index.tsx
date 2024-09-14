@@ -44,11 +44,9 @@ export const similarPropertiesData = [
   },
 ];
 
-interface SimilarPropertiesProps {
-  handleClick: () => void;
-}
 
-export const SimilarProperties: React.FC<SimilarPropertiesProps> = ({ handleClick }) => {
+
+export const SimilarProperties= () => {
   const navigation = useNavigation(); // Initialize navigation
 
   const handlePropertyClick = () => {

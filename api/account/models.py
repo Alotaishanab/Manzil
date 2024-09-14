@@ -8,7 +8,7 @@ from django.utils import timezone
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=20, unique=True)
+    phone_number = models.CharField(max_length=20)
     password_hash = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     registration_date = models.DateTimeField(default=timezone.now)

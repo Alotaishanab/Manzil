@@ -4,11 +4,11 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 // import { showToast } from '../helpers';
-// import AsyncHelper from '../helpers/asyncHelper';
+import AsyncHelper from '../../helpers/asyncHelper';
 // import * as RootNavigation from '../navigation/NavigationService';
 // import { QA } from './urls';
 
-const QA = ''; // Set your QA base URL
+const QA = 'http://localhost:8000'; // Set your QA base URL
 
 type ApiResponse<T> = Promise<AxiosResponse<T>>;
 
@@ -38,8 +38,7 @@ class Api {
   private initializeInterceptors() {
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        const token = '';
-        // const token = await AsyncHelper.getToken();
+         const token = await AsyncHelper.getToken();
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
         }
@@ -121,15 +120,15 @@ class Api {
   }
 
   private async logout(): Promise<void> {
-    // await AsyncHelper.removeToken();
+     await AsyncHelper.removeToken();
     // await AsyncHelper.removeRefreshToken();
     // await AsyncHelper.removeFCMToken();
     // await AsyncHelper.removeUserId();
   }
 
   private async addAuthToken(config: InternalAxiosRequestConfig) {
-    const token = '';
-    // const token = await AsyncHelper.getToken();
+    //const token = '';
+     const token = await AsyncHelper.getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
     }

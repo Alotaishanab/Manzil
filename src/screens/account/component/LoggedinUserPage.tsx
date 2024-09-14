@@ -7,9 +7,11 @@ import {TopSpace} from '@components';
 import IconTitleButtonArrow from '../../../../src/components/molecules/IconTitleButtonArrow';
 import {useNavigation} from '@react-navigation/native';
 import {fonts} from '@fonts';
+import { useLogOutUser } from '@services';
 
 const LoggedinUserPage = ({}: any) => {
   const {intl, toggleLocale} = useIntl();
+  const {mutate: logoutUser} = useLogOutUser();
 
   const navigation: any = useNavigation();
 
@@ -67,7 +69,16 @@ const LoggedinUserPage = ({}: any) => {
     navigation.navigate('ChatWithUs');
   };
   const handleLogout = () => {
-    navigation.navigate('Login');
+    logoutUser(undefined, {
+      onSuccess: () => {
+        // Navigate on success
+        navigation.navigate('Login');
+      },
+      onError: () => {
+        console.error("Error logging out user")
+      }
+    });
+    
   };
   const handleRequests = () => {
     navigation.navigate('RequestList');

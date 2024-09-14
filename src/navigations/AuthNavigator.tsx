@@ -103,13 +103,14 @@ type AuthStackParamList = {
   PropertiesRequestStatus?: any;
   ParentalGate: {nextScreen: keyof AuthStackParamList};
   SimilarProperties?: any;
+  PropertyScreen?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator = () => {
   return (
     <AuthStack.Navigator
-      initialRouteName="AddProperties" // SplashScreen  // Analytics // AddProperties
+      initialRouteName="SplashScreen" // SplashScreen  // Analytics // AddProperties
       screenOptions={{headerShown: false}}>
       <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
       <AuthStack.Screen name="Onboarding" component={Onboarding} />

@@ -16,11 +16,13 @@ import {styles} from './styles';
 import SignupHeader from '../signup/components/SignupHeader';
 import {fonts} from '@fonts';
 import {Colors} from '@colors';
+import {useVerifyUserPhone} from "@services"
 
 export const SignupOtpVerification = () => {
   const {intl} = useIntl();
   const route: any = useRoute();
   const type = route?.params?.type;
+  const { mutate: verifyPhone } = useVerifyUserPhone();
   console.log('typ:', type);
   const navigation: any = useNavigation();
   const {otpValidationSchema} = useValidations();
@@ -44,11 +46,24 @@ export const SignupOtpVerification = () => {
       Alert.alert('Please enter code');
       return;
     }
-    if (type === 'forgot') {
-      navigation.navigate('ResetPassword', {type: type});
-    } else {
-      navigation.navigate('Login');
-    }
+
+    console.log('data', data)
+    verifyPhone({ verification_code: data.code}, {
+      onSuccess: () => {
+        if (type === 'forgot') {
+          navigation.navigate('ResetPassword', {type: type});
+        } else {
+          navigation.navigate('Login');
+        }
+        
+      },
+      onError: () => {
+        console.error("Error in verify phone api")
+      }
+    });
+    
+
+   
   };
 
   const [seconds, setSeconds] = useState(60);

@@ -12,10 +12,14 @@ import SignupHeader from './components/SignupHeader';
 import {globalStyles} from '@globalStyles';
 import {AppleIcon, GoogleIcon} from '@svgs';
 import {useNavigation} from '@react-navigation/native';
+import api from '../../services/api/api'
+import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
+import {useSignupUser} from '@services'
 
 export const Signup = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
+  const { mutate: signUp } = useSignupUser();
   const {signupSchema} = useValidations();
   type FormData = {
     email: string | number | any;
@@ -38,11 +42,27 @@ export const Signup = () => {
     resolver: zodResolver(signupSchema),
   });
 
-  const handleSignup = (data: FormData) => {
+  const handleSignup = async (data: FormData) => {
     console.log('data', data);
     // const {email, password} = data;
     if (isValid) {
-      navigation.navigate('CreateAccount');
+      try {
+        signUp(data, {
+          onSuccess: () => {
+            // Navigate on success
+            navigation.navigate('CreateAccount');
+            showCustomFlashMessage('Signup successful');
+          },
+          onError: () => {
+            // Handle login failure
+            showCustomFlashMessage('Signup failed. Please try again.');
+          }
+        });
+        
+      } catch (error) {
+        console.error('Signup error:', error);
+        showCustomFlashMessage("Signup failed: Please try again later!!")
+      }
     }
   };
 
@@ -197,7 +217,7 @@ export const Signup = () => {
         <View style={{marginHorizontal: 10}} />
 
         <TouchableOpacity style={styles.socialBtn}>
-          <GoogleIcon width={25} height={25} />
+          <GoogleIcon width={25} height={25} fill={undefined} />
         </TouchableOpacity>
       </View>
     </Screen>
