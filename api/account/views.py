@@ -22,7 +22,7 @@ def register_user(request):
 
             if existing_user:
                 token_obj = generate_token(existing_user)
-                return Response({"token": token_obj, "user": {"id": user.user_id, "email": user.email}}, status=status.HTTP_200_OK)
+                return Response({"token": token_obj, "user": {"id": existing_user.user_id, "email": existing_user.email}}, status=status.HTTP_200_OK)
 
             user = serializer.save()
             token_obj = generate_token(user)
@@ -40,7 +40,7 @@ def register_user_phone_number(request):
             phone = serializer.validated_data.get('phone')
 
             phone_user = User.objects.filter(
-                phone_number=phone).exclude(id=request.user.id).first()
+                phone_number=phone).exclude(user_id=user_id).first()
             if phone_user:
                 return Response({"detail": "Phone is already registered with a user"}, status=status.HTTP_400_BAD_REQUEST)
 
