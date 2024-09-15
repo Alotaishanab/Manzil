@@ -20,12 +20,18 @@ export type RegisterUserPhoneForm = {
 };
 
 const registerUserPhone = async (formData: RegisterUserPhoneForm) => {
-  const {data} = await api.post<RegisterUserPhoneResponse>(apiUrls.registerPhone, formData);
+  try{
+  const data = await api.post<RegisterUserPhoneResponse>(apiUrls.registerPhone, formData);
   
   //AsyncHelper.setToken(data.token.access)
   //AsyncHelper.setRefreshToken(data.token.refresh)
   
   return data;
+  }
+  catch(error){
+    console.log("Error registering phone",error);
+    throw error;
+  }
 };
 
 export const useRegisterUserPhone = () => {

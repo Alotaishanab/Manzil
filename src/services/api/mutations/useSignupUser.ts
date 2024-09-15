@@ -22,16 +22,28 @@ export type SignUpForm = {
 };
 
 const signup = async (formData: SignUpForm) => {
-  const {data} = await api.post<SignUpResponse>(apiUrls.signup, formData);
-  
+  try{
+  const data = await api.post<SignUpResponse>(apiUrls.signup, formData, false);
+  console.log('signup response', data)
+
+ 
+
+  /** @ts-ignore */
   await AsyncHelper.setToken(data.token.access);
+  /** @ts-ignore */
   await AsyncHelper.setRefreshToken(data.token.refresh);
   
   return data;
+}
+catch(err){
+  console.log(err);
+  throw err;
+}
 };
 
 export const useSignupUser = () => {
   return useMutation<SignUpResponse, Error, SignUpForm>({
+    /** @ts-ignore */
     mutationFn: signup,
   });
 };

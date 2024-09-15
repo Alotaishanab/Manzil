@@ -10,6 +10,8 @@ import AsyncHelper from '../../../helpers/asyncHelper';
 const logoutUser = async () => {
 
     const refresh = await AsyncHelper.getRefreshToken()
+
+    console.log('refresh', refresh)
    await api.post<{}>(apiUrls.logout, {refresh});
   
   await AsyncHelper.removeToken()

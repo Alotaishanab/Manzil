@@ -33,8 +33,8 @@ export const Signup = () => {
     formState: {isValid},
   } = useForm<FormData>({
     defaultValues: {
-      name: 'Faisal',
-      email: 'khawajfaisal981@gmail.com',
+      name: 'Zulqarnain',
+      email: 'zulqarnain.fastian@gmail.com',
       password: 'Password@123',
       confirmPassword: 'Password@123',
     },
@@ -43,7 +43,7 @@ export const Signup = () => {
   });
 
   const handleSignup = async (data: FormData) => {
-    console.log('data', data);
+    console.log('data', data,'isValid', isValid);
     // const {email, password} = data;
     if (isValid) {
       try {
@@ -189,7 +189,7 @@ export const Signup = () => {
         disabled={false}
         borderRadius={30}
         fontFamily={fonts.primary.regular}
-        handleClick={handleSignup}
+        handleClick={handleSubmit(handleSignup)}
         title={intl.formatMessage({id: 'signupScreen.agree-continue'})}
         showRightIconButton={false}
       />

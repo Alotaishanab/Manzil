@@ -19,7 +19,7 @@ verification_code: string | number | any;
 };
 
 const verifyUserPhone = async (formData: VerifyUserPhoneForm) => {
-  const {data} = await api.post<VerifyUserPhoneResponse>(apiUrls.verifyPhone, formData);
+  const data = await api.post<VerifyUserPhoneResponse>(apiUrls.verifyPhone, formData);
   
 
   

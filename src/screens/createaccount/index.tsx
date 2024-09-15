@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React,{useState} from 'react';
 import {View, Pressable, Text} from 'react-native';
 import {
   CustomButton,
@@ -27,9 +27,10 @@ export const CreateAccount = () => {
   const {createAccountSchema} = useValidations();
   const {handleCategory, selectedCategory} = useCreateAccountProps();
   const { mutate: registerPhone } = useRegisterUserPhone();
+  const [country, setCountry] = useState({callingCode: ['1'], cca2: 'US'});
 
   type FormData = {
-    email: string | number | any;
+    phoneNumber: string | number | any;
   };
   const {
     control,
@@ -51,13 +52,17 @@ export const CreateAccount = () => {
   } = useForm();
 
   const phoneNumber = phoneWatch('phoneNumber');
-  console.log('phoneNumber', phoneNumber);
+ // console.log('phoneNumber', phoneNumber);
+ // console.log('country', country);
 
   const handleSignup = (data: FormData) => {
-    console.log('data', data);
+    console.log('data', data,'isValid', isValid);
     if (isValid) {
 
-      registerPhone({phone: phoneNumber}, {
+      const countryCode = country.callingCode.length > 0 ? country.callingCode[0]:country.callingCode; 
+      console.log('countryCode',countryCode,'phoneNumber',phoneNumber)
+
+      registerPhone({phone: `+${countryCode}${phoneNumber}`}, {
         onSuccess: () => {
           // Navigate on success
           navigation.navigate('SignupOtpVerification', {
@@ -76,7 +81,9 @@ export const CreateAccount = () => {
 
   const handleSignupNumber = (data: any) => {
     console.log('data', data);
-    registerPhone({phone: phoneNumber}, {
+    const countryCode = country.callingCode.length > 0 ? country.callingCode[0]:country.callingCode; 
+    console.log('countryCode',countryCode,'phoneNumber',phoneNumber)
+    registerPhone({phone: `+${countryCode}${phoneNumber}`}, {
       onSuccess: () => {
         // Navigate on success
         navigation.navigate('SignupOtpVerification');
@@ -117,7 +124,7 @@ export const CreateAccount = () => {
 
       <TopSpace top={30} />
 
-      <CountryPickerInput control={numberControl} name="phoneNumber" />
+      <CountryPickerInput control={numberControl} name="phoneNumber" onSelectCountry={setCountry} />
 
       <TopSpace top={30} />
       <CustomButton
