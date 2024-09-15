@@ -5,3 +5,4 @@ export * from './CustomButton';
 export * from './SearchBar';
 export * from './InputFieldCode';
 export * from './CustomFlashMessage';
+export * from './AddPropertyBack';

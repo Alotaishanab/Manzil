@@ -1,55 +1,64 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { CustomButton, TopSpace } from '@components'; 
-import { useIntl } from '@context';
-import { globalStyles } from '@globalStyles';
-import { Colors } from '@colors';
+import React, { Fragment, useState, useRef } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Animated,
+  PanResponder,
+  Vibration,
+  TouchableWithoutFeedback,
+  Dimensions,
+} from 'react-native';
+import { AreaIcon, DoubleTcIcon, ArrowDownIcon } from '@svgs';
 import { fonts } from '@fonts';
+import { Colors } from '@colors';
+import { globalStyles } from '@globalStyles';
+import { useIntl } from '@context';
+import { CustomButton, TopSpace } from '@components';
+import { CompassDirectionModal } from '../../../components/molecules/CompassDirectionModal';
 
-const PropertyStep4 = ({ selectedPropertyType, handleNext }: any) => {
+const { height: screenHeight } = Dimensions.get('window');
+
+const PropertyStep4 = ({ selectedType, handleNext, handleBack }: any) => {
   const { intl } = useIntl();
-  const [beds, setBeds] = useState('');
-  const [baths, setBaths] = useState('');
-  const [floor, setFloor] = useState('');
-  const [area, setArea] = useState('');
+  const [priceMeter, setPriceMeter] = useState(null);
+  const [valueDirection, setValueDirection] = useState<any>('');
+  const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
+  const [propertyAge, setPropertyAge] = useState('');
+  const [title, setTitle] = useState('');
+  const [price, setPrice] = useState('');
+  const [size, setSize] = useState('');
   const [errors, setErrors] = useState({});
+
+  const handlePriceChange = (text: string) => {
+    const sanitizedText = text.replace(/[^0-9]/g, '');
+    if (sanitizedText.length > 9) {
+      return;
+    }
+
+    const formattedText = sanitizedText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    setPrice(formattedText);
+    setErrors((prev) => ({ ...prev, price: null }));
+  };
+
 
   const handleSubmit = () => {
     let valid = true;
     const newErrors: any = {};
 
-    if (selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.houses' }) ||
-        selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.appartments' }) ||
-        selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.tower' })) {
-      if (!beds) {
-        newErrors.beds = 'Please enter the number of beds.';
-        valid = false;
-      }
 
-      if (!baths) {
-        newErrors.baths = 'Please enter the number of baths.';
-        valid = false;
-      }
+    if (!price) {
+      newErrors.price = 'Please enter a price.';
+      valid = false;
     }
 
-    if (selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.office' }) ||
-        selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.tower' })) {
-      if (!floor) {
-        newErrors.floor = 'Please enter the floor level.';
-        valid = false;
-      }
-    }
-
-    if (selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.land' }) ||
-        selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.farm-house' }) ||
-        selectedPropertyType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.chalet' })) {
-      if (!area) {
-        newErrors.area = 'Please enter the area size.';
-        valid = false;
-      }
-    }
 
     if (!valid) {
+      Vibration.vibrate(50);
       setErrors(newErrors);
       return;
     }
@@ -57,117 +66,30 @@ const PropertyStep4 = ({ selectedPropertyType, handleNext }: any) => {
     handleNext();
   };
 
-  const renderFieldsByPropertyType = () => {
-    switch (selectedPropertyType) {
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.houses' }):
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.appartments' }):
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.tower' }):
-        return (
-          <>
-            {/* Beds Field */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                {intl.formatMessage({ id: 'addpropertyScreen.beds' })}
-              </Text>
-              <TextInput
-                placeholder="Number of beds"
-                style={[styles.textInput, errors.beds && styles.errorBorder]}
-                keyboardType="numeric"
-                value={beds}
-                onChangeText={(text) => {
-                  setBeds(text);
-                  setErrors((prev) => ({ ...prev, beds: null }));
-                }}
-              />
-              {errors.beds && <Text style={styles.errorText}>{errors.beds}</Text>}
-            </View>
-
-            {/* Baths Field */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                {intl.formatMessage({ id: 'addpropertyScreen.baths' })}
-              </Text>
-              <TextInput
-                placeholder="Number of baths"
-                style={[styles.textInput, errors.baths && styles.errorBorder]}
-                keyboardType="numeric"
-                value={baths}
-                onChangeText={(text) => {
-                  setBaths(text);
-                  setErrors((prev) => ({ ...prev, baths: null }));
-                }}
-              />
-              {errors.baths && <Text style={styles.errorText}>{errors.baths}</Text>}
-            </View>
-          </>
-        );
-
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.office' }):
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.tower' }):
-        return (
-          <>
-            {/* Floor Field */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                {intl.formatMessage({ id: 'addpropertyScreen.floor' })}
-              </Text>
-              <TextInput
-                placeholder="Floor level"
-                style={[styles.textInput, errors.floor && styles.errorBorder]}
-                keyboardType="numeric"
-                value={floor}
-                onChangeText={(text) => {
-                  setFloor(text);
-                  setErrors((prev) => ({ ...prev, floor: null }));
-                }}
-              />
-              {errors.floor && <Text style={styles.errorText}>{errors.floor}</Text>}
-            </View>
-          </>
-        );
-
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.land' }):
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.farm-house' }):
-      case intl.formatMessage({ id: 'requestPropertyScreen.properties-type.chalet' }):
-        return (
-          <>
-            {/* Area Field */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                {intl.formatMessage({ id: 'addpropertyScreen.area' })}
-              </Text>
-              <TextInput
-                placeholder="Area size (sqm)"
-                style={[styles.textInput, errors.area && styles.errorBorder]}
-                keyboardType="numeric"
-                value={area}
-                onChangeText={(text) => {
-                  setArea(text);
-                  setErrors((prev) => ({ ...prev, area: null }));
-                }}
-              />
-              {errors.area && <Text style={styles.errorText}>{errors.area}</Text>}
-            </View>
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
+      {isDirectionModalVisible && <View style={styles.dimOverlay} />}
+      
       <View style={styles.container}>
-        {/* Property Type Display */}
-        <Text style={styles.title}>
-         
-        </Text>
-        <Text style={styles.selectedPropertyType}>{selectedPropertyType}</Text>
-
-        {renderFieldsByPropertyType()}
-
-        <TopSpace top={20} />
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>
+            {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
+          </Text>
+          <View style={[styles.priceContainer, errors.price && styles.errorBorder]}>
+            <TextInput
+              placeholder="2,000,000"
+              placeholderTextColor={Colors.light.grey}
+              style={styles.priceInput}
+              keyboardType="numeric"
+              value={price}
+              onChangeText={handlePriceChange}
+            />
+            <Text style={styles.priceCurrency}>SAR</Text>
+          </View>
+          {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
+        </View>
+          
+        
 
         <CustomButton
           btnWidth={'100%'}
@@ -177,49 +99,67 @@ const PropertyStep4 = ({ selectedPropertyType, handleNext }: any) => {
           title={intl.formatMessage({ id: 'buttons.next' })}
           showRightIconButton={true}
         />
+
+        
+            
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default PropertyStep4;
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    paddingHorizontal: 20,
     backgroundColor: Colors.light.background,
   },
-  title: {
-    fontSize: 18,
-    fontFamily: fonts.primary.bold,
-    color: Colors.light.headingTitle,
-    marginVertical: 20,
+  dimOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
   },
-  selectedPropertyType: {
-    fontSize: 16,
-    fontFamily: fonts.primary.regular,
-    color: Colors.light.greyDescription,
-    marginBottom: 20,
+  container: {
+    flex: 1,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   label: {
-    fontSize: 16,
-    fontFamily: fonts.primary.medium,
     color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
     marginBottom: 5,
+    fontSize: 16,
   },
-  textInput: {
+  textInputFullWidth: {
     height: 50,
     borderColor: Colors.light.inputBg,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    backgroundColor: Colors.light.inputBg,
-    fontFamily: fonts.primary.regular,
+    width: '100%',
+    paddingHorizontal: 20,
     color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+    borderWidth: 1,
+    backgroundColor: Colors.light.inputBg,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+  },
+  halfWidthContainer: {
+    width: '48%',
+  },
+  textInputHalfWidth: {
+    height: 50,
+    borderColor: Colors.light.inputBg,
+    width: '100%',
+    paddingHorizontal: 20,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+    borderWidth: 1,
+    backgroundColor: Colors.light.inputBg,
+    borderRadius: 10,
   },
   errorText: {
     color: 'red',
@@ -229,4 +169,95 @@ const styles = StyleSheet.create({
   errorBorder: {
     borderColor: 'red',
   },
+  directionLabel: {
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
+    marginBottom: 5,
+    fontSize: 16,
+    marginTop: 10,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: Colors.light.inputBg,
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: Colors.light.inputBg,
+    height: 50,
+  },
+  priceInput: {
+    flex: 1,
+    fontSize: 34,
+    textAlign: 'center',
+    color: Colors.light.black,
+    fontFamily: fonts.primary.bold,
+  },
+  priceCurrency: {
+    marginRight: 10,
+    fontSize: 18,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.bold,
+  },
+  directionText: {
+    fontSize: 16,
+    color: Colors.light.black,
+    fontFamily: fonts.primary.regular,
+    flex: 1,
+  },
+  directionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: Colors.light.inputBg,
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: Colors.light.inputBg,
+    height: 50,
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '100%',
+    height: screenHeight * 0.4, // Adjust height to 60% of the screen height
+    backgroundColor: Colors.light.offWhite,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ccc',
+    borderRadius: 3,
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+    marginBottom: 15,
+  },
+  modalOption: {
+    paddingVertical: 15,
+    width: '100%',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.inputBg,
+  },
+  modalOptionText: {
+    fontSize: 18,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    paddingHorizontal: 0,
+  },
 });
+

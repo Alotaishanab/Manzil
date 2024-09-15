@@ -53,6 +53,7 @@ export * from './ElectricityIcon';
 export * from './FilterIcon';
 export * from './FileIcon';
 export * from './FarmHouseIcon';
+export * from './FloorIcon';
 
 export * from './FavoriteIcon';
 export * from './FavoriteOutlineIcon';
@@ -86,6 +87,7 @@ export * from './InfoIcon';
 // K
 
 // L
+export * from './LivingRoomIcon';
 
 export * from './LockIcon';
 export * from './LandIcon';

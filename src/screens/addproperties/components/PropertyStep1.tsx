@@ -1,17 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useIntl } from '@context';
-import { CustomButton, TopSpace, PropertyTypeModal } from '@components';
+import { CustomButton, TopSpace, PropertyTypeModal, CompassDirectionModal } from '@components';
 import { CustomCheckbox } from '../../../components/atoms/CustomCheckbox';
 import {
-  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   Animated,
-  TouchableWithoutFeedback,
-  Dimensions,
   Vibration,
+  TextInput,
+  Modal,
+  Dimensions,
+  TouchableWithoutFeedback,
+  PanResponder,
 } from 'react-native';
 import { globalStyles } from '@globalStyles';
 import { Colors } from '@colors';
@@ -24,17 +26,44 @@ const { height: screenHeight } = Dimensions.get('window');
 const PropertyStep1 = ({
   selectedPropertyType,
   setSelectedPropertyType,
+  size,
+  setSize,
+  propertyAge,
+  setPropertyAge,
+  propertyType,
+  setPropertyType, 
   handleNext,
 }: any) => {
   const { intl } = useIntl();
   const { allPropertyType } = useAddPropertiesProps();
-  const [propertyType, setPropertyType] = useState(
-    intl.formatMessage({ id: 'addpropertyScreen.sell' })
-  );
   const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] = useState(false);
-  const [errors, setErrors] = useState({}); // Track validation errors
+  const [errors, setErrors] = useState({});
 
+  // Initialize panY starting from the bottom of the screen
   const panY = useRef(new Animated.Value(screenHeight)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (event, gestureState) => {
+        panY.setValue(gestureState.dy);
+      },
+      onPanResponderRelease: (event, gestureState) => {
+        if (gestureState.dy > 100) {
+          Animated.timing(panY, {
+            toValue: screenHeight, // Slide down
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setIsDirectionModalVisible(false));
+        } else {
+          Animated.spring(panY, {
+            toValue: 0, // Stay in place
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const handleOpenPropertyTypeModal = () => {
     setIsPropertyTypeModalVisible(true);
@@ -55,9 +84,32 @@ const PropertyStep1 = ({
 
   const handlePropertyTypeSelect = (type: string) => {
     setSelectedPropertyType(type);
-    setErrors((prev) => ({ ...prev, propertyType: null })); // Clear error when a valid selection is made
+    setErrors((prev) => ({ ...prev, propertyType: null }));
     handleClosePropertyTypeModal();
   };
+
+  const handleTitleChange = (text: string) => {
+    if (/[^a-zA-Z\s]/.test(text)) {
+      setErrors((prev) => ({ ...prev, title: 'Title should not contain numbers or special characters.' }));
+      return;
+    }
+    setTitle(text.slice(0, 50));
+    setErrors((prev) => ({ ...prev, title: null }));
+  };
+
+  const handleSizeChange = (text: string) => {
+    const sanitizedText = text.replace(/[^0-9]/g, '');
+    setSize(sanitizedText);
+    setErrors((prev) => ({ ...prev, size: null }));
+  };
+
+  const handlePropertyAgeChange = (text: string) => {
+    const sanitizedText = text.replace(/[^0-9]/g, '');
+    setPropertyAge(sanitizedText);
+    setErrors((prev) => ({ ...prev, propertyAge: null }));
+  };
+
+
 
   const handleSubmit = () => {
     let valid = true;
@@ -65,6 +117,17 @@ const PropertyStep1 = ({
 
     if (!selectedPropertyType) {
       newErrors.propertyType = 'Please select a property type.';
+      valid = false;
+    }
+
+
+    if (!size) {
+      newErrors.size = 'Please enter the property size.';
+      valid = false;
+    }
+
+    if (!propertyAge) {
+      newErrors.propertyAge = 'Please enter the property age.';
       valid = false;
     }
 
@@ -80,11 +143,7 @@ const PropertyStep1 = ({
   return (
     <View style={{ flexGrow: 1 }}>
       <TopSpace top={20} />
-      <Text style={styles.wantText}>
-        {intl.formatMessage({ id: 'addpropertyScreen.want-to' })}
-      </Text>
-      <TopSpace top={10} />
-      
+      <Text style={styles.label}>Select</Text>
       {/* Sell Rent */}
       <View style={globalStyles.simpleRow}>
         <CustomCheckbox
@@ -98,7 +157,10 @@ const PropertyStep1 = ({
           onValueChange={setPropertyType}
         />
       </View>
-      <TopSpace top={10} />
+
+      <TopSpace top={30} />
+
+     
 
       {/* Property Type Field */}
       <View style={styles.inputContainer}>
@@ -108,7 +170,7 @@ const PropertyStep1 = ({
         <TouchableOpacity
           style={[
             styles.propertyTypeContainer,
-            errors.propertyType && styles.errorBorder, // Apply error border if there's an error
+            errors.propertyType && styles.errorBorder,
           ]}
           onPress={handleOpenPropertyTypeModal}
         >
@@ -120,24 +182,63 @@ const PropertyStep1 = ({
         {errors.propertyType && <Text style={styles.errorText}>{errors.propertyType}</Text>}
       </View>
 
-      <TopSpace top={250} />
+      <View style={styles.rowContainer}>
+        <View style={styles.halfWidthContainer}>
+          <Text style={styles.label}>
+            {intl.formatMessage({ id: 'addpropertyScreen.size' })}
+          </Text>
+          <TextInput
+            placeholder="Property size..."
+            placeholderTextColor={Colors.light.black}
+            style={[
+              styles.textInputHalfWidth,
+              errors.size && styles.errorBorder,
+            ]}
+            keyboardType="numeric"
+            value={size}
+            onChangeText={handleSizeChange}
+          />
+          {errors.size && <Text style={styles.errorText}>{errors.size}</Text>}
+        </View>
+
+        <View style={styles.halfWidthContainer}>
+          <Text style={styles.label}>
+            {intl.formatMessage({ id: 'addpropertyScreen.propertyAge' })}
+          </Text>
+          <TextInput
+            placeholder="Property Age..."
+            placeholderTextColor={Colors.light.black}
+            style={[
+              styles.textInputHalfWidth,
+              errors.propertyAge && styles.errorBorder,
+            ]}
+            keyboardType="numeric"
+            value={propertyAge}
+            onChangeText={handlePropertyAgeChange}
+          />
+          {errors.propertyAge && <Text style={styles.errorText}>{errors.propertyAge}</Text>}
+        </View>
+      </View>
+
+
+      <TopSpace top={20} />
 
       <CustomButton
         btnWidth={'100%'}
         borderRadius={30}
         disabled={false}
-        handleClick={handleSubmit} // Use handleSubmit for validation
+        handleClick={handleSubmit}
         title={intl.formatMessage({ id: 'buttons.next' })}
         showRightIconButton={true}
       />
 
-      {/* Property Type Modal */}
       <PropertyTypeModal
         isVisible={isPropertyTypeModalVisible}
         onRequestClose={handleClosePropertyTypeModal}
-        handleClick={handlePropertyTypeSelect} // Pass the correct prop for handling click
+        handleClick={handlePropertyTypeSelect}
         panY={panY}
       />
+
     </View>
   );
 };
@@ -148,14 +249,13 @@ const styles = StyleSheet.create({
   wantText: {
     color: Colors.light.headingTitle,
     fontSize: 17,
-    fontFamily: fonts.primary.regular,
+    fontFamily: fonts.primary.medium,
   },
   propertyTypeLabel: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
     marginBottom: 5,
     fontSize: 16,
-    marginTop: 30,
   },
   propertyTypeText: {
     fontSize: 16,
@@ -178,6 +278,14 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 30,
   },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+  },
+  halfWidthContainer: {
+    width: '48%',
+  },
   errorText: {
     color: 'red',
     fontSize: 12,
@@ -185,5 +293,56 @@ const styles = StyleSheet.create({
   },
   errorBorder: {
     borderColor: 'red',
+  },
+  label: {
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
+    marginBottom: 5,
+    fontSize: 16,
+  },
+  textInputFullWidth: {
+    height: 50,
+    borderColor: Colors.light.inputBg,
+    width: '100%',
+    paddingHorizontal: 20,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+    borderWidth: 1,
+    fontSize: 16,
+    backgroundColor: Colors.light.inputBg,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+  textInputHalfWidth: {
+    height: 50,
+    borderColor: Colors.light.inputBg,
+    width: '100%',
+    paddingHorizontal: 20,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+    borderWidth: 1,
+    backgroundColor: Colors.light.inputBg,
+    borderRadius: 10,
+    fontSize: 16,
+  },
+  directionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '100%',
+    height: screenHeight * 0.4,
+    backgroundColor: Colors.light.offWhite,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
   },
 });

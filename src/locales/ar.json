@@ -204,6 +204,8 @@
   "sendFeedbackScreen.header": "أرسل لنا ردود الفعل",
   "sendFeedbackScreen.email-address": "عنوان البريد الإلكتروني",
   "sendFeedbackScreen.description": "وصف",
+  "addpropertyScreen.size": "مساحة",
+  "addpropertyScreen.propertyAge": "عمر العقار",
 
   "addpropertyScreen.header": "إضافة عقارات",
   "addpropertyScreen.step": "الخطوة",

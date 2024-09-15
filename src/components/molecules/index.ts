@@ -14,4 +14,6 @@ export * from './PropertiesFeaturesModal';
 export * from './RowTitleValue';
 export * from './FilterModal';
 export * from './PropertyCard';
-export * from './CompassDirectionModal'
+export * from './CompassDirectionModal';
+export * from './ScrollPicker';
+export * from './HouseComponent'

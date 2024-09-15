@@ -120,7 +120,6 @@ export const AuthNavigator = () => {
       />
 
       <AuthStack.Screen name="Signup" component={Signup} />
-
       <AuthStack.Screen name="Login" component={Login} />
       <AuthStack.Screen name="CreateAccount" component={CreateAccount} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
