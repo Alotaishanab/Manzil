@@ -58,9 +58,9 @@ export const useValidations = () => {
 
   const createAccountSchema = z.object({
     // email: z.string().email().min(7),
-    email: z
+    phoneNumber: z
       .string()
-      .email({message: intl.formatMessage({id: 'form-errors.invalidEmail'})}),
+      .nonempty(intl.formatMessage({id: 'form-errors.passwordRequired'})),
 
     // password: z
     //   .string()

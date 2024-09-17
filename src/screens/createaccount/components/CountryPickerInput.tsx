@@ -6,13 +6,18 @@ import {globalStyles} from '../../../styles/globalStyles';
 import {fonts} from '../../../assets/fonts';
 import {Colors} from '@colors';
 
-const CountryPickerInput = ({control, name}) => {
+
+const CountryPickerInput = ({control, name,onSelectCountry}) => {
   const [countryCode, setCountryCode] = useState('US');
   const [country, setCountry] = useState({callingCode: ['1'], cca2: 'US'});
 
   const onSelect = selectedCountry => {
     setCountryCode(selectedCountry.cca2);
     setCountry(selectedCountry);
+
+    if(onSelectCountry){
+      onSelectCountry(selectedCountry);
+    }
   };
 
   return (

@@ -1,14 +1,14 @@
 import axios, {
   AxiosInstance,
   AxiosResponse,
-  InternalAxiosRequestConfig,
+  AxiosRequestConfig,
 } from 'axios';
 // import { showToast } from '../helpers';
-// import AsyncHelper from '../helpers/asyncHelper';
+import AsyncHelper from '../../helpers/asyncHelper';
 // import * as RootNavigation from '../navigation/NavigationService';
 // import { QA } from './urls';
 
-const QA = ''; // Set your QA base URL
+const QA = 'http://10.0.2.2:8000'; // Set your QA base URL
 
 type ApiResponse<T> = Promise<AxiosResponse<T>>;
 
@@ -37,11 +37,10 @@ class Api {
 
   private initializeInterceptors() {
     this.client.interceptors.request.use(
-      async (config: InternalAxiosRequestConfig) => {
-        const token = '';
-        // const token = await AsyncHelper.getToken();
+      async (config: AxiosRequestConfig) => {
+         const token = await AsyncHelper.getToken();
         if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
+          config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
@@ -121,22 +120,24 @@ class Api {
   }
 
   private async logout(): Promise<void> {
-    // await AsyncHelper.removeToken();
+     await AsyncHelper.removeToken();
     // await AsyncHelper.removeRefreshToken();
     // await AsyncHelper.removeFCMToken();
     // await AsyncHelper.removeUserId();
   }
 
-  private async addAuthToken(config: InternalAxiosRequestConfig) {
-    const token = '';
-    // const token = await AsyncHelper.getToken();
+  private async addAuthToken(config: AxiosRequestConfig) {
+    //const token = '';
+     const token = await AsyncHelper.getToken();
+
+     console.log("addAuthToken ", token)
     if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
   }
 
   async get<T>(route: string, sendAuthToken = false): ApiResponse<T> {
-    const config: InternalAxiosRequestConfig = {headers: {}};
+    const config: AxiosRequestConfig = {headers: {}};
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
@@ -146,16 +147,16 @@ class Api {
   async post<T>(
     route: string,
     params: any,
-    sendAuthToken = false,
+    sendAuthToken = true,
     multipart = false,
   ): ApiResponse<T> {
-    const config: InternalAxiosRequestConfig = {
-      headers: multipart ? {'Content-Type': 'multipart/form-data'} : {},
+    const config: AxiosRequestConfig = {
+      headers: multipart ? {'Content-Type': 'multipart/form-data'} : {"Content-Type": "application/json"},
     };
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.post(route, params, config);
+    return await this.client.post(route, params, config);
   }
 
   async put<T>(
@@ -163,11 +164,11 @@ class Api {
     params: any,
     sendAuthToken = false,
   ): ApiResponse<T> {
-    const config: InternalAxiosRequestConfig = {headers: {}};
+    const config: AxiosRequestConfig = {headers: {"Content-Type": "application/json"}};
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.put(route, params, config);
+    return await this.client.put(route, params, config);
   }
 
   async delete<T>(
@@ -175,14 +176,14 @@ class Api {
     params: any,
     sendAuthToken = false,
   ): ApiResponse<T> {
-    const config: InternalAxiosRequestConfig = {
+    const config: AxiosRequestConfig = {
       data: params,
       headers: {},
     };
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.delete(route, config);
+    return await this.client.delete(route, config);
   }
 }
 
