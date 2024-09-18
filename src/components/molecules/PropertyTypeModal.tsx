@@ -148,6 +148,8 @@ export const PropertyTypeModal = ({
   ];
 
   const renderPropertyType = ({ item }: any) => {
+    console.log('Property type item', item);
+    
     const Icon = SVGs[item?.icon];
     if (!Icon) {
       console.warn(`Icon ${item?.icon} is not found in SVGs.`);
