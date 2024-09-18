@@ -21,6 +21,11 @@ type FormData = {
   confirmPassword: string;
 };
 
+type FormData = {
+  password: string;
+  confirmPassword: string;
+};
+
 export const ResetPassword = () => {
   const {resetPasswordSchema} = useValidations();
   const {intl} = useIntl();
@@ -64,7 +69,6 @@ export const ResetPassword = () => {
         />
 
         <TopSpace top={20} />
-        {/* resetPasswordScreen.header */}
         <Text style={styles.descriptionText}>
           {intl.formatMessage({id: 'resetPasswordScreen.description'})}
         </Text>

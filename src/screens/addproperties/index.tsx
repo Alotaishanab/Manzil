@@ -126,6 +126,7 @@ export const AddProperties = () => {
         const selectedImages: any = res.assets.map((asset: any) => ({
           uri: asset.uri,
         }));
+        // @ts-ignore
         setPhotos((prevPhotos: any) => [...prevPhotos, ...selectedImages]);
       } else {
         console.log('No images selected or response format is incorrect');
@@ -323,7 +324,7 @@ export const AddProperties = () => {
 
   const handleSubmit = () => {
     let valid = true;
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     // If everything is valid, submit the property
     submitProperty();
@@ -359,16 +360,12 @@ export const AddProperties = () => {
           <PropertyStep1
             selectedPropertyType={selectedPropertyType}
             setSelectedPropertyType={setSelectedPropertyType}
-            title={title}
-            setTitle={setTitle}
             size={size}
             setSize={setSize}
             propertyAge={propertyAge}
             setPropertyAge={setPropertyAge}
             propertyType={propertyType}
             setPropertyType={setPropertyType}
-            direction={direction}
-            setDirection={setDirection}
             handleNext={handleNext}
           />
         )}
@@ -449,7 +446,7 @@ export const AddProperties = () => {
             setMarkerPosition={setMarkerPosition}
             floorPlan={floorPlan}
             setFloorPlan={setFloorPlan}
-            handleNext={handleNext}
+            handleNext={handleSubmit}
             handleBack={handleBack}
           />
         )}

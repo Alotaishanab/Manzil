@@ -19,9 +19,21 @@ import { globalStyles } from '@globalStyles';
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
 import { ArrowDownIcon } from '@svgs';
-import { useAddPropertiesProps } from '../useAddPropertiesProps';
 
 const { height: screenHeight } = Dimensions.get('window');
+
+interface Props {
+  selectedPropertyType:string,
+  setSelectedPropertyType: (type: string) =>void,
+  size: string,
+  setSize: (size: string) =>void,
+  propertyAge: string,
+  setPropertyAge: (age: string) =>void,
+  propertyType: string,
+  setPropertyType:  (type: string) =>void, 
+  handleNext: () => void,
+  
+}
 
 const PropertyStep1 = ({
   selectedPropertyType,
@@ -33,11 +45,11 @@ const PropertyStep1 = ({
   propertyType,
   setPropertyType, 
   handleNext,
-}: any) => {
+}: Props) => {
   const { intl } = useIntl();
-  const { allPropertyType } = useAddPropertiesProps();
+  const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
   const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string,string|null>>({});
 
   // Initialize panY starting from the bottom of the screen
   const panY = useRef(new Animated.Value(screenHeight)).current;
@@ -88,14 +100,7 @@ const PropertyStep1 = ({
     handleClosePropertyTypeModal();
   };
 
-  const handleTitleChange = (text: string) => {
-    if (/[^a-zA-Z\s]/.test(text)) {
-      setErrors((prev) => ({ ...prev, title: 'Title should not contain numbers or special characters.' }));
-      return;
-    }
-    setTitle(text.slice(0, 50));
-    setErrors((prev) => ({ ...prev, title: null }));
-  };
+
 
   const handleSizeChange = (text: string) => {
     const sanitizedText = text.replace(/[^0-9]/g, '');
@@ -104,7 +109,9 @@ const PropertyStep1 = ({
   };
 
   const handlePropertyAgeChange = (text: string) => {
+    console.log('Property age raw text',text);
     const sanitizedText = text.replace(/[^0-9]/g, '');
+    console.log('Property age sanitizedText',sanitizedText);
     setPropertyAge(sanitizedText);
     setErrors((prev) => ({ ...prev, propertyAge: null }));
   };
@@ -170,7 +177,7 @@ const PropertyStep1 = ({
         <TouchableOpacity
           style={[
             styles.propertyTypeContainer,
-            errors.propertyType && styles.errorBorder,
+            !!errors['propertyType'] && styles.errorBorder,
           ]}
           onPress={handleOpenPropertyTypeModal}
         >
@@ -192,7 +199,7 @@ const PropertyStep1 = ({
             placeholderTextColor={Colors.light.black}
             style={[
               styles.textInputHalfWidth,
-              errors.size && styles.errorBorder,
+              !!errors.size && styles.errorBorder,
             ]}
             keyboardType="numeric"
             value={size}
@@ -210,7 +217,7 @@ const PropertyStep1 = ({
             placeholderTextColor={Colors.light.black}
             style={[
               styles.textInputHalfWidth,
-              errors.propertyAge && styles.errorBorder,
+              !!errors.propertyAge && styles.errorBorder,
             ]}
             keyboardType="numeric"
             value={propertyAge}
