@@ -1,4 +1,5 @@
-import React, { Fragment, useState, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {Fragment, useState, useRef} from 'react';
 import {
   SafeAreaView,
   View,
@@ -13,18 +14,17 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
 } from 'react-native';
-import { AreaIcon, DoubleTcIcon, ArrowDownIcon } from '@svgs';
-import { fonts } from '@fonts';
-import { Colors } from '@colors';
-import { globalStyles } from '@globalStyles';
-import { useIntl } from '@context';
-import { CustomButton, TopSpace } from '@components';
-import { CompassDirectionModal } from '../../../components/molecules/CompassDirectionModal';
+import {AreaIcon, DoubleTcIcon, ArrowDownIcon} from '@svgs';
+import {fonts} from '@fonts';
+import {Colors} from '@colors';
+import {globalStyles} from '@globalStyles';
+import {useIntl} from '@context';
+import {CustomButton, TopSpace} from '@components';
+import {CompassDirectionModal} from '../../../components/molecules/CompassDirectionModal';
 
-const { height: screenHeight } = Dimensions.get('window');
+const {height: screenHeight} = Dimensions.get('window');
 
-const PropertyStep4 = 
-({ selectedType,
+const PropertyStep4 = ({ selectedType,
   price,
   setPrice,
   handleNext,
@@ -41,20 +41,18 @@ const PropertyStep4 =
 
     const formattedText = sanitizedText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setPrice(formattedText);
-    setErrors((prev) => ({ ...prev, price: null }));
+    /** @ts-ignore */
+    setErrors(prev => ({...prev, price: null}));
   };
-
 
   const handleSubmit = () => {
     let valid = true;
     const newErrors: any = {};
 
-
     if (!price) {
       newErrors.price = 'Please enter a price.';
       valid = false;
     }
-
 
     if (!valid) {
       Vibration.vibrate(50);
@@ -70,9 +68,13 @@ const PropertyStep4 =
       <View style={styles.container}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>
-            {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
+            {intl.formatMessage({id: 'requestPropertyScreen.select-price'})}
           </Text>
-          <View style={[styles.priceContainer, errors.price && styles.errorBorder]}>
+          <View
+            style={[
+              styles.priceContainer,
+              !!errors.price && styles.errorBorder,
+            ]}>
             <TextInput
               placeholder="2,000,000"
               placeholderTextColor={Colors.light.grey}
@@ -85,20 +87,15 @@ const PropertyStep4 =
           </View>
           {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
         </View>
-          
-        
 
         <CustomButton
           btnWidth={'100%'}
           borderRadius={30}
           disabled={false}
           handleClick={handleSubmit}
-          title={intl.formatMessage({ id: 'buttons.next' })}
+          title={intl.formatMessage({id: 'buttons.next'})}
           showRightIconButton={true}
         />
-
-        
-            
       </View>
     </SafeAreaView>
   );
@@ -200,4 +197,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
 });
-

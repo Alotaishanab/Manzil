@@ -1,4 +1,6 @@
-import React, { Fragment, useState } from 'react';
+/* eslint-disable react/no-unstable-nested-components */
+/* eslint-disable react-native/no-inline-styles */
+import React, {Fragment, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -176,7 +178,9 @@ const PropertyStep5 = ({
     }
   };
 
-  const renderPropertyType = ({ item }: any) => {
+  const renderPropertyType = ({item}: any) => {
+    console.log('property features type', item);
+    //@ts-ignore
     const Icon = SVGs[item?.icon];
     const isSelected = selectedPropertyFeatures.includes(item?.name); // Check if the feature is selected
     return (
@@ -189,8 +193,7 @@ const PropertyStep5 = ({
               ? Colors.light.primaryBtn
               : Colors.light.propertyCardLine,
           },
-        ]}
-      >
+        ]}>
         <Icon width={50} height={50} />
         <Text numberOfLines={2} style={globalStyles.propertyTypeCardText}>
           {item?.name}
@@ -257,8 +260,7 @@ const PropertyStep5 = ({
       <TouchableOpacity
         onPress={handleAddFloorPicker}
         activeOpacity={0.8}
-        style={styles.addFloorplanBtn}
-      >
+        style={styles.addFloorplanBtn}>
         {floor ? (
           <Image
             source={{ uri: floor }}

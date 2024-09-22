@@ -1,7 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { useIntl } from '@context';
-import { CustomButton, TopSpace, PropertyTypeModal, CompassDirectionModal } from '@components';
-import { CustomCheckbox } from '../../../components/atoms/CustomCheckbox';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {useRef, useState} from 'react';
+import {useIntl} from '@context';
+import {
+  CustomButton,
+  TopSpace,
+  PropertyTypeModal,
+  CompassDirectionModal,
+} from '@components';
+import {CustomCheckbox} from '../../../components/atoms/CustomCheckbox';
 import {
   StyleSheet,
   Text,
@@ -15,24 +21,23 @@ import {
   TouchableWithoutFeedback,
   PanResponder,
 } from 'react-native';
-import { globalStyles } from '@globalStyles';
-import { Colors } from '@colors';
-import { fonts } from '@fonts';
-import { ArrowDownIcon } from '@svgs';
+import {globalStyles} from '@globalStyles';
+import {Colors} from '@colors';
+import {fonts} from '@fonts';
+import {ArrowDownIcon} from '@svgs';
 
-const { height: screenHeight } = Dimensions.get('window');
+const {height: screenHeight} = Dimensions.get('window');
 
 interface Props {
-  selectedPropertyType:string,
-  setSelectedPropertyType: (type: string) =>void,
-  size: string,
-  setSize: (size: string) =>void,
-  propertyAge: string,
-  setPropertyAge: (age: string) =>void,
-  propertyType: string,
-  setPropertyType:  (type: string) =>void, 
-  handleNext: () => void,
-  
+  selectedPropertyType: string;
+  setSelectedPropertyType: (type: string) => void;
+  size: string;
+  setSize: (size: string) => void;
+  propertyAge: string;
+  setPropertyAge: (age: string) => void;
+  propertyType: string;
+  setPropertyType: (type: string) => void;
+  handleNext: () => void;
 }
 
 const PropertyStep1 = ({
@@ -43,13 +48,14 @@ const PropertyStep1 = ({
   propertyAge,
   setPropertyAge,
   propertyType,
-  setPropertyType, 
+  setPropertyType,
   handleNext,
 }: Props) => {
-  const { intl } = useIntl();
+  const {intl} = useIntl();
   const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
-  const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] = useState(false);
-  const [errors, setErrors] = useState<Record<string,string|null>>({});
+  const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] =
+    useState(false);
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
 
   // Initialize panY starting from the bottom of the screen
   const panY = useRef(new Animated.Value(screenHeight)).current;
@@ -74,7 +80,7 @@ const PropertyStep1 = ({
           }).start();
         }
       },
-    })
+    }),
   ).current;
 
   const handleOpenPropertyTypeModal = () => {
@@ -96,27 +102,23 @@ const PropertyStep1 = ({
 
   const handlePropertyTypeSelect = (type: string) => {
     setSelectedPropertyType(type);
-    setErrors((prev) => ({ ...prev, propertyType: null }));
+    setErrors(prev => ({...prev, propertyType: null}));
     handleClosePropertyTypeModal();
   };
-
-
 
   const handleSizeChange = (text: string) => {
     const sanitizedText = text.replace(/[^0-9]/g, '');
     setSize(sanitizedText);
-    setErrors((prev) => ({ ...prev, size: null }));
+    setErrors(prev => ({...prev, size: null}));
   };
 
   const handlePropertyAgeChange = (text: string) => {
-    console.log('Property age raw text',text);
+    console.log('Property age raw text', text);
     const sanitizedText = text.replace(/[^0-9]/g, '');
-    console.log('Property age sanitizedText',sanitizedText);
+    console.log('Property age sanitizedText', sanitizedText);
     setPropertyAge(sanitizedText);
-    setErrors((prev) => ({ ...prev, propertyAge: null }));
+    setErrors(prev => ({...prev, propertyAge: null}));
   };
-
-
 
   const handleSubmit = () => {
     let valid = true;
@@ -126,7 +128,6 @@ const PropertyStep1 = ({
       newErrors.propertyType = 'Please select a property type.';
       valid = false;
     }
-
 
     if (!size) {
       newErrors.size = 'Please enter the property size.';
@@ -148,18 +149,18 @@ const PropertyStep1 = ({
   };
 
   return (
-    <View style={{ flexGrow: 1 }}>
+    <View style={{flexGrow: 1}}>
       <TopSpace top={20} />
       <Text style={styles.label}>Select</Text>
       {/* Sell Rent */}
       <View style={globalStyles.simpleRow}>
         <CustomCheckbox
-          title={intl.formatMessage({ id: 'addpropertyScreen.sell' })}
+          title={intl.formatMessage({id: 'addpropertyScreen.sell'})}
           selectedOption={propertyType}
           onValueChange={setPropertyType}
         />
         <CustomCheckbox
-          title={intl.formatMessage({ id: 'addpropertyScreen.rent' })}
+          title={intl.formatMessage({id: 'addpropertyScreen.rent'})}
           selectedOption={propertyType}
           onValueChange={setPropertyType}
         />
@@ -167,32 +168,33 @@ const PropertyStep1 = ({
 
       <TopSpace top={30} />
 
-     
-
       {/* Property Type Field */}
       <View style={styles.inputContainer}>
         <Text style={styles.propertyTypeLabel}>
-          {intl.formatMessage({ id: 'landPropertyDetailScreen.property-type' })}
+          {intl.formatMessage({id: 'landPropertyDetailScreen.property-type'})}
         </Text>
         <TouchableOpacity
           style={[
             styles.propertyTypeContainer,
-            !!errors['propertyType'] && styles.errorBorder,
+            !!errors.propertyType && styles.errorBorder,
           ]}
-          onPress={handleOpenPropertyTypeModal}
-        >
+          onPress={handleOpenPropertyTypeModal}>
           <Text style={styles.propertyTypeText}>
-            {selectedPropertyType ? selectedPropertyType : 'Select Property Type'}
+            {selectedPropertyType
+              ? selectedPropertyType
+              : 'Select Property Type'}
           </Text>
           <ArrowDownIcon width={20} height={20} fill="black" />
         </TouchableOpacity>
-        {errors.propertyType && <Text style={styles.errorText}>{errors.propertyType}</Text>}
+        {errors.propertyType && (
+          <Text style={styles.errorText}>{errors.propertyType}</Text>
+        )}
       </View>
 
       <View style={styles.rowContainer}>
         <View style={styles.halfWidthContainer}>
           <Text style={styles.label}>
-            {intl.formatMessage({ id: 'addpropertyScreen.size' })}
+            {intl.formatMessage({id: 'addpropertyScreen.size'})}
           </Text>
           <TextInput
             placeholder="Property size..."
@@ -210,7 +212,7 @@ const PropertyStep1 = ({
 
         <View style={styles.halfWidthContainer}>
           <Text style={styles.label}>
-            {intl.formatMessage({ id: 'addpropertyScreen.propertyAge' })}
+            {intl.formatMessage({id: 'addpropertyScreen.propertyAge'})}
           </Text>
           <TextInput
             placeholder="Property Age..."
@@ -223,10 +225,11 @@ const PropertyStep1 = ({
             value={propertyAge}
             onChangeText={handlePropertyAgeChange}
           />
-          {errors.propertyAge && <Text style={styles.errorText}>{errors.propertyAge}</Text>}
+          {errors.propertyAge && (
+            <Text style={styles.errorText}>{errors.propertyAge}</Text>
+          )}
         </View>
       </View>
-
 
       <TopSpace top={20} />
 
@@ -235,7 +238,7 @@ const PropertyStep1 = ({
         borderRadius={30}
         disabled={false}
         handleClick={handleSubmit}
-        title={intl.formatMessage({ id: 'buttons.next' })}
+        title={intl.formatMessage({id: 'buttons.next'})}
         showRightIconButton={true}
       />
 
@@ -245,7 +248,6 @@ const PropertyStep1 = ({
         handleClick={handlePropertyTypeSelect}
         panY={panY}
       />
-
     </View>
   );
 };

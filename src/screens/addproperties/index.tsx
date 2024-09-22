@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {useState} from 'react';
 import {
   Platform,
   SafeAreaView,
@@ -93,12 +94,45 @@ export const AddProperties = () => {
   });
 
 
-  const { intl } = useIntl();
+  // New state variables for property fields
+  const [beds, setBeds] = useState<number | null>(null);
+  const [baths, setBaths] = useState<number | null>(null);
+  const [floors, setFloors] = useState<number | null>(null);
+  const [livingRooms, setLivingRooms] = useState<number | null>(null);
+  const [rooms, setRooms] = useState<number | null>(null);
+  const [numberOfStreets, setNumberOfStreets] = useState<number | null>(1);
+  const [footTraffic, setFootTraffic] = useState<
+    'High' | 'Medium' | 'Low' | null
+  >('Medium');
+  const [floorNumber, setFloorNumber] = useState<number | null>(1);
+  const [numberOfGates, setNumberOfGates] = useState<number | null>(1);
+  const [loadingDocks, setLoadingDocks] = useState<number | null>(1);
+  const [storageCapacity, setStorageCapacity] = useState<number | null>(100);
+  const [numberOfUnits, setNumberOfUnits] = useState<number | null>(1);
+  const [parkingSpaces, setParkingSpaces] = useState<number | null>(1);
+  const [waterAccess, setWaterAccess] = useState(false);
+  const [electricityAccess, setElectricityAccess] = useState(false);
+  const [sewageSystem, setSewageSystem] = useState(false);
+  const [price, setPrice] = useState('');
+  const [propertyFeature, setPropertyFeature] = useState<string | null>(null);
+
+  const [bedroomCount, setBedroomCount] = useState<number | string | null>(
+    null,
+  );
+  const [bathroomCount, setBathroomCount] = useState<number | string | null>(
+    null,
+  );
+
+  const [priceMeter, setPriceMeter] = useState<string | null>(null);
+
+  const [images, setImages] = useState<Array<any>>([]);
+
+  const {intl} = useIntl();
 
   const totalSteps = 6;
 
   const handleNext = () => {
-    setStep((prevStep) => (prevStep < totalSteps ? prevStep + 1 : prevStep));
+    setStep(prevStep => (prevStep < totalSteps ? prevStep + 1 : prevStep));
   };
 
   const handleBack = () => {
@@ -334,17 +368,15 @@ export const AddProperties = () => {
     <SafeAreaView style={globalStyles.wrapScreen}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react-native/no-inline-styles
         contentContainerStyle={{
           paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
         }}>
-        <AddPropertyBack
-          text={"Add Properties"}
-          onPress={handleBack}
-        />
+        <AddPropertyBack text={'Add Properties'} onPress={handleBack} />
         <TopSpace top={10} />
         <View style={globalStyles.rowSpaceBetween}>
           <Text style={styles.heading}>
-            {intl.formatMessage({ id: 'addpropertyScreen.header' })}
+            {intl.formatMessage({id: 'addpropertyScreen.header'})}
           </Text>
           <View style={globalStyles.simpleRow}>
             <Text style={styles.stepText}>
@@ -387,8 +419,8 @@ export const AddProperties = () => {
             setFloors={setFloors}
             livingRooms={livingRooms}
             setLivingRooms={setLivingRooms}
-            rooms={rooms}
-            setRooms={setRooms}
+            apartmentRooms={rooms}
+            setApartmentRooms={setRooms}
             numberOfStreets={numberOfStreets}
             setNumberOfStreets={setNumberOfStreets}
             footTraffic={footTraffic}
@@ -408,7 +440,8 @@ export const AddProperties = () => {
             parkingSpaces={parkingSpaces}
             setParkingSpaces={setParkingSpaces}
             handleNext={handleNext}
-            handleBack={handleBack}
+            errors={errors}
+            setErrors={setErrors}
           />
         )}  
 
@@ -421,7 +454,12 @@ export const AddProperties = () => {
             sewageSystem={sewageSystem}
             setSewageSystem={setSewageSystem}
             handleNext={handleNext}
-            handleBack={handleBack}
+            electricityAccess={electricityAccess}
+            setElectricityAccess={setElectricityAccess}
+            setSewageSystem={setSewageSystem}
+            setWaterAccess={setWaterAccess}
+            sewageSystem={sewageSystem}
+            waterAccess={waterAccess}
           />
         )}
 
@@ -432,6 +470,10 @@ export const AddProperties = () => {
             price={price}
             handleNext={handleNext}
             handleBack={handleBack}
+            errors={errors}
+            setErrors={setErrors}
+            price={price}
+            setPrice={setPrice}
           />
         )}
 
@@ -448,6 +490,16 @@ export const AddProperties = () => {
             setFloorPlan={setFloorPlan}
             handleNext={handleSubmit}
             handleBack={handleBack}
+            propertyFeature={propertyFeature}
+            setPropertyFeature={setPropertyFeature}
+            bedroomCount={bedroomCount}
+            setBedroomCount={setBedroomCount}
+            bathroomCount={bathroomCount}
+            setBathroomCount={setBathroomCount}
+            priceMeter={priceMeter}
+            setPriceMeter={setPriceMeter}
+            images={images}
+            setImages={setImages}
           />
         )}
 
@@ -476,7 +528,7 @@ export const AddProperties = () => {
 };
 
 const styles = StyleSheet.create({
-  wrap: { backgroundColor: Colors.light.background, flex: 1, padding: 24 },
+  wrap: {backgroundColor: Colors.light.background, flex: 1, padding: 24},
   heading: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.semiBold,
