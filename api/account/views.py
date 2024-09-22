@@ -3,7 +3,7 @@ from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserLogoutSerializer, UserVerifyPhoneSerializer, UserRegisterPhoneSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserLogoutSerializer, UserVerifyPhoneSerializer, UserRegisterPhoneSerializer, UserChangePasswordSerializer
 from .jwt_utils import generate_token, blacklist_token
 from .models import User
 from .verify import send_code, check_code
@@ -55,6 +55,21 @@ def register_user_phone_number(request):
             send_code(phone)
             return Response({"message": "Code sent"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def resend_phone_code(request):
+    if request.method == 'POST':
+        user_id = request.user.user_id
+        user = User.objects.filter(user_id=user_id).first()
+        if user:
+            if user.phone_number:
+                send_code(user.phone_number)
+                return Response({"message": "Resent code"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "User has no phone registered"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(["POST"])
@@ -115,3 +130,24 @@ def verify_code(request):
                 user.save()
                 return Response({"message": "Phone is verified"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def change_user_password(request):
+    if request.method == 'POST':
+        serializer = UserChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            current_password = serializer.validated_data['currentPassword']
+            new_password = serializer.validated_data['password']
+            user_id = request.user.user_id
+            user = User.objects.filter(user_id=user_id).first()
+
+            if user:
+                if not user.check_password(current_password):
+                    raise serializers.ValidationError(
+                        "Current password is incorrect")
+                user.set_password(new_password)
+                user.save()
+                return Response({"message": "Password changed"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)

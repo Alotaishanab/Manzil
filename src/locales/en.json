@@ -33,7 +33,7 @@
   "signupScreen.privacy-policy": "Privacy Policy",
   "signupScreen.agree-continue":"Agree and Continue",
   "signupScreen.forgot-password":"Forgot password?",
-  "signupScreen.otp-sent":"We have sent you a verification code to your phone number ending in ******6657.",
+  "signupScreen.otp-sent":"We have sent you a verification code to your phone number ending in {phone_number}",
   "signupScreen.otp-sent-email":"We have sent you a verification code to your email.",
 
   

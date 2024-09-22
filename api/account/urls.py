@@ -7,4 +7,6 @@ urlpatterns = [
     path('user/register/phone', views.register_user_phone_number),
     path('user/logout', views.logout_user, name="logout_user"),
     path('user/verify/phone', views.verify_code, name="verify_code"),
+    path('user/change-password', views.change_user_password),
+    path('user/resend/code', views.resend_phone_code),
 ]

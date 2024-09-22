@@ -9,7 +9,10 @@ export const apiUrls = {
   signup: 'account/user/signup',
   logout: 'account/user/logout',
   registerPhone: 'account/user/register/phone',
-  verifyPhone: "/account/user/verify/phone",
+  verifyPhone: '/account/user/verify/phone',
+  changeUserPassword: '/account/user/change-password',
+  resetUserPassword: '/account/user/reset-password',
+  resendPhoneCode: '/account/user/resend/code',
 
   userProfile: '/api/user/',
 };

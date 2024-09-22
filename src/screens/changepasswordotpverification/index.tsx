@@ -14,13 +14,14 @@ import {useIntl} from '@context';
 import {useValidations} from '../../validations/useValidations';
 import {styles} from './styles';
 
+type FormData = {
+  code: '';
+};
+
 export const ChangePasswordOtpVerification = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
   const {otpValidationSchema} = useValidations();
-  type FormData = {
-    code: '';
-  };
 
   const {
     control,

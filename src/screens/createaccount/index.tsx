@@ -1,17 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import React,{useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {View, Pressable, Text} from 'react-native';
-import {
-  CustomButton,
-  CustomTextInput,
-  HeaderBackButtonTitle,
-  Screen,
-  TopSpace,
-} from '@components';
+import {CustomButton, Screen, TopSpace} from '@components';
 import {useIntl} from '@context';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
-import ChooseVerificationMethod from './components/ChooseVerificationMethod';
 import {useValidations} from '../../validations/useValidations';
 import {useCreateAccountProps} from './useCreateAccountProps';
 import {styles} from './styles';
@@ -19,26 +12,26 @@ import {globalStyles} from '../../styles/globalStyles';
 import CountryPickerInput from './components/CountryPickerInput';
 import {useNavigation} from '@react-navigation/native';
 import SignupHeader from '../signup/components/SignupHeader';
-import {useRegisterUserPhone} from '@services'
+import {useRegisterUserPhone} from '@services';
+
+type FormData = {
+  phoneNumber: string | number | any;
+};
 
 export const CreateAccount = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
   const {createAccountSchema} = useValidations();
-  const {handleCategory, selectedCategory} = useCreateAccountProps();
-  const { mutate: registerPhone } = useRegisterUserPhone();
+  const {selectedCategory} = useCreateAccountProps();
+  const {mutate: registerPhone} = useRegisterUserPhone();
   const [country, setCountry] = useState({callingCode: ['1'], cca2: 'US'});
 
-  type FormData = {
-    phoneNumber: string | number | any;
-  };
   const {
-    control,
     handleSubmit,
     formState: {isValid},
   } = useForm<FormData>({
     defaultValues: {
-      email: '',
+      phoneNumber: '',
     },
     mode: 'onSubmit',
     resolver: zodResolver(createAccountSchema),
@@ -48,59 +41,68 @@ export const CreateAccount = () => {
     control: numberControl,
     handleSubmit: handleSubmitNumber,
     watch: phoneWatch,
-    formState: {errors: errorsNumber},
   } = useForm();
 
   const phoneNumber = phoneWatch('phoneNumber');
- // console.log('phoneNumber', phoneNumber);
- // console.log('country', country);
+  const maskedPhoneNumber = useMemo(
+    () =>
+      phoneNumber && phoneNumber?.length > 4
+        ? phoneNumber.slice(0, -4).replace(/\d/g, '*') + phoneNumber.slice(-4)
+        : phoneNumber,
+    [phoneNumber],
+  );
 
   const handleSignup = (data: FormData) => {
-    console.log('data', data,'isValid', isValid);
+    console.log('data', data, 'isValid', isValid);
     if (isValid) {
+      const countryCode =
+        country.callingCode.length > 0
+          ? country.callingCode[0]
+          : country.callingCode;
+      console.log('countryCode', countryCode, 'phoneNumber', phoneNumber);
 
-      const countryCode = country.callingCode.length > 0 ? country.callingCode[0]:country.callingCode; 
-      console.log('countryCode',countryCode,'phoneNumber',phoneNumber)
-
-      registerPhone({phone: `+${countryCode}${phoneNumber}`}, {
-        onSuccess: () => {
-          // Navigate on success
-          navigation.navigate('SignupOtpVerification', {
-            type: 'signup',
-          });
-          
+      registerPhone(
+        {phone: `+${countryCode}${phoneNumber}`},
+        {
+          onSuccess: () => {
+            // Navigate on success
+            navigation.navigate('SignupOtpVerification', {
+              type: 'signup',
+              maskedPhoneNumber,
+            });
+          },
+          onError: () => {
+            console.error('Registering phone number failed');
+          },
         },
-        onError: () => {
-          console.error("Registering phone number failed");
-        }
-      });
-
-      
+      );
     }
   };
 
   const handleSignupNumber = (data: any) => {
     console.log('data', data);
-    const countryCode = country.callingCode.length > 0 ? country.callingCode[0]:country.callingCode; 
-    console.log('countryCode',countryCode,'phoneNumber',phoneNumber)
-    registerPhone({phone: `+${countryCode}${phoneNumber}`}, {
-      onSuccess: () => {
-        // Navigate on success
-        navigation.navigate('SignupOtpVerification');
-        
+    const countryCode =
+      country.callingCode.length > 0
+        ? country.callingCode[0]
+        : country.callingCode;
+    console.log('countryCode', countryCode, 'phoneNumber', phoneNumber);
+    registerPhone(
+      {phone: `+${countryCode}${phoneNumber}`},
+      {
+        onSuccess: () => {
+          // Navigate on success
+          navigation.navigate('SignupOtpVerification', {
+            maskedPhoneNumber,
+          });
+        },
+        onError: () => {
+          console.error('Registering phone number failed');
+        },
       },
-      onError: () => {
-        console.error("Registering phone number failed");
-      }
-    });
-    
-    
+    );
   };
 
   // console.log('ohone',ph)
-  
-  const handleGoogleLogin = () => {};
-  const handleAppleLogin = () => {};
 
   const handleSignin = () => {
     navigation.navigate('Login');
@@ -124,7 +126,11 @@ export const CreateAccount = () => {
 
       <TopSpace top={30} />
 
-      <CountryPickerInput control={numberControl} name="phoneNumber" onSelectCountry={setCountry} />
+      <CountryPickerInput
+        control={numberControl}
+        name="phoneNumber"
+        onSelectCountry={setCountry}
+      />
 
       <TopSpace top={30} />
       <CustomButton

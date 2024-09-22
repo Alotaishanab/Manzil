@@ -28,7 +28,7 @@
   "signupScreen.privacy-policy": "سياسة الخصوصية",
   "signupScreen.agree-continue":"الموافقة والمتابعة",
   "signupScreen.forgot-password":"هل نسيت كلمة السر؟",
-  "signupScreen.otp-sent":"لقد أرسلنا لك رمز التحقق إلى رقم هاتفك المنتهي بـ ******6657.",
+  "signupScreen.otp-sent": "لقد أرسلنا رمز التحقق إلى رقم هاتفك الذي ينتهي بـ {phone_number}",
   "signupScreen.otp-sent-email":"لقد أرسلنا لك رمز التحقق إلى بريدك الإلكتروني.",
 
 

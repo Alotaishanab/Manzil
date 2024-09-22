@@ -37,12 +37,7 @@ export const ForgotPassword = () => {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const {
-    control: numberControl,
-    handleSubmit: handleSubmitNumber,
-    watch: phoneWatch,
-    formState: {errors: errorsNumber},
-  } = useForm();
+  const {control: numberControl, handleSubmit: handleSubmitNumber} = useForm();
   console.log('errors :', errors, 'isValid: ', isValid);
   const handleForm = (data: FormData) => {
     console.log('data', data);
