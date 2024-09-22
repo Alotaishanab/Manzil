@@ -21,7 +21,9 @@ export interface LoginCredentials {
 const login = async (loginData: LoginCredentials) => {
   const data = await api.post<LoginResponse>(apiUrls.login, loginData,false);
 
+  /** @ts-ignore */
   await AsyncHelper.setToken(data.token.access);
+  /** @ts-ignore */
   await AsyncHelper.setRefreshToken(data.token.refresh);
 
   return data;
@@ -29,6 +31,7 @@ const login = async (loginData: LoginCredentials) => {
 
 export const useLoginUser = () => {
   return useMutation<LoginResponse, Error, LoginCredentials>({
+    /** @ts-ignore */
     mutationFn: login,
   });
 };

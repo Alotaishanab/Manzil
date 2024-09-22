@@ -56,3 +56,20 @@ class UserVerifyPhoneSerializer(serializers.Serializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+    confirmPassword = serializers.CharField()
+    currentPassword = serializers.CharField()
+
+    def validate(self, data):
+        new_password = data.get('password')
+        confirm_new_password = data.get('confirmPassword')
+
+        if new_password != confirm_new_password:
+            raise serializers.ValidationError(
+                {'password': "Passwords don't match"}
+            )
+
+        return data

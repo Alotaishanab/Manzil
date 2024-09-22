@@ -138,10 +138,7 @@ export const AuthNavigator = () => {
       />
       <AuthStack.Screen name="ExploreSearch" component={ExploreSearch} />
       <AuthStack.Screen name="FilterProperty" component={FilterProperty} />
-      <AuthStack.Screen
-        name="PropertyScreen"
-        component={PropertyScreen}
-      />
+      <AuthStack.Screen name="PropertyScreen" component={PropertyScreen} />
       <AuthStack.Screen name="ExploreProperty" component={ExploreProperty} />
       <AuthStack.Screen name="AddProperties" component={AddProperties} />
 
@@ -183,7 +180,10 @@ export const AuthNavigator = () => {
         name="PropertiesRequestStatus"
         component={PropertiesRequestStatus}
       />
-      <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
+      <AuthStack.Screen
+        name="SimilarProperties"
+        component={SimilarProperties}
+      />
     </AuthStack.Navigator>
   );
 };
