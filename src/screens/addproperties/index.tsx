@@ -101,9 +101,9 @@ export const AddProperties = () => {
   const [livingRooms, setLivingRooms] = useState<number | null>(null);
   const [rooms, setRooms] = useState<number | null>(null);
   const [numberOfStreets, setNumberOfStreets] = useState<number | null>(1);
-  const [footTraffic, setFootTraffic] = useState<
-    'High' | 'Medium' | 'Low' | null
-  >('Medium');
+  const [footTraffic, setFootTraffic] = useState<FootTrafficType | null>(
+    'Medium',
+  );
   const [floorNumber, setFloorNumber] = useState<number | null>(1);
   const [numberOfGates, setNumberOfGates] = useState<number | null>(1);
   const [loadingDocks, setLoadingDocks] = useState<number | null>(1);
@@ -128,6 +128,7 @@ export const AddProperties = () => {
   const [images, setImages] = useState<Array<any>>([]);
 
   const {intl} = useIntl();
+  const {mutate: addProperty} = useAddProperty();
 
   const totalSteps = 6;
 

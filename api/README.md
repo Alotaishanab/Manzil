@@ -1,3 +1,49 @@
+## Set up Postgres Database with PostGIS
+
+### Install PostgreSQL and PostGIS
+
+Before running your Django API, you'll need to set up a PostgreSQL database with the PostGIS extension, which is essential for handling geospatial data in Django.
+
+For Ubuntu/Debian-based systems:
+Install PostgreSQL and PostGIS:
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib postgis
+
+Start the PostgreSQL service:
+sudo service postgresql start
+
+For MacOS (using Homebrew):
+Install PostgreSQL and PostGIS:
+brew install postgresql
+brew install postgis
+
+Start the PostgreSQL service:
+brew services start postgresql
+
+### Create a New PostgreSQL Database and User
+
+Once PostgreSQL is installed, follow these steps to create a new database and user:
+
+Log in to the PostgreSQL prompt:
+sudo -u postgres psql
+
+Create a new database:
+CREATE DATABASE manzil_db;
+
+Create a new user and set a password:
+CREATE USER core_user WITH PASSWORD 'your_password';
+
+Grant all privileges to the user on the new database:
+GRANT ALL PRIVILEGES ON DATABASE manzil_db TO core_user;
+
+### Enable PostGIS Extension
+
+While still logged into the PostgreSQL prompt, connect to your database and enable the PostGIS extension:
+\c manzil_db;
+CREATE EXTENSION postgis;
+
+This adds the necessary geospatial capabilities to your PostgreSQL database.
+
 ## Set up a virtual environment
 
 python -m venv env

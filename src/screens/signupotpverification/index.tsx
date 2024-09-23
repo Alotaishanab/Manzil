@@ -20,7 +20,6 @@ export const SignupOtpVerification = () => {
   const type = route?.params?.type;
   const maskedPhoneNumber = route?.params?.maskedPhoneNumber;
 
-
   const {mutate: verifyPhone} = useVerifyUserPhone();
   const {mutate: resendPhoneCode} = useResendPhoneCode();
   console.log('typ:', type);

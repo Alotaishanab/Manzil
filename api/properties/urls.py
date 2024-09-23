@@ -1,5 +1,6 @@
 from . import user_views
+from django.urls import path
 
 urlpatterns = [
-    path('user/properties', user_views.add_property),
+    path('add', user_views.add_property),
 ]

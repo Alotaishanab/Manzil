@@ -19,7 +19,7 @@ export interface LoginCredentials {
 }
 
 const login = async (loginData: LoginCredentials) => {
-  const data = await api.post<LoginResponse>(apiUrls.login, loginData,false);
+  const data = await api.post<LoginResponse>(apiUrls.login, loginData, false);
 
   /** @ts-ignore */
   await AsyncHelper.setToken(data.token.access);
