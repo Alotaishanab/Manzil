@@ -19,23 +19,24 @@ def add_property(request):
                 user_id=request.user.user_id,
                 property_type=serializer.validated_data['propertyType'],
                 property_category=serializer.validated_data['propertyCategory'],
+                price_per_meter=serializer.validated_data['priceMeter'],
                 property_age=serializer.validated_data.get('propertyAge'),
                 title=serializer.validated_data['title'],
                 description=serializer.validated_data['description'],
                 price=serializer.validated_data['price'],
                 area=serializer.validated_data['area'],
                 # TODO: Need to confirm this field in UI
-                location=serializer.validated_data['location'],
+                # location=serializer.validated_data['location'],
                 # TODO: Need to confirm this field in UI
-                coordinates=serializer.validated_data['coordinates'],
+                # coordinates=serializer.validated_data['coordinates'],
                 # TODO: Need to confirm this field in UI
-                status=serializer.validated_data.get('status'),
+                # status=serializer.validated_data.get('status'),
                 # TODO: Need to confirm this field in UI
-                contact_information=serializer.validated_data.get(
-                    'contact_information'),
-                property_images=serializer.validated_data['property_images'],
-                property_videos=serializer.validated_data.get(
-                    'property_videos'),
+                # contact_information=serializer.validated_data.get(
+                #    'contactInformation'),
+                # property_images=serializer.validated_data['propertyImages'],
+                # property_videos=serializer.validated_data.get(
+                #    'propertyVideos'),
                 bedrooms=serializer.validated_data.get('bedrooms'),
                 bathrooms=serializer.validated_data.get('bathrooms'),
                 has_water=serializer.validated_data.get('waterAccess', False),
@@ -56,9 +57,9 @@ def add_property(request):
                 parking_spaces=serializer.validated_data.get('parkingSpaces'),
                 number_of_gates=serializer.validated_data.get(
                     'numberOfGates'),
-                loading_docks=serializer.validated_data.get('loading_docks'),
+                loading_docks=serializer.validated_data.get('loadingDocks'),
                 storage_capacity=serializer.validated_data.get(
-                    'loadingDocks'),
+                    'storageCapacity'),
                 number_of_units=serializer.validated_data.get(
                     'numberOfUnits'),
                 property_features=serializer.validated_data.get(
@@ -72,8 +73,10 @@ def add_property(request):
 
             return Response({
                 "message": "Property created successfully!",
-                "propertyId": property_instance.id  # Returning the newly created property ID
+                # Returning the newly created property ID
+                "propertyId": property_instance.property_id
             }, status=status.HTTP_201_CREATED)
         else:
             # If the data is invalid, return errors
+            print('Add property serializer.errors', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

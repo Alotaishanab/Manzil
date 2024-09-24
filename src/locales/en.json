@@ -293,6 +293,7 @@
   "requestPropertyScreen.properties-type.warehouse": "Warehouse",
   "requestPropertyScreen.properties-type.tower": "Tower",
   "requestPropertyScreen.properties-type.floor": "Floor",
+  "requestPropertyScreen.properties-type.villa": "Villa",
   "requestPropertyScreen.select-price": "Price",
   "requestPropertyScreen.bathrooms": "Bathrooms",
   "requestPropertyScreen.bedrooms": "Bedrooms",

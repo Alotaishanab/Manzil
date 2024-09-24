@@ -11,6 +11,12 @@ export type DirectionType = 'North' | 'South' | 'East' | 'West';
 
 export type FootTrafficType = 'High' | 'Medium' | 'Low';
 
+export type PropertyFeature = {
+  id: string;
+  name: string;
+  icon: string;
+};
+
 export interface AddPropertyPayload {
   propertyType: string;
   area: string; // Maps to area in backend
@@ -51,16 +57,21 @@ export interface AddPropertyPayload {
   /** Office */
   parkingSpaces: number | null;
 
-  propertyFeature: string | null;
+  propertyFeature: PropertyFeature[];
 }
 
 const addProperty = async (payload: AddPropertyPayload) => {
-  const data = await api.post<AddPropertyResponse>(
-    apiUrls.addProperty,
-    payload,
-  );
+  try {
+    const data = await api.post<AddPropertyResponse>(
+      apiUrls.addProperty,
+      payload,
+    );
 
-  return data;
+    return data;
+  } catch (error) {
+    console.log('error adding property', error);
+    throw error;
+  }
 };
 
 export const useAddProperty = () => {

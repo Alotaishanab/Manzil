@@ -49,16 +49,17 @@ class Property(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     area = models.DecimalField(max_digits=10, decimal_places=2)
     price_per_meter = models.DecimalField(
-        max_digits=10, decimal_places=2, editable=False)  # Calculated
-    location = models.CharField(max_length=255)
-    coordinates = PointField()  # Geographic coordinates (lat/lon)
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    # Geographic coordinates (lat/lon)
+    coordinates = PointField(null=True, blank=True)
     listing_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, blank=True, null=True)
     contact_information = models.TextField(blank=True, null=True)
 
     # Media fields
-    property_images = ArrayField(models.TextField(), blank=False)
+    property_images = ArrayField(models.TextField(), blank=True, null=True)
     property_videos = ArrayField(
         models.TextField(), blank=True, null=True, size=3)
 

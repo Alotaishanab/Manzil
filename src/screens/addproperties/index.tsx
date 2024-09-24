@@ -95,11 +95,11 @@ export const AddProperties = () => {
 
 
   // New state variables for property fields
-  const [beds, setBeds] = useState<number | null>(null);
-  const [baths, setBaths] = useState<number | null>(null);
-  const [floors, setFloors] = useState<number | null>(null);
-  const [livingRooms, setLivingRooms] = useState<number | null>(null);
-  const [rooms, setRooms] = useState<number | null>(null);
+  const [beds, setBeds] = useState<number | null>(1);
+  const [baths, setBaths] = useState<number | null>(1);
+  const [floors, setFloors] = useState<number | null>(1);
+  const [livingRooms, setLivingRooms] = useState<number | null>(1);
+  const [rooms, setRooms] = useState<number | null>(1);
   const [numberOfStreets, setNumberOfStreets] = useState<number | null>(1);
   const [footTraffic, setFootTraffic] = useState<FootTrafficType | null>(
     'Medium',
@@ -114,14 +114,10 @@ export const AddProperties = () => {
   const [electricityAccess, setElectricityAccess] = useState(false);
   const [sewageSystem, setSewageSystem] = useState(false);
   const [price, setPrice] = useState('');
-  const [propertyFeature, setPropertyFeature] = useState<string | null>(null);
+  const [propertyFeature, setPropertyFeature] = useState<PropertyFeature[]>([]);
 
-  const [bedroomCount, setBedroomCount] = useState<number | string | null>(
-    null,
-  );
-  const [bathroomCount, setBathroomCount] = useState<number | string | null>(
-    null,
-  );
+  const [bedroomCount, setBedroomCount] = useState<number | string | null>(1);
+  const [bathroomCount, setBathroomCount] = useState<number | string | null>(1);
 
   const [priceMeter, setPriceMeter] = useState<string | null>(null);
 
@@ -147,6 +143,18 @@ export const AddProperties = () => {
     }
   };
   
+
+  const onChangePropertyFeature = (feature: PropertyFeature) => {
+    const exists = propertyFeature.some(item => item.id === feature.id);
+
+    if (!exists) {
+      setPropertyFeature([...propertyFeature, feature]);
+    } else {
+      setPropertyFeature(
+        propertyFeature.filter(item => item.id !== feature.id),
+      );
+    }
+  };
 
   const handlePicker = async () => {
     try {
@@ -492,7 +500,7 @@ export const AddProperties = () => {
             handleNext={handleSubmit}
             handleBack={handleBack}
             propertyFeature={propertyFeature}
-            setPropertyFeature={setPropertyFeature}
+            setPropertyFeature={onChangePropertyFeature}
             bedroomCount={bedroomCount}
             setBedroomCount={setBedroomCount}
             bathroomCount={bathroomCount}

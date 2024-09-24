@@ -278,6 +278,8 @@ const PropertyStep2 = ({
         break;
     }
 
+    console.log('newErrors on Step2', newErrors);
+
     if (!valid) {
       Vibration.vibrate(50);
       setErrors(newErrors);
@@ -312,6 +314,7 @@ const PropertyStep2 = ({
     }
 
     if (text.length > maxLength) {
+      //@ts-ignore
       setErrors(prev => ({
         ...prev,
         description: `Description cannot exceed ${maxLength} characters.`,
@@ -494,7 +497,7 @@ const PropertyStep2 = ({
           placeholderTextColor={Colors.light.black}
           style={[
             styles.textInputFullWidth,
-            errors.title && styles.errorBorder,
+            !!errors.title && styles.errorBorder,
           ]}
           value={title}
           onChangeText={handleTitleChange}
@@ -510,7 +513,7 @@ const PropertyStep2 = ({
         <TextInput
           style={[
             styles.descriptionInput,
-            errors.description && styles.errorBorder,
+            !!errors.description && styles.errorBorder,
           ]}
           placeholder="Enter a brief description of the property"
           placeholderTextColor={Colors.light.black}
@@ -539,6 +542,10 @@ const PropertyStep2 = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  pickerContainer: {
+    width: '45%',
+    marginBottom: 20,
   },
   row: {
     flexDirection: 'row',

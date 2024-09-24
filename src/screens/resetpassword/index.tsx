@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {Text, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -14,12 +15,6 @@ import {useValidations} from '../../../src/validations/useValidations';
 import {useIntl} from '@context';
 import {styles} from './styles';
 import {useResetUserPassword} from '@services';
-import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
-
-type FormData = {
-  password: string;
-  confirmPassword: string;
-};
 
 type FormData = {
   password: string;
@@ -31,7 +26,7 @@ export const ResetPassword = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
   const {mutate: resetPassword} = useResetUserPassword();
- 
+
   const {
     control,
     handleSubmit,
@@ -47,8 +42,8 @@ export const ResetPassword = () => {
   console.log('isValid', isValid);
   const onSubmit = (data: FormData) => {
     console.log('data', data);
-    
-    navigation.navigate('Login')
+
+    navigation.navigate('Login');
     // resetPassword(data, {
     //   onSuccess: () => {
     //     // Navigate on success
