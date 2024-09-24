@@ -25,8 +25,8 @@ export const AddProperties = () => {
   const [photos, setPhotos] = useState([]);
   const [floor, setFloor] = useState('');
   const [selectedPropertyType, setSelectedPropertyType] = useState('House'); 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState(''); 
+  const [title, setTitle] = useState('awdawdaw');
+  const [description, setDescription] = useState('dwadawdawdawd'); 
   const [size, setSize] = useState('333');
   const [propertyAge, setPropertyAge] = useState('3');
   const [propertyType, setPropertyType] = useState('');

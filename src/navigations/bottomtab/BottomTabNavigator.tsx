@@ -74,6 +74,7 @@ export const BottomTabNavigator = () => {
   const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 
+    
   // Animated values for scaling, rotating, and fading
   const animations = {
     ExploreStack: {
@@ -190,11 +191,11 @@ const handleTabPress = (routeName, navigation) => {
               ],
               opacity: animations[route.name].opacity,
             };
-
+          
             useEffect(() => {
               animateIcon(route.name, focused);
             }, [focused]);
-
+          
             switch (route.name) {
               case 'ExploreStack':
                 Icon = ExploreIcon;
@@ -217,10 +218,11 @@ const handleTabPress = (routeName, navigation) => {
               default:
                 return null;
             }
-
+          
             return (
               <TouchableOpacity onPress={() => handleTabPress(route.name, navigation)}>
                 <Animated.View style={animatedStyle}>
+                  {focused && <View style={styles.activeTabIndicator}></View>}
                   <Icon
                     width={route.name === 'AddOptions' ? 15 : 22}
                     height={route.name === 'AddOptions' ? 15 : 22}
@@ -230,6 +232,8 @@ const handleTabPress = (routeName, navigation) => {
               </TouchableOpacity>
             );
           },
+          
+          
         })}>
         <Tab.Screen
           name="ExploreStack"
@@ -261,7 +265,7 @@ const handleTabPress = (routeName, navigation) => {
 
         <Tab.Screen
           name="AddOptions"
-          component={() => null}
+          component={ExploreMaps}
           options={{
             tabBarLabel: () => null,
             tabBarButton: ({ focused }) => (
@@ -362,6 +366,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.headingTitle,
     borderWidth: 1.5,
   },
+  activeTabIndicator: {
+    position: 'absolute',
+    top: 0, // Adjust this as needed to position the line correctly above the tab
+    left: 0,
+    right: 0,
+    height: 4, // Adjust thickness of the line
+    backgroundColor: 'green', // This sets the color of the active indicator
+  }
 });
 
 export default BottomTabNavigator;

@@ -1,107 +1,295 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, StyleSheet , Vibration, TouchableHighlight, Image} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { CustomButton, TopSpace, PropertyTypeModal, CompassDirectionModal, ScrollPicker , HouseComponent } from '@components';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  StyleSheet,
+  Vibration,
+  TouchableHighlight,
+} from 'react-native';
+import { CustomButton, TopSpace } from '@components';
 import { Colors } from '@colors';
+import { Picker } from '@react-native-picker/picker';
 import { fonts } from '@fonts';
 import { useIntl } from '@context';
+import {
+  HouseComponent,
+  ApartmentComponent,
+  WorkersResidenceComponent,
+  LandComponent,
+  FarmhouseComponent,
+  ShopComponent,
+  ChaletComponent,
+  OfficeComponent,
+  WarehouseComponent,
+  TowerComponent,
+} from '@components';
 
-const PropertyStep2 = ({ 
+const PropertyStep2 = ({
   selectedPropertyType,
-   handleNext,
-   title,
+  handleNext,
+  title,
   setTitle,
   description,
   setDescription,
 }: any) => {
   // State variables for common fields
-  const [beds, setBeds] = useState(1);
-  const [baths, setBaths] = useState(1);
-  const [floors, setFloors] = useState(1);
-  const [livingRooms, setLivingRooms] = useState(1);
-  const [rooms, setRooms] = useState(1);
-  const [direction, setDirection] = useState('North');
-  const [numberOfStreets, setNumberOfStreets] = useState(1);
-  const [footTraffic, setFootTraffic] = useState('Medium');
-  const [floorNumber, setFloorNumber] = useState(1);
-  const [numberOfGates, setNumberOfGates] = useState(1);
-  const [loadingDocks, setLoadingDocks] = useState(1);
-  const [storageCapacity, setStorageCapacity] = useState(100);
-  const [numberOfUnits, setNumberOfUnits] = useState(1);
-  const [parkingSpaces, setParkingSpaces] = useState(1);
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerData, setPickerData] = useState([]);
-  const [currentField, setCurrentField] = useState(null);
+  const [beds, setBeds] = useState<number>(1);
+  const [baths, setBaths] = useState<number>(1);
+  const [floors, setFloors] = useState<number>(1);
+  const [livingRooms, setLivingRooms] = useState<number>(1);
+  const [rooms, setRooms] = useState<number>(1);
+  const [direction, setDirection] = useState<string>('North');
+  const [numberOfStreets, setNumberOfStreets] = useState<number>(1);
+  const [footTraffic, setFootTraffic] = useState<string>('Medium');
+  const [proximity, setProximity] = useState<string>('Near Main Road'); // Added for Shop
+  const [floorNumber, setFloorNumber] = useState<number>(1);
+  const [numberOfGates, setNumberOfGates] = useState<number>(1);
+  const [loadingDocks, setLoadingDocks] = useState<number>(1);
+  const [storageCapacity, setStorageCapacity] = useState<number>(100);
+  const [numberOfUnits, setNumberOfUnits] = useState<number>(1);
+  const [parkingSpaces, setParkingSpaces] = useState<number>(1);
+  const [pickerVisible, setPickerVisible] = useState<boolean>(false);
+  const [pickerData, setPickerData] = useState<any[]>([]);
+  const [currentField, setCurrentField] = useState<string | null>(null);
 
   // Intl
   const { intl } = useIntl();
 
-  // Errors 
-  const [errors, setErrors] = useState({});
+  // Errors
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = () => {
     let valid = true;
-    const newErrors: any = {};
-  
+    const newErrors: { [key: string]: string } = {};
+
     if (!selectedPropertyType) {
       newErrors.propertyType = 'Please select a property type.';
       valid = false;
     }
-  
+
     if (!title.trim()) {
       newErrors.title = 'Please enter a title.';
       valid = false;
     }
-  
-    if (!description) {
+
+    if (!description.trim()) {
       newErrors.description = 'Please describe the property.';
       valid = false;
     }
-  
-    // Add validation for beds, baths, floors, and livingRooms
-    if (selectedPropertyType === 'House') {
-      if (!beds) {
-        newErrors.beds = 'Please select the number of beds.';
-        valid = false;
-      }
-      if (!baths) {
-        newErrors.baths = 'Please select the number of baths.';
-        valid = false;
-      }
-      if (!floors) {
-        newErrors.floors = 'Please select the number of floors.';
-        valid = false;
-      }
-      if (!livingRooms) {
-        newErrors.livingRooms = 'Please select the number of living rooms.';
-        valid = false;
-      }
+
+    // Add validation based on property type
+    switch (selectedPropertyType) {
+      case 'House':
+        if (!beds || beds <= 0) {
+          newErrors.beds = 'Please select the number of beds.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of baths.';
+          valid = false;
+        }
+        if (!floors || floors <= 0) {
+          newErrors.floors = 'Please select the number of floors.';
+          valid = false;
+        }
+        if (!livingRooms || livingRooms <= 0) {
+          newErrors.livingRooms = 'Please select the number of living rooms.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Appartment':
+        if (!rooms || rooms <= 0) {
+          newErrors.rooms = 'Please select the number of rooms.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of baths.';
+          valid = false;
+        }
+        if (!floorNumber || floorNumber <= 0) {
+          newErrors.floorNumber = 'Please select the floor number.';
+          valid = false;
+        }
+        if (!livingRooms || livingRooms <= 0) {
+          newErrors.livingRooms = 'Please select the number of living rooms.';
+          valid = false;
+        }
+        if (!floors || floors <= 0) {
+          newErrors.floors = 'Please select the number of floors.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Workers Residence':
+        if (!beds || beds <= 0) {
+          newErrors.beds = 'Please select the number of beds.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of baths.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Land':
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        if (!numberOfStreets || numberOfStreets <= 0) {
+          newErrors.numberOfStreets = 'Please select the number of streets.';
+          valid = false;
+        }
+        break;
+
+      case 'Farmhouse':
+        if (!beds || beds <= 0) {
+          newErrors.beds = 'Please select the number of beds.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of baths.';
+          valid = false;
+        }
+        if (!livingRooms || livingRooms <= 0) {
+          newErrors.livingRooms = 'Please select the number of living rooms.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Shop':
+        if (!footTraffic) {
+          newErrors.footTraffic = 'Please select the foot traffic level.';
+          valid = false;
+        }
+        if (!proximity) {
+          newErrors.proximity = 'Please select the proximity to main road.';
+          valid = false;
+        }
+        break;
+
+      case 'Chalet':
+        if (!beds || beds <= 0) {
+          newErrors.beds = 'Please select the number of beds.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of baths.';
+          valid = false;
+        }
+        if (!livingRooms || livingRooms <= 0) {
+          newErrors.livingRooms = 'Please select the number of living rooms.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Office':
+        if (!floors || floors <= 0) {
+          newErrors.floors = 'Please select the number of floors.';
+          valid = false;
+        }
+        if (!parkingSpaces || parkingSpaces < 0) {
+          newErrors.parkingSpaces = 'Please select the number of parking spaces.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      case 'Warehouse':
+        if (!numberOfGates || numberOfGates <= 0) {
+          newErrors.numberOfGates = 'Please select the number of gates.';
+          valid = false;
+        }
+        if (loadingDocks < 0) {
+          newErrors.loadingDocks = 'Loading docks cannot be negative.';
+          valid = false;
+        }
+        if (!storageCapacity || storageCapacity < 0) {
+          newErrors.storageCapacity = 'Please select the storage capacity.';
+          valid = false;
+        }
+        break;
+
+      case 'Tower':
+        if (!rooms || rooms <= 0) {
+          newErrors.rooms = 'Please select the number of rooms per unit.';
+          valid = false;
+        }
+        if (!baths || baths <= 0) {
+          newErrors.baths = 'Please select the number of bathrooms per unit.';
+          valid = false;
+        }
+        if (!numberOfUnits || numberOfUnits <= 0) {
+          newErrors.numberOfUnits = 'Please select the number of units.';
+          valid = false;
+        }
+        if (!floors || floors <= 0) {
+          newErrors.floors = 'Please select the number of floors.';
+          valid = false;
+        }
+        if (!direction) {
+          newErrors.direction = 'Please select a direction.';
+          valid = false;
+        }
+        break;
+
+      default:
+        break;
     }
-  
+
     if (!valid) {
       Vibration.vibrate(50);
       setErrors(newErrors);
       return;
     }
-  
+
     handleNext();
   };
-  
 
   const handleTitleChange = (text: string) => {
     if (/[^a-zA-Z\s]/.test(text)) {
-      setErrors((prev) => ({ ...prev, title: 'Title should not contain numbers or special characters.' }));
+      setErrors((prev) => ({
+        ...prev,
+        title: 'Title should not contain numbers or special characters.',
+      }));
       return;
     }
     setTitle(text.slice(0, 50));
-    setErrors((prev) => ({ ...prev, title: null }));
+    setErrors((prev) => ({ ...prev, title: '' }));
   };
 
   const handleDescriptionChange = (text: string) => {
     const minLength = 10;
     const maxLength = 200;
-  
-    // Check if the description is too short
+
     if (text.length < minLength) {
       setErrors((prev) => ({
         ...prev,
@@ -109,8 +297,7 @@ const PropertyStep2 = ({
       }));
       return;
     }
-  
-    // Check if the description is too long
+
     if (text.length > maxLength) {
       setErrors((prev) => ({
         ...prev,
@@ -118,401 +305,255 @@ const PropertyStep2 = ({
       }));
       return;
     }
-  
-    // Set the description and clear any previous errors
+
     setDescription(text);
-    setErrors((prev) => ({ ...prev, description: null }));
+    setErrors((prev) => ({ ...prev, description: '' }));
   };
-  
 
-  
-
-  // Function to open picker for a specific field
-  const openPicker = (field, options, valueSetter) => {
-    setCurrentField({ field, valueSetter });
-    setPickerData(options);
+  const openPicker = (fieldKey) => {
+    switch (fieldKey) {
+      case 'beds':
+        setCurrentField({ field: 'beds', valueSetter: setBeds });
+        break;
+      case 'baths':
+        setCurrentField({ field: 'baths', valueSetter: setBaths });
+        break;
+      case 'floors':
+        setCurrentField({ field: 'floors', valueSetter: setFloors });
+        break;
+      case 'livingRooms':
+        setCurrentField({ field: 'livingRooms', valueSetter: setLivingRooms });
+        break;
+      case 'rooms':
+        setCurrentField({ field: 'rooms', valueSetter: setRooms });
+        break;
+      case 'floorNumber':
+        setCurrentField({ field: 'floorNumber', valueSetter: setFloorNumber });
+        break;
+      case 'numberOfStreets':
+        setCurrentField({ field: 'numberOfStreets', valueSetter: setNumberOfStreets });
+        break;
+      case 'footTraffic':
+        setCurrentField({ field: 'footTraffic', valueSetter: setFootTraffic });
+        break;
+      case 'proximity':
+        setCurrentField({ field: 'proximity', valueSetter: setProximity });
+        break;
+      case 'parkingSpaces':
+        setCurrentField({ field: 'parkingSpaces', valueSetter: setParkingSpaces });
+        break;
+      case 'numberOfGates':
+        setCurrentField({ field: 'numberOfGates', valueSetter: setNumberOfGates });
+        break;
+      case 'loadingDocks':
+        setCurrentField({ field: 'loadingDocks', valueSetter: setLoadingDocks });
+        break;
+      case 'storageCapacity':
+        setCurrentField({ field: 'storageCapacity', valueSetter: setStorageCapacity });
+        break;
+      case 'numberOfUnits':
+        setCurrentField({ field: 'numberOfUnits', valueSetter: setNumberOfUnits });
+        break;
+      case 'direction':
+        setCurrentField({ field: 'direction', valueSetter: setDirection });
+        break;
+      default:
+        console.warn(`Field ${fieldKey} not found`);
+    }
     setPickerVisible(true);
   };
+  
 
-  const generateNumericOptions = (start, end) => {
+  // Function to generate numeric options
+  const generateNumericOptions = (start: number, end: number, step: number = 1) => {
     const items = [];
-    for (let i = start; i <= end; i++) {
+    for (let i = start; i <= end; i += step) {
       items.push(i);
     }
     return items;
   };
-  
+
+  // Function to handle picker selection
+const handlePickerSelect = (selectedValue) => {
+  if (currentField && currentField.valueSetter) {
+    // Use the setter function dynamically
+    currentField.valueSetter(selectedValue);
+
+    // Clear currentField after setting value
+    setCurrentField(null);
+    setPickerVisible(false);
+    
+    // Optionally clear related errors
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [currentField.field]: '', // Clear error for the specific field
+    }));
+  }
+};
+
+
   // Function to render fields dynamically based on selected property type
   const renderFieldsForPropertyType = () => {
-    return (
-      <View>
-      
+    switch (selectedPropertyType) {
+      case 'House':
+        return (
+          <HouseComponent
+            beds={beds}
+            setBeds={setBeds}
+            baths={baths}
+            setBaths={setBaths}
+            floors={floors}
+            setFloors={setFloors}
+            livingRooms={livingRooms}
+            setLivingRooms={setLivingRooms}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-       
-        {(() => {
-          switch (selectedPropertyType) {
-            // Using the ScrollPicker in the House case:
+      case 'Appartment':
+        return (
+          <ApartmentComponent
+            rooms={rooms}
+            setRooms={setRooms}
+            baths={baths}
+            setBaths={setBaths}
+            floorNumber={floorNumber}
+            setFloorNumber={setFloorNumber}
+            livingRooms={livingRooms}
+            setLivingRooms={setLivingRooms}
+            floors={floors}
+            setFloors={setFloors}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-            case 'House':
-              return (
-                <View>
-                  <HouseComponent
-                    beds={beds}
-                    setBeds={setBeds}
-                    baths={baths}
-                    setBaths={setBaths}
-                    floors={floors}
-                    setFloors={setFloors}
-                    livingRooms={livingRooms}
-                    setLivingRooms={setLivingRooms}
-                    errors={errors}
-                  />
-                </View>
-              );
+      case 'Workers Residence':
+        return (
+          <WorkersResidenceComponent
+            beds={beds}
+            setBeds={setBeds}
+            baths={baths}
+            setBaths={setBaths}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
+      case 'Land':
+        return (
+          <LandComponent
+            direction={direction}
+            setDirection={setDirection}
+            numberOfStreets={numberOfStreets}
+            setNumberOfStreets={setNumberOfStreets}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-            case 'Appartment':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('rooms', generateNumericOptions(1, 10), setRooms)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Rooms: {rooms}</Text>
-                  </TouchableOpacity>
+      case 'Farmhouse':
+        return (
+          <FarmhouseComponent
+            beds={beds}
+            setBeds={setBeds}
+            baths={baths}
+            setBaths={setBaths}
+            livingRooms={livingRooms}
+            setLivingRooms={setLivingRooms}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('baths', generateNumericOptions(1, 5), setBaths)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Baths: {baths}</Text>
-                  </TouchableOpacity>
+      case 'Shop':
+        return (
+          <ShopComponent
+            footTraffic={footTraffic}
+            setFootTraffic={setFootTraffic}
+            proximity={proximity}
+            setProximity={setProximity}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'floorNumber',
-                        generateNumericOptions(1, 50),
-                        setFloorNumber
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Floor Number: {floorNumber}
-                    </Text>
-                  </TouchableOpacity>
+      case 'Chalet':
+        return (
+          <ChaletComponent
+            beds={beds}
+            setBeds={setBeds}
+            baths={baths}
+            setBaths={setBaths}
+            livingRooms={livingRooms}
+            setLivingRooms={setLivingRooms}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'livingRooms',
-                        generateNumericOptions(1, 3),
-                        setLivingRooms
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Number of Living Rooms: {livingRooms}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
+      case 'Office':
+        return (
+          <OfficeComponent
+            floors={floors}
+            setFloors={setFloors}
+            parkingSpaces={parkingSpaces}
+            setParkingSpaces={setParkingSpaces}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-            case 'Workers Residence':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('beds', generateNumericOptions(1, 20), setBeds)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Beds: {beds}</Text>
-                  </TouchableOpacity>
+      case 'Warehouse':
+        return (
+          <WarehouseComponent
+            numberOfGates={numberOfGates}
+            setNumberOfGates={setNumberOfGates}
+            loadingDocks={loadingDocks}
+            setLoadingDocks={setLoadingDocks}
+            storageCapacity={storageCapacity}
+            setStorageCapacity={setStorageCapacity}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('baths', generateNumericOptions(1, 5), setBaths)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Baths: {baths}</Text>
-                  </TouchableOpacity>
-                </View>
-              );
+      case 'Tower':
+        return (
+          <TowerComponent
+            rooms={rooms}
+            setRooms={setRooms}
+            baths={baths}
+            setBaths={setBaths}
+            numberOfUnits={numberOfUnits}
+            setNumberOfUnits={setNumberOfUnits}
+            floors={floors}
+            setFloors={setFloors}
+            direction={direction}
+            setDirection={setDirection}
+            errors={errors}
+            openPicker={openPicker}
+          />
+        );
 
-            case 'Land':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'direction',
-                        ['North', 'South', 'East', 'West'],
-                        setDirection
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>Direction: {direction}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'numberOfStreets',
-                        generateNumericOptions(1, 4),
-                        setNumberOfStreets
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Number of Streets: {numberOfStreets}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Farmhouse':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('beds', generateNumericOptions(1, 20), setBeds)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Beds: {beds}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('baths', generateNumericOptions(1, 5), setBaths)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Baths: {baths}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'livingRooms',
-                        generateNumericOptions(1, 3),
-                        setLivingRooms
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Number of Living Rooms: {livingRooms}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Shop':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'footTraffic',
-                        ['High', 'Medium', 'Low'],
-                        setFootTraffic
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Foot Traffic: {footTraffic}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'proximity',
-                        ['Near Main Road', 'Far from Main Road'],
-                        setFootTraffic
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Proximity to Main Road: {footTraffic}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Chalet':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('beds', generateNumericOptions(1, 20), setBeds)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Beds: {beds}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('baths', generateNumericOptions(1, 5), setBaths)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Baths: {baths}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'livingRooms',
-                        generateNumericOptions(1, 3),
-                        setLivingRooms
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Number of Living Rooms: {livingRooms}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Office':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('floors', generateNumericOptions(1, 10), setFloors)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Floors: {floors}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('parkingSpaces', generateNumericOptions(0, 50), setParkingSpaces)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Available Parking Spaces: {parkingSpaces}</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Warehouse':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'numberOfGates',
-                        generateNumericOptions(1, 10),
-                        setNumberOfGates
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Number of Gates: {numberOfGates}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'loadingDocks',
-                        generateNumericOptions(0, 5),
-                        setLoadingDocks
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Loading Docks: {loadingDocks}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker(
-                        'storageCapacity',
-                        generateNumericOptions(100, 10000, 100),
-                        setStorageCapacity
-                      )
-                    }
-                  >
-                    <Text style={styles.pickerText}>
-                      Storage Capacity (m³): {storageCapacity}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            case 'Tower':
-              return (
-                <View>
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('rooms', generateNumericOptions(1, 10), setRooms)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Rooms per Unit: {rooms}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('baths', generateNumericOptions(1, 5), setBaths)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Bathrooms per Unit: {baths}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('numberOfUnits', generateNumericOptions(1, 50), setNumberOfUnits)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Units: {numberOfUnits}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() =>
-                      openPicker('floors', generateNumericOptions(1, 50), setFloors)
-                    }
-                  >
-                    <Text style={styles.pickerText}>Number of Floors: {floors}</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-
-            default:
-              return (
-                <Text style={styles.error}>Please select a valid property type</Text>
-              );
-          }
-        })()}
-      </View>
-    );
+      default:
+        return (
+          <Text style={styles.error}>Please select a valid property type</Text>
+        );
+    }
   };
 
   return (
@@ -563,31 +604,30 @@ const PropertyStep2 = ({
         showRightIconButton={true}
       />    
 
-      {/* Modal Picker */}
-      <Modal
-        visible={pickerVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setPickerVisible(false)}
+<Modal
+  visible={pickerVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setPickerVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.pickerContainer}>
+      <Picker
+        selectedValue={currentField ? currentField.field : ''}
+        onValueChange={(itemValue) => {
+          if (currentField) {
+            handlePickerSelect(itemValue);  // Use the updated handler
+          }
+        }}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={currentField ? currentField.field : ''}
-              onValueChange={(itemValue) => {
-                if (currentField) {
-                  currentField.valueSetter(itemValue);
-                }
-                setPickerVisible(false);
-              }}
-            >
-              {pickerData.map((value, index) => (
-                <Picker.Item label={String(value)} value={value} key={index} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-      </Modal>
+        {pickerData.map((value, index) => (
+          <Picker.Item label={String(value)} value={value} key={index} />
+        ))}
+      </Picker>
+    </View>
+  </View>
+</Modal>
+
     </ScrollView>
   );
 };

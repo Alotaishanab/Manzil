@@ -16,4 +16,5 @@ export * from './FilterModal';
 export * from './PropertyCard';
 export * from './CompassDirectionModal';
 export * from './ScrollPicker';
-export * from './HouseComponent'
+export * from './PickerField';
+export * from './FullScreenMap';

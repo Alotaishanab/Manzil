@@ -50,3 +50,4 @@ export * from './promoteproperty';
 export * from './listedproperties';
 export * from './allagencies';
 export * from './paymentcardsconfirmation';
+export * from './centerscreen';

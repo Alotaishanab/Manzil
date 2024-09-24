@@ -1,75 +1,134 @@
-/* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable react-native/no-inline-styles */
 import React, { Fragment, useState } from 'react';
 import {
   FlatList,
   Image,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { CustomButton, CustomMap, DropDownPicker, TopSpace } from '@components';
-import ImageCorouselPicker from './ImageCorouselPicker'; // Ensure this is the correct import path
+import { CustomButton, CustomMap, DropDownPicker, TopSpace , FullScreenMap } from '@components';
+import ImageCarouselPicker from './ImageCorouselPicker'; // Ensure this is the correct import path
 import { fonts } from '@fonts';
 import { Colors } from '@colors';
 import { globalStyles } from '@globalStyles';
 import { useIntl } from '@context';
 import * as SVGs from '../../../assets/svgs';
-import { AreaIcon, DoubleTcIcon } from '@svgs';
-import BedroomView from '../../../../src/screens/filterproperty/components/BedroomView'; // Ensure this is the correct import path
 import { useAddPropertiesProps } from '../useAddPropertiesProps';
 import { useNavigation } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
   const navigation = useNavigation();
   const { intl } = useIntl();
   const { propertyFeatures } = useAddPropertiesProps();
-  const [propertyFeature, setPropertyFeature] = useState<string | null>(null);
+  const [selectedFeatures, setSelectedFeatures] = useState<Array<string>>([]); // Array for multiple features
   const [bedroomCount, setBedroomCount] = useState<number | string | null>(null);
   const [bathroomCount, setBathroomCount] = useState<number | string | null>(null);
   const [valueFloor, setValueFloor] = useState<string>('');
   const [isFocusFloor, setIsFocusFloor] = useState<boolean>(false);
-  const [priceMeter, setPriceMeter] = useState<string | null>(null);
-  const [isFocusPriceMeter, setIsFocusPriceMeter] = useState<boolean>(false);
-  const [images, setImages] = useState<Array<any>>([]); // Assuming an array of images
+  const [media, setMedia] = useState<Array<any>>([]);
   const [mapType, setMapType] = useState<string>('standard');
   const [description, setDescription] = useState<string>('');
   const [floor, setFloor] = useState<any>(null); // Assuming `floor` can be an image or any other type
 
-  const bedrooms = [1, 2, 3, '4+'];
-  const data = [
-    { label: '1', value: '1' },
-    { label: '2', value: '2' },
-    { label: '3', value: '3' },
-    { label: '4', value: '4' },
-    { label: '5', value: '5' },
-    { label: '6', value: '6' },
-    { label: '7', value: '7' },
-    { label: '8', value: '8' },
-  ];
+  const [mapVisible, setMapVisible] = useState(false); // Map modal visibility state
+  const [markerPosition, setMarkerPosition] = useState(null); // Marker position state
 
-  const handlePicker = (selectedImages: Array<any>) => {
-    setImages(selectedImages);
+  // Function to toggle property feature selection
+  const toggleFeature = (feature: string) => {
+    setSelectedFeatures((prevFeatures) => {
+      if (prevFeatures.includes(feature)) {
+        return prevFeatures.filter(f => f !== feature);
+      } else {
+        return [...prevFeatures, feature];
+      }
+    });
+  };
+
+  // Handle location selection from FullScreenMap
+  const handleLocationSelect = (location) => {
+    setMarkerPosition(location); // Store the selected location
+    console.log('Selected Location:', location); // Log coordinates for testing
+  };
+
+  const handlePicker = (selectedMedia: Array<any>) => {
+    setMedia(selectedMedia); // Handle both images and videos
   };
 
   const handleAddFloorPicker = () => {
     // Implement logic to add floor plan (e.g., opening image picker)
   };
 
+  const openMediaPicker = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'mixed', // Allow both images and videos
+        selectionLimit: 0,  // Allow multiple media selection
+      },
+      (response) => {
+        if (!response.didCancel && response.assets) {
+          const currentImages = media.filter(item => item.type.startsWith('image'));
+          const currentVideos = media.filter(item => item.type.startsWith('video'));
+
+          // Filter selected media
+          const selectedMedia = response.assets.filter(asset => {
+            const isImage = asset.type.startsWith('image');
+            const isVideo = asset.type.startsWith('video');
+
+            // Common formats supported for images and videos
+            const supportedImageFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+            const supportedVideoFormats = ['video/mp4', 'video/quicktime'];
+
+            if (isImage && supportedImageFormats.includes(asset.type)) {
+              return true;
+            }
+            if (isVideo && supportedVideoFormats.includes(asset.type)) {
+              return true;
+            }
+            return false;
+          });
+
+          let newImages = [];
+          let newVideos = [];
+
+          selectedMedia.forEach((asset) => {
+            if (asset.type.startsWith('image') && currentImages.length + newImages.length < 10) {
+              newImages.push({
+                uri: asset.uri,
+                type: asset.type, // Image type
+              });
+            }
+            if (asset.type.startsWith('video') && currentVideos.length + newVideos.length < 3) {
+              newVideos.push({
+                uri: asset.uri,
+                type: asset.type, // Video type
+              });
+            }
+          });
+
+          setMedia((prevMedia) => [
+            ...prevMedia,
+            ...newImages,
+            ...newVideos
+          ]);
+        }
+      }
+    );
+  };
+
   const renderPropertyType = ({ item }: any) => {
     const Icon = SVGs[item?.icon];
+    const isSelected = selectedFeatures.includes(item?.name); // Check if the feature is selected
     return (
       <TouchableOpacity
-        onPress={() => setPropertyFeature(item?.name)}
+        onPress={() => toggleFeature(item?.name)} // Toggle selection
         style={[
           globalStyles.propertTypeCard,
           {
-            borderColor:
-              propertyFeature === item?.name
-                ? Colors.light.primaryBtn
-                : Colors.light.propertyCardLine,
+            borderColor: isSelected
+              ? Colors.light.primaryBtn
+              : Colors.light.propertyCardLine,
           },
         ]}
       >
@@ -85,42 +144,46 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
     <>
       <TopSpace top={10} />
 
-      {/* Description Input */}
-      <Text style={styles.selectPrice}>
-        {intl.formatMessage({ id: 'requestPropertyScreen.add-description' })}
-      </Text>
-      <TextInput
-        placeholder={intl.formatMessage({
-          id: 'requestPropertyScreen.add-description-placeholder',
-        })}
-        textAlignVertical="top"
-        numberOfLines={10}
-        multiline={true}
-        style={styles.descriptionInput}
-        value={description}
-        onChangeText={setDescription}
-      />
-
       {/* Address and Map */}
       <TopSpace top={10} />
       <Text style={styles.selectPrice}>Address</Text>
       <TopSpace top={5} />
-      <View>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => setMapVisible(true)} // Open full-screen map on press
+        style={styles.mapContainer}
+      >
         <CustomMap
           height={250}
           showHome={true}
           showMaximizeScreen={true}
           isAbsoluteFill={false}
           mapType={mapType}
+          markerPosition={markerPosition} // Pass the selected marker position
+          initialRegion={
+            markerPosition
+              ? {
+                  latitude: markerPosition.latitude,
+                  longitude: markerPosition.longitude,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }
+              : undefined
+          }
         />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setMapType(prevType => (prevType === 'standard' ? 'satellite' : 'standard'))}
-          style={styles.mapToggleButton}
-        >
-          <SVGs.MapLayerIcon width={25} height={25} />
-        </TouchableOpacity>
-      </View>
+        {markerPosition && (
+          <Text style={styles.selectedLocationText}>
+            {`Lat: ${markerPosition.latitude}, Lng: ${markerPosition.longitude}`}
+          </Text>
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => setMapType(prevType => (prevType === 'standard' ? 'satellite' : 'standard'))}
+        style={styles.mapToggleButton}
+      >
+        <SVGs.MapLayerIcon width={25} height={25} />
+      </TouchableOpacity>
 
       {/* Floor Plan Input */}
       <TopSpace top={10} />
@@ -165,125 +228,13 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
 
   return (
     <Fragment>
-      {/* Image Carousel Picker */}
-      <ImageCorouselPicker images={images} handlePicker={handlePicker} />
+      {/* Image and Video Carousel Picker */}
+      <ImageCarouselPicker media={media} handlePicker={handlePicker} />
 
-      {/* Description, Price, and Size Input */}
-      <TopSpace top={10} />
-      <View style={globalStyles.simpleRow}>
-        <View style={{ flex: 1 }}>
-          <View style={globalStyles.simpleRow}>
-            <Text style={styles.selectPrice}>
-              {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
-            </Text>
-            <DoubleTcIcon width={20} height={20} />
-          </View>
-          <TextInput placeholder="E.g 500,000 SAR" style={styles.textInputRow} />
-        </View>
-
-        <View style={{ flex: 1, marginLeft: 10 }}>
-          <View style={globalStyles.simpleRow}>
-            <AreaIcon width={30} height={30} />
-            <Text style={styles.selectPrice}>
-              {intl.formatMessage({ id: 'requestPropertyScreen.size' })}
-            </Text>
-          </View>
-          <TextInput placeholder="E.g 500,000 SAR" style={styles.textInputRow} />
-        </View>
-      </View>
-
-      {/* Rooms, Bedrooms, and Price Inputs */}
-      <View style={styles.bedroomBathroomContent}>
-        {selectedType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.office' }) ? (
-          <BedroomView
-            selectedOption={bedroomCount}
-            setSelectedOption={setBedroomCount}
-            iconName="BedIcon"
-            data={bedrooms}
-            title={intl.formatMessage({ id: 'addpropertyScreen.rooms' })}
-          />
-        ) : selectedType !== intl.formatMessage({ id: 'requestPropertyScreen.properties-type.land' }) ? (
-          <>
-            <BedroomView
-              selectedOption={bedroomCount}
-              setSelectedOption={setBedroomCount}
-              iconName="BedIcon"
-              data={bedrooms}
-              title={intl.formatMessage({ id: 'filterPropertyScreen.bedrooms' })}
-            />
-          </>
-        ) : (
-          <View style={{ flex: 1 }}>
-            <Text style={styles.selectPrice}>
-              {intl.formatMessage({ id: 'landPropertyDetailScreen.price-one-meter' })}
-            </Text>
-
-            <DropDownPicker
-              placeholder="Select"
-              value={priceMeter}
-              dropdownWidth={'95%'}
-              data={data}
-              borderRadius={30}
-              isFocus={isFocusPriceMeter}
-              setIsFocus={setIsFocusPriceMeter}
-              labelField="label"
-              valueField="value"
-              onChange={setPriceMeter}
-            />
-          </View>
-        )}
-
-        {/* Bathrooms or Direction Input */}
-        {selectedType !== intl.formatMessage({ id: 'requestPropertyScreen.properties-type.land' }) ? (
-          <BedroomView
-            iconName="BathroomIcon"
-            data={bedrooms}
-            title={intl.formatMessage({ id: 'filterPropertyScreen.bathrooms' })}
-            selectedOption={bathroomCount}
-            setSelectedOption={setBathroomCount}
-          />
-        ) : (
-          <View style={{ flex: 1 }}>
-            <Text style={styles.selectPrice}>
-              {intl.formatMessage({ id: 'landPropertyDetailScreen.direction' })}
-            </Text>
-
-            <DropDownPicker
-              placeholder="Select"
-              value={valueFloor}
-              data={data}
-              dropdownWidth={'95%'}
-              borderRadius={30}
-              isFocus={isFocusFloor}
-              setIsFocus={setIsFocusFloor}
-              labelField="label"
-              valueField="value"
-              onChange={setValueFloor}
-            />
-          </View>
-        )}
-      </View>
-
-      {/* Floor Level for Office Properties */}
-      {selectedType === intl.formatMessage({ id: 'requestPropertyScreen.properties-type.office' }) && (
-        <>
-          <Text style={styles.selectPrice}>
-            {intl.formatMessage({ id: 'addpropertyScreen.feature-property.floor-level' })}
-          </Text>
-
-          <DropDownPicker
-            placeholder="Select"
-            value={valueFloor}
-            data={data}
-            borderRadius={30}
-            isFocus={isFocusFloor}
-            setIsFocus={setIsFocusFloor}
-            labelField="label"
-            valueField="value"
-            onChange={setValueFloor}
-          />
-        </>
-      )}
+      {/* Add Media Button */}
+      <TouchableOpacity onPress={openMediaPicker} style={styles.addMediaBtn}>
+        <Text style={styles.addImageText}>Add More Media</Text>
+      </TouchableOpacity>
 
       {/* Property Features */}
       <View style={{ marginVertical: 10 }}>
@@ -299,6 +250,12 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
         columnWrapperStyle={styles.propertyColumnWrap}
         ListFooterComponent={ListFooter}
       />
+      {/* Full-Screen Map for selecting location */}
+      <FullScreenMap
+        visible={mapVisible}
+        onClose={() => setMapVisible(false)}
+        onLocationSelect={handleLocationSelect}
+      />
     </Fragment>
   );
 };
@@ -312,29 +269,22 @@ const styles = StyleSheet.create({
     color: Colors.light.headingTitle,
     marginBottom: 5,
   },
-  descriptionInput: {
-    borderWidth: 1,
-    borderColor: Colors.light.inputBg,
+  mapContainer: {
     borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  addMediaBtn: {
+    backgroundColor: Colors.light.primaryBtn,
     padding: 10,
-    textAlignVertical: 'top',
-    height: 150,
-    backgroundColor: Colors.light.inputBg,
-  },
-  textInputRow: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    borderWidth: 1,
     borderRadius: 10,
-    paddingHorizontal: 15,
-    marginTop: 5,
-    backgroundColor: Colors.light.inputBg,
-    color: Colors.light.headingTitle,
+    alignItems: 'center',
+    marginVertical: 10,
   },
-  bedroomBathroomContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  addImageText: {
+    fontSize: 16,
+    fontFamily: fonts.primary.medium,
+    color: Colors.light.background,
   },
   propertyColumnWrap: {
     justifyContent: 'space-between',
@@ -354,12 +304,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: Colors.light.inputBg,
   },
-  addImageText: {
-    fontSize: 16,
-    fontFamily: fonts.primary.medium,
-    color: Colors.light.headingTitle,
-    marginLeft: 10,
-  },
   mapToggleButton: {
     backgroundColor: Colors.light.background,
     justifyContent: 'center',
@@ -371,5 +315,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 80,
     alignSelf: 'flex-end',
+  },
+  selectedLocationText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#fff',
   },
 });

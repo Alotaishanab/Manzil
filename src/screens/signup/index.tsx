@@ -183,23 +183,6 @@ export const Signup = () => {
         {intl.formatMessage({id: 'signupScreen.forgot-password'})}
       </Text>
       <TopSpace top={20} />
-
-      <Text style={[globalStyles.orLineText, {textAlign: 'center'}]}>
-        {intl.formatMessage({id: 'signinScreen.or'})}
-      </Text>
-      <TopSpace top={20} />
-
-      <View style={globalStyles.simpleRow}>
-        <TouchableOpacity style={styles.socialBtn}>
-          <AppleIcon width={25} height={25} />
-        </TouchableOpacity>
-
-        <View style={{marginHorizontal: 10}} />
-
-        <TouchableOpacity style={styles.socialBtn}>
-          <GoogleIcon width={25} height={25} />
-        </TouchableOpacity>
-      </View>
     </Screen>
   );
 };
@@ -207,7 +190,7 @@ export const Signup = () => {
 const styles = StyleSheet.create({
   inputTitleStyle: {
     fontSize: 13,
-    fontFamily: fonts.primary.semiBold,
+    fontFamily: fonts.primary.bold,
     color: Colors.light.headingTitle,
   },
   termServiceNormalText: {

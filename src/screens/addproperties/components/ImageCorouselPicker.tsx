@@ -1,23 +1,23 @@
-import {Colors} from '@colors';
-import React, {useState} from 'react';
+import { Colors } from '@colors';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ImageBackground,
   StyleSheet,
   Dimensions,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
-import {GalleryIcon, MultiWindowAddIcon} from '@svgs';
-import {fonts} from '@fonts';
-import {globalStyles} from '@globalStyles';
+import Video from 'react-native-video'; // Import video component for handling videos
+import { GalleryIcon, MultiWindowAddIcon } from '@svgs';
+import { fonts } from '@fonts';
+import { globalStyles } from '@globalStyles';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-export const ImageCarouselPicker = ({images = [], handlePicker}: any) => {
-  const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0); // state to track the current index
+export const ImageCarouselPicker = ({ media = [], handlePicker }: any) => {
+  const [currentIndex, setCurrentIndex] = useState(0); // State to track the current index
 
   return (
     <View style={styles.container}>
@@ -26,44 +26,55 @@ export const ImageCarouselPicker = ({images = [], handlePicker}: any) => {
         showsButtons={false}
         loop={false}
         index={currentIndex}
-        // index={}
-        onIndexChanged={index => setCurrentIndex(index)} // update index on change
-        paginationStyle={[styles.pagination, {}]}
+        onIndexChanged={(index) => setCurrentIndex(index)} // Update index on change
+        scrollEnabled={true} // Ensure swiping is enabled
+        removeClippedSubviews={false} // Prevent content from being clipped
+        paginationStyle={[styles.pagination]}
         renderPagination={(index, total) => {
           return (
             <View style={[styles.pagination]}>
               <GalleryIcon width={18} height={18} />
               <Text style={styles.paginationText}>
-                {images?.length > 0 ? index + 1 : 0}
-                {images?.length == 0 ? `/${total - 1}` : `/${total}`}
+                {media?.length > 0 ? index + 1 : 0}
+                {media?.length == 0 ? `/${total - 1}` : `/${total}`}
               </Text>
             </View>
           );
         }}>
-        {images?.length > 0 ? (
-          images?.map(
-            (image: {uri: any}, index: React.Key | null | undefined) => (
-              <View key={index} style={[styles.slide]}>
+        {media?.length > 0 ? (
+          media?.map((item: { uri: any, type: string }, index: React.Key | null | undefined) => (
+            <View key={index} style={[styles.slide]}>
+              {item.type.startsWith('video') ? (
+                <Video
+                  source={{ uri: item.uri }}
+                  style={styles.mediaStyle}
+                  resizeMode="cover"
+                  controls={true} // Enable video controls like play, pause, etc.
+                  paused={currentIndex !== index} // Play only the current video
+                />
+              ) : (
                 <ImageBackground
                   resizeMode="cover"
-                  source={{uri: image.uri}}
-                  style={styles.imageBgStyle}
+                  source={{ uri: item.uri }}
+                  style={styles.mediaStyle}
                   imageStyle={{
                     borderRadius: 10,
                   }}
-                  // onLoadStart={() => setLoading(true)}
-                  // onLoadEnd={() => setLoading(false)}
                 />
-              </View>
-            ),
-          )
+              )}
+            </View>
+          ))
         ) : (
-          <Pressable onPress={() => handlePicker()} style={styles.addImageBtn}>
+          <TouchableOpacity
+            onPress={() => handlePicker()} // Only trigger onPress if not swiping
+            style={styles.addMediaBtn}
+            activeOpacity={0.7}
+          >
             <View style={globalStyles.simpleRow}>
               <MultiWindowAddIcon width={45} height={45} />
-              <Text style={styles.addImageText}>Add image</Text>
+              <Text style={styles.addMediaText}>Add media</Text>
             </View>
-          </Pressable>
+          </TouchableOpacity>
         )}
       </Swiper>
     </View>
@@ -76,18 +87,30 @@ const styles = StyleSheet.create({
   container: {
     height: 300,
     width: '100%',
-    // flex: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: Colors.light.background, // Background color for container
   },
-  wrapper: {},
+  wrapper: {
+    // Customize wrapper if necessary
+  },
   slide: {
     justifyContent: 'center',
     alignItems: 'center',
     width: width,
+    height: '100%',
+  },
+  mediaStyle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
   },
   imageBgStyle: {
     width: width,
     height: height * 0.75,
-    // justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
   },
   imageCountWrapper: {
     margin: 15,
@@ -99,7 +122,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageCountText: {
-    color: '#fff',
+    color: Colors.light.primaryBtn,
     fontSize: 18,
     marginLeft: 5,
   },
@@ -108,12 +131,12 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
     height: 40,
-    width: '25%',
+    width: 100, // Adjust pagination width for better alignment
     borderRadius: 25,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.light.background,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Add transparency to pagination background
   },
   paginationText: {
     color: Colors.light.primaryBtn,
@@ -121,17 +144,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 12,
   },
-  addImageBtn: {
-    width: width,
+  addMediaBtn: {
+    width: '100%',
     height: '100%',
-    backgroundColor: '#F7F7F7',
     justifyContent: 'center',
-    borderRadius: 10,
     alignItems: 'center',
+    backgroundColor: '#F7F7F7',
+    borderRadius: 10,
   },
-  addImageText: {
-    fontSize: 24,
-    marginLeft: 5,
+  addMediaText: {
+    fontSize: 18,
+    marginTop: 10,
     fontFamily: fonts.primary.regular,
     color: Colors.light.headingTitle,
   },

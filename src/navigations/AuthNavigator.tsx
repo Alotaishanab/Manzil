@@ -46,6 +46,7 @@ import {
   RequestList,
   PropertiesRequestStatus,
   SimilarProperties,
+  CenterScreen,
 } from '@screens';
 import {BottomTabNavigator} from './bottomtab/BottomTabNavigator';
 
@@ -103,6 +104,7 @@ type AuthStackParamList = {
   PropertiesRequestStatus?: any;
   ParentalGate: {nextScreen: keyof AuthStackParamList};
   SimilarProperties?: any;
+  CenterScreen?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -182,7 +184,9 @@ export const AuthNavigator = () => {
         name="PropertiesRequestStatus"
         component={PropertiesRequestStatus}
       />
+      
       <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
+      <AuthStack.Screen name="CenterScreen" component={CenterScreen} />
     </AuthStack.Navigator>
   );
 };

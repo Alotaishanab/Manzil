@@ -30,7 +30,7 @@ const PropertyStep4 = ({ selectedType, handleNext, handleBack }: any) => {
   const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
   const [propertyAge, setPropertyAge] = useState('');
   const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState('33333333');
   const [size, setSize] = useState('');
   const [errors, setErrors] = useState({});
 

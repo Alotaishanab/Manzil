@@ -62,7 +62,7 @@ const style = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: fonts.tertiary.semiBold,
+    fontFamily: fonts.tertiary.bold,
     fontSize: 28,
     color: Colors.light.headingTitle,
     // fontWeight: '600',

@@ -5,7 +5,7 @@ import {fonts} from '../../assets/fonts/index';
 export const styles = StyleSheet.create({
   headingText: {
     fontSize: 24,
-    fontFamily: fonts.primary.medium,
+    fontFamily: fonts.primary.bold,
     color: Colors.light.headingTitle,
     fontWeight: '500',
   },

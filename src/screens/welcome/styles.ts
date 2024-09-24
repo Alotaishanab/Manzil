@@ -24,8 +24,8 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
   },
   imgView: {
-    width: 260,
-    height: 260,
+    width: 360,
+    height: 360,
     borderRadius: 20,
     alignSelf: 'center',
   },
