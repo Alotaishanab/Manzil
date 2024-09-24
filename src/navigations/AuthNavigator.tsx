@@ -105,13 +105,14 @@ type AuthStackParamList = {
   ParentalGate: {nextScreen: keyof AuthStackParamList};
   SimilarProperties?: any;
   CenterScreen?: any;
+  PropertyScreen?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator = () => {
   return (
     <AuthStack.Navigator
-      initialRouteName="AddProperties" // SplashScreen  // Analytics // AddProperties
+      initialRouteName="SplashScreen" // SplashScreen  // Analytics // AddProperties
       screenOptions={{headerShown: false}}>
       <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
       <AuthStack.Screen name="Onboarding" component={Onboarding} />
@@ -139,10 +140,7 @@ export const AuthNavigator = () => {
       />
       <AuthStack.Screen name="ExploreSearch" component={ExploreSearch} />
       <AuthStack.Screen name="FilterProperty" component={FilterProperty} />
-      <AuthStack.Screen
-        name="PropertyScreen"
-        component={PropertyScreen}
-      />
+      <AuthStack.Screen name="PropertyScreen" component={PropertyScreen} />
       <AuthStack.Screen name="ExploreProperty" component={ExploreProperty} />
       <AuthStack.Screen name="AddProperties" component={AddProperties} />
 
@@ -187,6 +185,10 @@ export const AuthNavigator = () => {
       
       <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
       <AuthStack.Screen name="CenterScreen" component={CenterScreen} />
+      <AuthStack.Screen
+        name="SimilarProperties"
+        component={SimilarProperties}
+      />
     </AuthStack.Navigator>
   );
 };

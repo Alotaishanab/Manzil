@@ -5,9 +5,14 @@ export const CLIENTSERVER = '';
 export const PRODUCTION = '';
 
 export const apiUrls = {
-  login: 'user/sign-in',
-  signup: 'user/sign-up-user',
-  logout: 'user/sign-out',
+  login: 'account/user/login',
+  signup: 'account/user/signup',
+  logout: 'account/user/logout',
+  registerPhone: 'account/user/register/phone',
+  verifyPhone: '/account/user/verify/phone',
+  changeUserPassword: '/account/user/change-password',
+  resetUserPassword: '/account/user/reset-password',
+  resendPhoneCode: '/account/user/resend/code',
 
   userProfile: '/api/user/',
 };

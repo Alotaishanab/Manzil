@@ -16,12 +16,14 @@ import ErrorBoundary from 'react-native-error-boundary';
 import FlashMessage from 'react-native-flash-message';
 
 import {CustomFallback} from '@components';
-// import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {enableScreens} from 'react-native-screens';
 import {HideWarnings} from '@helpers';
 import {fonts} from '@fonts';
 import {Colors} from '@colors';
 import {View} from 'react-native';
+
+const queryClient = new QueryClient();
 
 function App(): React.JSX.Element {
   const [locale, setLocale] = useState('en'); // Default locale is French
@@ -39,7 +41,7 @@ function App(): React.JSX.Element {
     determineLocale();
     HideWarnings();
   }, []);
-  // const queryClient = new QueryClient();
+
   enableScreens(true);
 
   return (
@@ -47,7 +49,7 @@ function App(): React.JSX.Element {
       <PaperProvider>
         <ErrorBoundary FallbackComponent={CustomFallback}>
           <IntlProvider locale={locale}>
-            {/* <QueryClientProvider client={queryClient}> */}
+             <QueryClientProvider client={queryClient}> 
             <NavigationContainer>
               <AuthNavigator />
               {/* <FlashMessage
@@ -64,7 +66,7 @@ function App(): React.JSX.Element {
               /> */}
               <FlashMessage position="top" hideStatusBar={false} />
             </NavigationContainer>
-            {/* </QueryClientProvider> */}
+            </QueryClientProvider>
           </IntlProvider>
         </ErrorBoundary>
       </PaperProvider>

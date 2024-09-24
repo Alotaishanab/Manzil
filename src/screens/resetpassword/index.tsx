@@ -13,15 +13,20 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useValidations} from '../../../src/validations/useValidations';
 import {useIntl} from '@context';
 import {styles} from './styles';
+import {useResetUserPassword} from '@services';
+import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
+
+type FormData = {
+  password: string;
+  confirmPassword: string;
+};
 
 export const ResetPassword = () => {
   const {resetPasswordSchema} = useValidations();
   const {intl} = useIntl();
   const navigation: any = useNavigation();
-  type FormData = {
-    password: string;
-    confirmPassword: string;
-  };
+  const {mutate: resetPassword} = useResetUserPassword();
+ 
   const {
     control,
     handleSubmit,
@@ -37,7 +42,19 @@ export const ResetPassword = () => {
   console.log('isValid', isValid);
   const onSubmit = (data: FormData) => {
     console.log('data', data);
-    navigation.navigate('Login');
+    
+    navigation.navigate('Login')
+    // resetPassword(data, {
+    //   onSuccess: () => {
+    //     // Navigate on success
+    //     showCustomFlashMessage('Reset password successful');
+    //     navigation.navigate('Login');
+    //   },
+    //   onError: () => {
+    //     // Handle login failure
+    //     showCustomFlashMessage('Reset password failed. Please try again.');
+    //   }
+    // });
   };
   return (
     <Screen showKeyboardAware={true}>

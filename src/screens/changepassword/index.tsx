@@ -14,11 +14,20 @@ import {useForm} from 'react-hook-form';
 import {useValidations} from '../../../src/validations/useValidations';
 import {styles} from './styles';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {useChangeUserPassword} from '@services';
+import {showCustomFlashMessage} from '../../../src/helpers/showCustomFlashMessage';
+
+type FormData = {
+  currentPassword: string | number | any;
+  password: string | number | any;
+  confirmPassword: string | number | any;
+};
 
 export const ChangePassword = () => {
   const {intl} = useIntl();
   const navigation: any = useNavigation();
   const {changePasswordSchema} = useValidations();
+  const {mutate: changeUserPassword} = useChangeUserPassword();
   const route: any = useRoute();
   const type = route?.params?.type;
   const {
@@ -30,11 +39,6 @@ export const ChangePassword = () => {
     hideConfirmPass,
   } = useChangePasswordProps();
 
-  type FormData = {
-    currentPassword: string | number | any;
-    password: string | number | any;
-    confirmPassword: string | number | any;
-  };
   const {
     control,
     handleSubmit,
@@ -50,11 +54,22 @@ export const ChangePassword = () => {
   });
   const onSubmit = (data: FormData) => {
     console.log('data', data);
-    if (type === 'forgot') {
-      navigation.navigate('Login');
-    } else {
-      navigation.navigate('Account');
-    }
+
+    changeUserPassword(data, {
+      onSuccess: () => {
+        // Navigate on success
+        showCustomFlashMessage('Password changed successfully');
+        if (type === 'forgot') {
+          navigation.navigate('Login');
+        } else {
+          navigation.navigate('Account');
+        }
+      },
+      onError: () => {
+        // Handle login failure
+        showCustomFlashMessage('Failed to change password. Please try again.');
+      },
+    });
   };
   console.log('isValid', isValid);
   return (

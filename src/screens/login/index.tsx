@@ -15,11 +15,11 @@ import { useForm } from 'react-hook-form';
 import { globalStyles } from '../../../src/styles/globalStyles';
 import { useNavigation } from '@react-navigation/native';
 import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
-// import { useLogin } from '@services';
+import { useLoginUser } from '@services';
 
 export const Login = () => {
   const { intl } = useIntl();
-  // const { mutate: login } = useLogin();
+   const { mutate: login } = useLoginUser();
   const navigation: any = useNavigation();
   const { loginSchema } = useValidations();
 
@@ -34,7 +34,7 @@ export const Login = () => {
     formState: { isValid },
   } = useForm<FormData>({
     defaultValues: {
-      email: 'khawajfaisal981@gmail.com',
+      email: 'zulqarnain.fastian@gmail.com',
       password: 'Password@123',
     },
     mode: 'onSubmit',
@@ -45,9 +45,17 @@ export const Login = () => {
     // Your login logic here
     const { email, password } = data;
     if (isValid) {
-      // For now, let's assume login is successful and navigate to 'Explore'
-      navigation.navigate('BottomTabNavigator');
-      showCustomFlashMessage('Login successful');
+      login({ email, password }, {
+        onSuccess: () => {
+          // Navigate on success
+          navigation.navigate('BottomTabNavigator');
+          showCustomFlashMessage('Login successful');
+        },
+        onError: () => {
+          // Handle login failure
+          showCustomFlashMessage('Login failed. Please try again.');
+        }
+      });
     }
   };
 
@@ -100,7 +108,7 @@ export const Login = () => {
         keyboardType="default"
         returnKeyType="done"
         isRequired={true}
-        secureTextEntry={true}
+        //secureTextEntry={true}
         placeholderColor={''}
         maxLength={70}
         multiLine={false}
