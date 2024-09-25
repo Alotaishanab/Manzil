@@ -203,26 +203,9 @@ export const Signup = () => {
         {intl.formatMessage({id: 'signupScreen.forgot-password'})}
       </Text>
       <TopSpace top={20} />
-<<<<<<< HEAD
-=======
 
-      <Text style={[globalStyles.orLineText, {textAlign: 'center'}]}>
-        {intl.formatMessage({id: 'signinScreen.or'})}
-      </Text>
-      <TopSpace top={20} />
 
-      <View style={globalStyles.simpleRow}>
-        <TouchableOpacity style={styles.socialBtn}>
-          <AppleIcon width={25} height={25} />
-        </TouchableOpacity>
-
-        <View style={{marginHorizontal: 10}} />
-
-        <TouchableOpacity style={styles.socialBtn}>
-          <GoogleIcon width={25} height={25} fill={undefined} />
-        </TouchableOpacity>
-      </View>
->>>>>>> ed8a2b9781e66769b62da73dcb6c9f6c972911a7
+      
     </Screen>
   );
 };

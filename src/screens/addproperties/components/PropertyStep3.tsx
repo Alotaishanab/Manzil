@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CustomCheckbox } from '../../../components/atoms/CustomCheckbox';
 import { StyleSheet, Text, View } from 'react-native';
 import { CustomButton, TopSpace } from '@components';
@@ -6,77 +6,68 @@ import { globalStyles } from '@globalStyles';
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
 
-const PropertyStep3 = ({ handleNext }: any) => {
-  // State for each checkbox group
-  const [waterAccess, setWaterAccess] = useState('No');
-  const [electricityAccess, setElectricityAccess] = useState('No');
-  const [sewageSystem, setSewageSystem] = useState('No');
-
-  // Handlers for changing checkbox values
-  const onValueChangeWater = (val: React.SetStateAction<string>) => {
-    setWaterAccess(val);
-  };
-
-  const onValueChangeElectricity = (val: React.SetStateAction<string>) => {
-    setElectricityAccess(val);
-  };
-
-  const onValueChangeSewage = (val: React.SetStateAction<string>) => {
-    setSewageSystem(val);
-  };
-
+const PropertyStep3 = ({
+  waterAccess,
+  setWaterAccess,
+  electricityAccess,
+  setElectricityAccess,
+  sewageSystem,
+  setSewageSystem,
+  handleNext,
+}: any) => {
   return (
     <View style={styles.container}>
-      
       <TopSpace top={10} />
 
-      {/* Checkboxes for Utilities */}
+      {/* Water Access */}
       <View style={styles.checkboxGroup}>
         <Text style={styles.wantText}>Water access?</Text>
         <View style={styles.centeredRow}>
           <CustomCheckbox
             title="Yes"
             selectedOption={waterAccess}
-            onValueChange={onValueChangeWater}
+            onValueChange={setWaterAccess}
           />
           <CustomCheckbox
             title="No"
             selectedOption={waterAccess}
-            onValueChange={onValueChangeWater}
+            onValueChange={setWaterAccess}
           />
         </View>
       </View>
       <TopSpace top={20} />
 
+      {/* Electricity Access */}
       <View style={styles.checkboxGroup}>
         <Text style={styles.wantText}>Electricity access?</Text>
         <View style={styles.centeredRow}>
           <CustomCheckbox
             title="Yes"
             selectedOption={electricityAccess}
-            onValueChange={onValueChangeElectricity}
+            onValueChange={setElectricityAccess}
           />
           <CustomCheckbox
             title="No"
             selectedOption={electricityAccess}
-            onValueChange={onValueChangeElectricity}
+            onValueChange={setElectricityAccess}
           />
         </View>
       </View>
       <TopSpace top={20} />
 
+      {/* Sewage System */}
       <View style={styles.checkboxGroup}>
         <Text style={styles.wantText}>Sewage system?</Text>
         <View style={styles.centeredRow}>
           <CustomCheckbox
             title="Yes"
             selectedOption={sewageSystem}
-            onValueChange={onValueChangeSewage}
+            onValueChange={setSewageSystem}
           />
           <CustomCheckbox
             title="No"
             selectedOption={sewageSystem}
-            onValueChange={onValueChangeSewage}
+            onValueChange={setSewageSystem}
           />
         </View>
       </View>
@@ -104,13 +95,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontFamily: fonts.primary.regular,
-    color: Colors.light.headingTitle,
-    textAlign: 'left',
-    marginVertical: 20,
-  },
   wantText: {
     color: Colors.light.headingTitle,
     fontSize: 17,
@@ -119,7 +103,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   checkboxGroup: {
-    alignItems: 'left',
     marginBottom: 20,
   },
   centeredRow: {

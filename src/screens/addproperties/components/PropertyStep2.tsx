@@ -35,26 +35,38 @@ const PropertyStep2 = ({
   setTitle,
   description,
   setDescription,
+  beds,
+  setBeds,
+  baths,
+  setBaths,
+  floors,
+  setFloors,
+  livingRooms,
+  setLivingRooms,
+  rooms,
+  setRooms,
+  direction,
+  setDirection,
+  numberOfStreets,
+  setNumberOfStreets,
+  footTraffic,
+  setFootTraffic,
+  proximity,
+  setProximity,
+  floorNumber,
+  setFloorNumber,
+  numberOfGates,
+  setNumberOfGates,
+  loadingDocks,
+  setLoadingDocks,
+  storageCapacity,
+  setStorageCapacity,
+  numberOfUnits,
+  setNumberOfUnits,
+  parkingSpaces,
+  setParkingSpaces,
 }: any) => {
-  // State variables for common fields
-  const [beds, setBeds] = useState<number>(1);
-  const [baths, setBaths] = useState<number>(1);
-  const [floors, setFloors] = useState<number>(1);
-  const [livingRooms, setLivingRooms] = useState<number>(1);
-  const [rooms, setRooms] = useState<number>(1);
-  const [direction, setDirection] = useState<string>('North');
-  const [numberOfStreets, setNumberOfStreets] = useState<number>(1);
-  const [footTraffic, setFootTraffic] = useState<string>('Medium');
-  const [proximity, setProximity] = useState<string>('Near Main Road'); // Added for Shop
-  const [floorNumber, setFloorNumber] = useState<number>(1);
-  const [numberOfGates, setNumberOfGates] = useState<number>(1);
-  const [loadingDocks, setLoadingDocks] = useState<number>(1);
-  const [storageCapacity, setStorageCapacity] = useState<number>(100);
-  const [numberOfUnits, setNumberOfUnits] = useState<number>(1);
-  const [parkingSpaces, setParkingSpaces] = useState<number>(1);
-  const [pickerVisible, setPickerVisible] = useState<boolean>(false);
-  const [pickerData, setPickerData] = useState<any[]>([]);
-  const [currentField, setCurrentField] = useState<string | null>(null);
+
 
   // Intl
   const { intl } = useIntl();
@@ -309,87 +321,7 @@ const PropertyStep2 = ({
     setDescription(text);
     setErrors((prev) => ({ ...prev, description: '' }));
   };
-
-  const openPicker = (fieldKey) => {
-    switch (fieldKey) {
-      case 'beds':
-        setCurrentField({ field: 'beds', valueSetter: setBeds });
-        break;
-      case 'baths':
-        setCurrentField({ field: 'baths', valueSetter: setBaths });
-        break;
-      case 'floors':
-        setCurrentField({ field: 'floors', valueSetter: setFloors });
-        break;
-      case 'livingRooms':
-        setCurrentField({ field: 'livingRooms', valueSetter: setLivingRooms });
-        break;
-      case 'rooms':
-        setCurrentField({ field: 'rooms', valueSetter: setRooms });
-        break;
-      case 'floorNumber':
-        setCurrentField({ field: 'floorNumber', valueSetter: setFloorNumber });
-        break;
-      case 'numberOfStreets':
-        setCurrentField({ field: 'numberOfStreets', valueSetter: setNumberOfStreets });
-        break;
-      case 'footTraffic':
-        setCurrentField({ field: 'footTraffic', valueSetter: setFootTraffic });
-        break;
-      case 'proximity':
-        setCurrentField({ field: 'proximity', valueSetter: setProximity });
-        break;
-      case 'parkingSpaces':
-        setCurrentField({ field: 'parkingSpaces', valueSetter: setParkingSpaces });
-        break;
-      case 'numberOfGates':
-        setCurrentField({ field: 'numberOfGates', valueSetter: setNumberOfGates });
-        break;
-      case 'loadingDocks':
-        setCurrentField({ field: 'loadingDocks', valueSetter: setLoadingDocks });
-        break;
-      case 'storageCapacity':
-        setCurrentField({ field: 'storageCapacity', valueSetter: setStorageCapacity });
-        break;
-      case 'numberOfUnits':
-        setCurrentField({ field: 'numberOfUnits', valueSetter: setNumberOfUnits });
-        break;
-      case 'direction':
-        setCurrentField({ field: 'direction', valueSetter: setDirection });
-        break;
-      default:
-        console.warn(`Field ${fieldKey} not found`);
-    }
-    setPickerVisible(true);
-  };
   
-
-  // Function to generate numeric options
-  const generateNumericOptions = (start: number, end: number, step: number = 1) => {
-    const items = [];
-    for (let i = start; i <= end; i += step) {
-      items.push(i);
-    }
-    return items;
-  };
-
-  // Function to handle picker selection
-const handlePickerSelect = (selectedValue) => {
-  if (currentField && currentField.valueSetter) {
-    // Use the setter function dynamically
-    currentField.valueSetter(selectedValue);
-
-    // Clear currentField after setting value
-    setCurrentField(null);
-    setPickerVisible(false);
-    
-    // Optionally clear related errors
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [currentField.field]: '', // Clear error for the specific field
-    }));
-  }
-};
 
 
   // Function to render fields dynamically based on selected property type
@@ -409,7 +341,6 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -429,7 +360,6 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -443,7 +373,6 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -455,7 +384,6 @@ const handlePickerSelect = (selectedValue) => {
             numberOfStreets={numberOfStreets}
             setNumberOfStreets={setNumberOfStreets}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -471,7 +399,6 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -483,7 +410,7 @@ const handlePickerSelect = (selectedValue) => {
             proximity={proximity}
             setProximity={setProximity}
             errors={errors}
-            openPicker={openPicker}
+
           />
         );
 
@@ -499,7 +426,7 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
+
           />
         );
 
@@ -513,7 +440,7 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
+
           />
         );
 
@@ -527,7 +454,7 @@ const handlePickerSelect = (selectedValue) => {
             storageCapacity={storageCapacity}
             setStorageCapacity={setStorageCapacity}
             errors={errors}
-            openPicker={openPicker}
+
           />
         );
 
@@ -545,7 +472,6 @@ const handlePickerSelect = (selectedValue) => {
             direction={direction}
             setDirection={setDirection}
             errors={errors}
-            openPicker={openPicker}
           />
         );
 
@@ -603,31 +529,6 @@ const handlePickerSelect = (selectedValue) => {
         title={intl.formatMessage({ id: 'buttons.next' })}
         showRightIconButton={true}
       />    
-
-<Modal
-  visible={pickerVisible}
-  transparent={true}
-  animationType="slide"
-  onRequestClose={() => setPickerVisible(false)}
->
-  <View style={styles.modalContainer}>
-    <View style={styles.pickerContainer}>
-      <Picker
-        selectedValue={currentField ? currentField.field : ''}
-        onValueChange={(itemValue) => {
-          if (currentField) {
-            handlePickerSelect(itemValue);  // Use the updated handler
-          }
-        }}
-      >
-        {pickerData.map((value, index) => (
-          <Picker.Item label={String(value)} value={value} key={index} />
-        ))}
-      </Picker>
-    </View>
-  </View>
-</Modal>
-
     </ScrollView>
   );
 };

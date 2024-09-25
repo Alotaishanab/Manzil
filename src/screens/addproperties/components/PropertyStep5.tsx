@@ -6,8 +6,15 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Vibration,
 } from 'react-native';
-import { CustomButton, CustomMap, DropDownPicker, TopSpace , FullScreenMap } from '@components';
+import {
+  CustomButton,
+  CustomMap,
+  DropDownPicker,
+  TopSpace,
+  FullScreenMap,
+} from '@components';
 import ImageCarouselPicker from './ImageCorouselPicker'; // Ensure this is the correct import path
 import { fonts } from '@fonts';
 import { Colors } from '@colors';
@@ -18,28 +25,31 @@ import { useAddPropertiesProps } from '../useAddPropertiesProps';
 import { useNavigation } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
+const PropertyStep5 = ({
+  media,
+  setMedia,
+  selectedPropertyFeatures,
+  setSelectedPropertyFeatures,
+  markerPosition,
+  setMarkerPosition,
+  floor,
+  setFloor,
+  handleNext,
+  handleBack,
+}) => {
   const navigation = useNavigation();
   const { intl } = useIntl();
   const { propertyFeatures } = useAddPropertiesProps();
-  const [selectedFeatures, setSelectedFeatures] = useState<Array<string>>([]); // Array for multiple features
-  const [bedroomCount, setBedroomCount] = useState<number | string | null>(null);
-  const [bathroomCount, setBathroomCount] = useState<number | string | null>(null);
-  const [valueFloor, setValueFloor] = useState<string>('');
-  const [isFocusFloor, setIsFocusFloor] = useState<boolean>(false);
-  const [media, setMedia] = useState<Array<any>>([]);
-  const [mapType, setMapType] = useState<string>('standard');
-  const [description, setDescription] = useState<string>('');
-  const [floor, setFloor] = useState<any>(null); // Assuming `floor` can be an image or any other type
 
+  const [mapType, setMapType] = useState<string>('standard');
   const [mapVisible, setMapVisible] = useState(false); // Map modal visibility state
-  const [markerPosition, setMarkerPosition] = useState(null); // Marker position state
+  const [errors, setErrors] = useState({}); // State to manage validation errors
 
   // Function to toggle property feature selection
   const toggleFeature = (feature: string) => {
-    setSelectedFeatures((prevFeatures) => {
+    setSelectedPropertyFeatures((prevFeatures) => {
       if (prevFeatures.includes(feature)) {
-        return prevFeatures.filter(f => f !== feature);
+        return prevFeatures.filter((f) => f !== feature);
       } else {
         return [...prevFeatures, feature];
       }
@@ -58,21 +68,37 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
 
   const handleAddFloorPicker = () => {
     // Implement logic to add floor plan (e.g., opening image picker)
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        selectionLimit: 1,
+      },
+      (response) => {
+        if (!response.didCancel && response.assets && response.assets.length > 0) {
+          const asset = response.assets[0];
+          setFloor(asset.uri);
+        }
+      }
+    );
   };
 
   const openMediaPicker = () => {
     launchImageLibrary(
       {
         mediaType: 'mixed', // Allow both images and videos
-        selectionLimit: 0,  // Allow multiple media selection
+        selectionLimit: 0, // Allow multiple media selection
       },
       (response) => {
         if (!response.didCancel && response.assets) {
-          const currentImages = media.filter(item => item.type.startsWith('image'));
-          const currentVideos = media.filter(item => item.type.startsWith('video'));
+          const currentImages = media.filter((item) =>
+            item.type.startsWith('image')
+          );
+          const currentVideos = media.filter((item) =>
+            item.type.startsWith('video')
+          );
 
           // Filter selected media
-          const selectedMedia = response.assets.filter(asset => {
+          const selectedMedia = response.assets.filter((asset) => {
             const isImage = asset.type.startsWith('image');
             const isVideo = asset.type.startsWith('video');
 
@@ -93,13 +119,19 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
           let newVideos = [];
 
           selectedMedia.forEach((asset) => {
-            if (asset.type.startsWith('image') && currentImages.length + newImages.length < 10) {
+            if (
+              asset.type.startsWith('image') &&
+              currentImages.length + newImages.length < 10
+            ) {
               newImages.push({
                 uri: asset.uri,
                 type: asset.type, // Image type
               });
             }
-            if (asset.type.startsWith('video') && currentVideos.length + newVideos.length < 3) {
+            if (
+              asset.type.startsWith('video') &&
+              currentVideos.length + newVideos.length < 3
+            ) {
               newVideos.push({
                 uri: asset.uri,
                 type: asset.type, // Video type
@@ -107,19 +139,46 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
             }
           });
 
-          setMedia((prevMedia) => [
-            ...prevMedia,
-            ...newImages,
-            ...newVideos
-          ]);
+          setMedia((prevMedia) => [...prevMedia, ...newImages, ...newVideos]);
         }
       }
     );
   };
 
+  // Validation function to ensure required fields are filled
+  const validateFields = () => {
+    const currentErrors = {};
+
+    if (media.length === 0) {
+      currentErrors.media = intl.formatMessage({
+        id: 'errors.addMedia', // Ensure you have this key in your localization files
+      }) || 'Please add at least one media item.';
+    }
+
+    if (!markerPosition) {
+      currentErrors.markerPosition = intl.formatMessage({
+        id: 'errors.selectLocation', // Ensure you have this key in your localization files
+      }) || 'Please select a location on the map.';
+    }
+
+    if (selectedPropertyFeatures.length === 0) {
+      currentErrors.selectedPropertyFeatures = intl.formatMessage({
+        id: 'errors.selectFeatures', // Ensure you have this key in your localization files
+      }) || 'Please select at least one property feature.';
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      Vibration.vibrate(50); // Vibrate for 50ms on error
+    } else {
+      setErrors({});
+      handleNext(); // Proceed to the next step if no errors
+    }
+  };
+
   const renderPropertyType = ({ item }: any) => {
     const Icon = SVGs[item?.icon];
-    const isSelected = selectedFeatures.includes(item?.name); // Check if the feature is selected
+    const isSelected = selectedPropertyFeatures.includes(item?.name); // Check if the feature is selected
     return (
       <TouchableOpacity
         onPress={() => toggleFeature(item?.name)} // Toggle selection
@@ -151,7 +210,10 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => setMapVisible(true)} // Open full-screen map on press
-        style={styles.mapContainer}
+        style={[
+          styles.mapContainer,
+          errors.markerPosition && styles.errorBorder, // Apply red border if there's an error
+        ]}
       >
         <CustomMap
           height={250}
@@ -177,9 +239,14 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
           </Text>
         )}
       </TouchableOpacity>
+      {errors.markerPosition && (
+        <Text style={styles.errorText}>{errors.markerPosition}</Text>
+      )}
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => setMapType(prevType => (prevType === 'standard' ? 'satellite' : 'standard'))}
+        onPress={() =>
+          setMapType((prevType) => (prevType === 'standard' ? 'satellite' : 'standard'))
+        }
         style={styles.mapToggleButton}
       >
         <SVGs.MapLayerIcon width={25} height={25} />
@@ -194,7 +261,7 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
       >
         {floor ? (
           <Image
-            source={floor}
+            source={{ uri: floor }}
             style={{
               width: '100%',
               height: '100%',
@@ -211,6 +278,7 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
           </View>
         )}
       </TouchableOpacity>
+      {/* Floor Plan is Optional; No Error Message Needed */}
 
       <TopSpace top={20} />
 
@@ -219,7 +287,7 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
         btnWidth={'100%'}
         borderRadius={30}
         disabled={false}
-        handleClick={handleNext}
+        handleClick={validateFields} // Validate before proceeding
         title={intl.formatMessage({ id: 'buttons.next' })}
         showRightIconButton={true}
       />
@@ -229,7 +297,15 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
   return (
     <Fragment>
       {/* Image and Video Carousel Picker */}
-      <ImageCarouselPicker media={media} handlePicker={handlePicker} />
+      <View
+        style={[
+          styles.mediaContainer,
+          errors.media && styles.errorBorder, // Apply red border if there's an error
+        ]}
+      >
+        <ImageCarouselPicker media={media} handlePicker={handlePicker} />
+      </View>
+      {errors.media && <Text style={styles.errorText}>{errors.media}</Text>}
 
       {/* Add Media Button */}
       <TouchableOpacity onPress={openMediaPicker} style={styles.addMediaBtn}>
@@ -237,19 +313,30 @@ const PropertyStep5 = ({ selectedType, handleNext, handleBack }) => {
       </TouchableOpacity>
 
       {/* Property Features */}
-      <View style={{ marginVertical: 10 }}>
-        <Text style={styles.featuredPropertyText}>Properties Features</Text>
+      <View
+        style={[
+          styles.propertyFeaturesContainer,
+          errors.selectedPropertyFeatures && styles.errorBorder, // Apply red border if there's an error
+        ]}
+      >
+        <View style={{ marginVertical: 10 }}>
+          <Text style={styles.featuredPropertyText}>Property Features</Text>
+        </View>
+        <FlatList
+          data={propertyFeatures}
+          showsVerticalScrollIndicator={false}
+          renderItem={renderPropertyType}
+          numColumns={3}
+          horizontal={false}
+          keyboardShouldPersistTaps="always"
+          columnWrapperStyle={styles.propertyColumnWrap}
+          ListFooterComponent={ListFooter}
+        />
       </View>
-      <FlatList
-        data={propertyFeatures}
-        showsVerticalScrollIndicator={false}
-        renderItem={renderPropertyType}
-        numColumns={3}
-        horizontal={false}
-        keyboardShouldPersistTaps="always"
-        columnWrapperStyle={styles.propertyColumnWrap}
-        ListFooterComponent={ListFooter}
-      />
+      {errors.selectedPropertyFeatures && (
+        <Text style={styles.errorText}>{errors.selectedPropertyFeatures}</Text>
+      )}
+
       {/* Full-Screen Map for selecting location */}
       <FullScreenMap
         visible={mapVisible}
@@ -273,6 +360,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 10,
+    // Removed default border
   },
   addMediaBtn: {
     backgroundColor: Colors.light.primaryBtn,
@@ -320,5 +408,29 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 14,
     color: '#fff',
+  },
+  // New Styles for Error Handling
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
+    marginLeft: 10, // Optional: Align error message with field
+  },
+  errorBorder: {
+    borderColor: 'red',
+    borderWidth: 1, // Apply borderWidth when errorBorder is used
+  },
+  mediaContainer: {
+    // Removed default border
+    borderRadius: 10,
+    padding: 10,
+    // Optionally add background color or shadow
+  },
+  propertyFeaturesContainer: {
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 10,
+    // Removed default border
+    // Optionally add background color or shadow
   },
 });

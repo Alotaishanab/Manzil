@@ -112,7 +112,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 export const AuthNavigator = () => {
   return (
     <AuthStack.Navigator
-      initialRouteName="SplashScreen" // SplashScreen  // Analytics // AddProperties
+      initialRouteName="AddProperties" // SplashScreen  // Analytics // AddProperties
       screenOptions={{headerShown: false}}>
       <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
       <AuthStack.Screen name="Onboarding" component={Onboarding} />
@@ -184,11 +184,6 @@ export const AuthNavigator = () => {
       />
       
       <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
-      <AuthStack.Screen name="CenterScreen" component={CenterScreen} />
-      <AuthStack.Screen
-        name="SimilarProperties"
-        component={SimilarProperties}
-      />
     </AuthStack.Navigator>
   );
 };

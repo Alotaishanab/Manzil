@@ -23,15 +23,14 @@ import { CompassDirectionModal } from '../../../components/molecules/CompassDire
 
 const { height: screenHeight } = Dimensions.get('window');
 
-const PropertyStep4 = ({ selectedType, handleNext, handleBack }: any) => {
+const PropertyStep4 = 
+({ selectedType,
+  price,
+  setPrice,
+  handleNext,
+  handleBack
+   }: any) => {
   const { intl } = useIntl();
-  const [priceMeter, setPriceMeter] = useState(null);
-  const [valueDirection, setValueDirection] = useState<any>('');
-  const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
-  const [propertyAge, setPropertyAge] = useState('');
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('33333333');
-  const [size, setSize] = useState('');
   const [errors, setErrors] = useState({});
 
   const handlePriceChange = (text: string) => {
@@ -68,8 +67,6 @@ const PropertyStep4 = ({ selectedType, handleNext, handleBack }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {isDirectionModalVisible && <View style={styles.dimOverlay} />}
-      
       <View style={styles.container}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>
@@ -197,63 +194,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.bold,
-  },
-  directionText: {
-    fontSize: 16,
-    color: Colors.light.black,
-    fontFamily: fonts.primary.regular,
-    flex: 1,
-  },
-  directionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: Colors.light.inputBg,
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.light.inputBg,
-    height: 50,
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    width: '100%',
-    height: screenHeight * 0.4, // Adjust height to 60% of the screen height
-    backgroundColor: Colors.light.offWhite,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: '#ccc',
-    borderRadius: 3,
-    marginBottom: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: fonts.primary.bold,
-    color: Colors.light.headingTitle,
-    marginBottom: 15,
-  },
-  modalOption: {
-    paddingVertical: 15,
-    width: '100%',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.inputBg,
-  },
-  modalOptionText: {
-    fontSize: 18,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
   },
   buttonContainer: {
     marginTop: 20,

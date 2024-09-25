@@ -1,6 +1,6 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {Explore, ExploreMaps} from '@screens';
+import {Explore, ExploreMaps, CenterScreen} from '@screens';
 
 type ExploreStackParamList = {
   // Account: undefined;
