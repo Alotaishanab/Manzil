@@ -17,6 +17,8 @@ export type PropertyFeature = {
   icon: string;
 };
 
+export type OwnershipType = 'independent' | 'multipleOwners' | 'agency';
+
 export interface AddPropertyPayload {
   propertyType: string;
   area: string; // Maps to area in backend
@@ -24,38 +26,46 @@ export interface AddPropertyPayload {
   title: string;
   propertyAge: string; // NEED TO confirm it's column
   description: string;
+  ownershipType: OwnershipType;
+
+  media: any[];
+  floorPlan: string;
 
   electricityAccess: boolean;
   sewageSystem: boolean;
   waterAccess: boolean;
+
   price: string;
-  priceMeter: string | null;
+  markerPosition: any;
+
+  ownership?: unknown;
 
   /** House properties */
-  bedrooms: number | null;
-  bathrooms: number | null;
-  floors: number | null;
-  livingRooms: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  floors?: number | null;
+  livingRooms?: number | null;
 
   /** Apartment properties */
-  apartmentRooms: number | null;
-  floorNumber: number | null;
+  rooms?: number | null;
+  floorNumber?: number | null;
 
-  numberOfStreets: number | null;
+  numberOfStreets?: number | null;
 
   direction: DirectionType | null;
-  footTraffic: FootTrafficType | null;
+  footTraffic?: FootTrafficType | null;
 
   /** Warehouse */
-  numberOfGates: number | null;
-  loadingDocks: number | null;
-  storageCapacity: number | null;
+  numberOfGates?: number | null;
+  loadingDocks?: number | null;
+  storageCapacity?: number | null;
+  proximity?: string;
 
   /** Tower */
-  numberOfUnits: number | null;
+  numberOfUnits?: number | null;
 
   /** Office */
-  parkingSpaces: number | null;
+  parkingSpaces?: number | null;
 
   propertyFeature: PropertyFeature[];
 }

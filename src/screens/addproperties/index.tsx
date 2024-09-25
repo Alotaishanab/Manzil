@@ -9,27 +9,33 @@ import {
   View,
   Vibration,
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { Colors } from '@colors';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {Colors} from '@colors';
 import {useNavigation} from '@react-navigation/native';
-import { AddPropertyBack, TopSpace } from '@components';
-import { fonts } from '@fonts';
-import { globalStyles } from '@globalStyles';
-import { useIntl } from '@context';
+import {AddPropertyBack, TopSpace} from '@components';
+import {fonts} from '@fonts';
+import {globalStyles} from '@globalStyles';
+import {useIntl} from '@context';
 import PropertyStep1 from './components/PropertyStep1';
 import PropertyStep2 from './components/PropertyStep2';
 import PropertyStep3 from './components/PropertyStep3';
 import PropertyStep4 from './components/PropertyStep4';
 import PropertyStep5 from './components/PropertyStep5';
 import PropertyStep6 from './components/PropertyStep6';
-import axios from 'axios';  // Make sure axios is installed
-
+import axios from 'axios'; // Make sure axios is installed
+import {
+  AddPropertyPayload,
+  DirectionType,
+  FootTrafficType,
+  OwnershipType,
+  PropertyFeature,
+  useAddProperty,
+} from '@services';
 
 export const AddProperties = () => {
   const navigation: any = useNavigation();
 
   const [step, setStep] = useState(1);
-  const [floor, setFloor] = useState('');
   const [selectedPropertyType, setSelectedPropertyType] = useState('House');
   const [title, setTitle] = useState('awdawdaw');
   const [price, setPrice] = useState('4444');
@@ -63,12 +69,13 @@ export const AddProperties = () => {
 
   // Step 5
   const [floorPlan, setFloorPlan] = useState('');
-  const [media, setMedia] = useState([]);
+  const [media, setMedia] = useState<any[]>([]);
   const [selectedPropertyFeatures, setSelectedPropertyFeatures] = useState([]);
-  const [markerPosition, setMarkerPosition] = useState(null); // Coordinates
+  const [markerPosition, setMarkerPosition] = useState<any>(null); // Coordinates
 
   // Step 6
-  const [ownershipType, setOwnershipType] = useState('independent');
+  const [ownershipType, setOwnershipType] =
+    useState<OwnershipType>('independent');
   const [selectedDOBs, setSelectedDOBs] = useState({
     independent: '',
     multipleOwners: '',
@@ -93,27 +100,7 @@ export const AddProperties = () => {
     agencyNumber: '',
   });
 
-
   // New state variables for property fields
-  const [beds, setBeds] = useState<number | null>(1);
-  const [baths, setBaths] = useState<number | null>(1);
-  const [floors, setFloors] = useState<number | null>(1);
-  const [livingRooms, setLivingRooms] = useState<number | null>(1);
-  const [rooms, setRooms] = useState<number | null>(1);
-  const [numberOfStreets, setNumberOfStreets] = useState<number | null>(1);
-  const [footTraffic, setFootTraffic] = useState<FootTrafficType | null>(
-    'Medium',
-  );
-  const [floorNumber, setFloorNumber] = useState<number | null>(1);
-  const [numberOfGates, setNumberOfGates] = useState<number | null>(1);
-  const [loadingDocks, setLoadingDocks] = useState<number | null>(1);
-  const [storageCapacity, setStorageCapacity] = useState<number | null>(100);
-  const [numberOfUnits, setNumberOfUnits] = useState<number | null>(1);
-  const [parkingSpaces, setParkingSpaces] = useState<number | null>(1);
-  const [waterAccess, setWaterAccess] = useState(false);
-  const [electricityAccess, setElectricityAccess] = useState(false);
-  const [sewageSystem, setSewageSystem] = useState(false);
-  const [price, setPrice] = useState('');
   const [propertyFeature, setPropertyFeature] = useState<PropertyFeature[]>([]);
 
   const [bedroomCount, setBedroomCount] = useState<number | string | null>(1);
@@ -142,7 +129,6 @@ export const AddProperties = () => {
       });
     }
   };
-  
 
   const onChangePropertyFeature = (feature: PropertyFeature) => {
     const exists = propertyFeature.some(item => item.id === feature.id);
@@ -179,126 +165,107 @@ export const AddProperties = () => {
     }
   };
 
-  const handleAddFloorPicker = async () => {
-    try {
-      const res: any = await launchImageLibrary({
-        mediaType: 'photo',
-        includeBase64: false,
-      });
-      if (res?.didCancel) {
-        console.log('User canceled the action');
-      } else if (Array.isArray(res.assets)) {
-        setFloor(res.assets[0]?.uri);
-      } else {
-        console.log('No images selected or response format is incorrect');
-      }
-    } catch (e) {
-      console.log('Error:', e);
-    }
-  };
-
   const submitProperty = async () => {
     try {
       // Initialize the common data that applies to all property types
-      let propertyData = {
-        selectedPropertyType,
+      let propertyData: AddPropertyPayload = {
+        propertyCategory: selectedPropertyType,
         title,
         price,
         description,
-        size,
+        area: size,
         propertyAge,
         propertyType, // Sell or Rent
-        direction,
-        floor,
-        waterAccess,
-        electricityAccess,
-        sewageSystem,
+        direction: direction as unknown as DirectionType,
+        waterAccess: waterAccess === 'Yes',
+        electricityAccess: electricityAccess === 'Yes',
+        sewageSystem: sewageSystem === 'Yes',
         media,
         floorPlan,
-        selectedPropertyFeatures,
+        propertyFeature: selectedPropertyFeatures,
         markerPosition,
         ownershipType,
       };
-  
+
       // Conditional logic based on the property type
       switch (selectedPropertyType) {
         case 'House':
           propertyData = {
             ...propertyData,
-            beds,
-            baths,
+            bedrooms: beds,
+            bathrooms: baths,
             floors,
             livingRooms,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Appartment':
           propertyData = {
             ...propertyData,
             rooms,
-            baths,
+            bathrooms: baths,
             floorNumber,
             livingRooms,
             floors,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Workers Residence':
           propertyData = {
             ...propertyData,
-            beds,
-            baths,
-            direction,
+            bedrooms: beds,
+            bathrooms: baths,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Land':
           propertyData = {
             ...propertyData,
-            direction,
+            direction: direction as unknown as DirectionType,
             numberOfStreets,
           };
           break;
-  
+
         case 'Farmhouse':
           propertyData = {
             ...propertyData,
-            beds,
-            baths,
+            bedrooms: beds,
+            bathrooms: baths,
             livingRooms,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Shop':
           propertyData = {
             ...propertyData,
-            footTraffic,
+            footTraffic: footTraffic as unknown as FootTrafficType,
             proximity, // Assuming proximity is available in the state
           };
           break;
-  
+
         case 'Chalet':
           propertyData = {
             ...propertyData,
-            beds,
-            baths,
+            bedrooms: beds,
+            bathrooms: baths,
             livingRooms,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Office':
           propertyData = {
             ...propertyData,
             floors,
             parkingSpaces,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         case 'Warehouse':
           propertyData = {
             ...propertyData,
@@ -307,37 +274,37 @@ export const AddProperties = () => {
             storageCapacity,
           };
           break;
-  
+
         case 'Tower':
           propertyData = {
             ...propertyData,
             rooms,
-            baths,
+            bathrooms: baths,
             numberOfUnits,
             floors,
-            direction,
+            direction: direction as unknown as DirectionType,
           };
           break;
-  
+
         default:
           throw new Error('Invalid property type selected');
       }
-  
+
       // Handle ownership-specific fields based on the ownership type
-      if (ownershipType === 'Independent') {
+      if (ownershipType === 'independent') {
         propertyData.ownership = {
           instrumentNumber: independentFields.instrumentNumber,
           ownerIDNumber: independentFields.ownerIDNumber,
           ownerDOB: selectedDOBs.independent,
         };
-      } else if (ownershipType === 'Multiple Owners') {
+      } else if (ownershipType === 'multipleOwners') {
         propertyData.ownership = {
           instrumentNumber: multipleOwnersFields.instrumentNumber,
           ownerIDNumber: multipleOwnersFields.ownerIDNumber,
           agencyNumber: multipleOwnersFields.agencyNumber,
           ownerDOB: selectedDOBs.multipleOwners,
         };
-      } else if (ownershipType === 'Agency') {
+      } else if (ownershipType === 'agency') {
         propertyData.ownership = {
           instrumentNumber: agencyFields.instrumentNumber,
           commercialRegNumber: agencyFields.commercialRegNumber,
@@ -346,24 +313,27 @@ export const AddProperties = () => {
           agentDOB: selectedDOBs.agency,
         };
       }
-  
+
       // Log the final property data for debugging
-      console.log('Submitting property data:', JSON.stringify(propertyData, null, 2));
-  
-      // Submit the filtered propertyData
-      const response = await axios.post('https://your-backend-url.com/api/properties', propertyData);
-  
-      if (response.status === 200) {
-        console.log('Property submitted successfully:', response.data);
-      } else {
-        console.log('Error submitting property:', response.data);
-      }
+      console.log(
+        'Submitting property data:',
+        JSON.stringify(propertyData, null, 2),
+      );
+
+      addProperty(propertyData, {
+        onSuccess: () => {
+          // Navigate on success
+          navigation.navigate('PropertyScreen');
+        },
+        onError: () => {
+          // Handle login failure
+          console.log('Error adding property');
+        },
+      });
     } catch (error) {
       console.error('Error while submitting property:', error);
     }
   };
-  
-  
 
   const handleSubmit = () => {
     let valid = true;
@@ -452,7 +422,7 @@ export const AddProperties = () => {
             errors={errors}
             setErrors={setErrors}
           />
-        )}  
+        )}
 
         {step === 3 && (
           <PropertyStep3
@@ -512,23 +482,22 @@ export const AddProperties = () => {
           />
         )}
 
-{step === 6 && (
-  <PropertyStep6
-    selectedDOBs={selectedDOBs}
-    setSelectedDOBs={setSelectedDOBs}
-    independentFields={independentFields}
-    setIndependentFields={setIndependentFields}
-    multipleOwnersFields={multipleOwnersFields}
-    setMultipleOwnersFields={setMultipleOwnersFields}
-    agencyFields={agencyFields}
-    setAgencyFields={setAgencyFields}
-    ownershipType={ownershipType}
-    setOwnershipType={setOwnershipType}
-    handleNext={handleSubmit} // Assuming this is your submission function
-    handleBack={handleBack}   // Handle going back to the previous step
-  />
-)}
-
+        {step === 6 && (
+          <PropertyStep6
+            selectedDOBs={selectedDOBs}
+            setSelectedDOBs={setSelectedDOBs}
+            independentFields={independentFields}
+            setIndependentFields={setIndependentFields}
+            multipleOwnersFields={multipleOwnersFields}
+            setMultipleOwnersFields={setMultipleOwnersFields}
+            agencyFields={agencyFields}
+            setAgencyFields={setAgencyFields}
+            ownershipType={ownershipType}
+            setOwnershipType={setOwnershipType}
+            handleNext={handleSubmit} // Assuming this is your submission function
+            handleBack={handleBack} // Handle going back to the previous step
+          />
+        )}
 
         <TopSpace top={10} />
       </ScrollView>

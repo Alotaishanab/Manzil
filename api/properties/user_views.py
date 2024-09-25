@@ -19,7 +19,6 @@ def add_property(request):
                 user_id=request.user.user_id,
                 property_type=serializer.validated_data['propertyType'],
                 property_category=serializer.validated_data['propertyCategory'],
-                price_per_meter=serializer.validated_data['priceMeter'],
                 property_age=serializer.validated_data.get('propertyAge'),
                 title=serializer.validated_data['title'],
                 description=serializer.validated_data['description'],
@@ -27,16 +26,13 @@ def add_property(request):
                 area=serializer.validated_data['area'],
                 # TODO: Need to confirm this field in UI
                 # location=serializer.validated_data['location'],
-                # TODO: Need to confirm this field in UI
-                # coordinates=serializer.validated_data['coordinates'],
-                # TODO: Need to confirm this field in UI
-                # status=serializer.validated_data.get('status'),
-                # TODO: Need to confirm this field in UI
-                # contact_information=serializer.validated_data.get(
-                #    'contactInformation'),
+                coordinates=serializer.validated_data['markerPosition'],
+                contact_information=serializer.validated_data.get(
+                    'ownership'),
                 # property_images=serializer.validated_data['propertyImages'],
                 # property_videos=serializer.validated_data.get(
                 #    'propertyVideos'),
+                ownership_type=serializer.validated_data.get('ownershipType'),
                 bedrooms=serializer.validated_data.get('bedrooms'),
                 bathrooms=serializer.validated_data.get('bathrooms'),
                 has_water=serializer.validated_data.get('waterAccess', False),
@@ -47,7 +43,7 @@ def add_property(request):
                 direction=serializer.validated_data.get('direction'),
                 floors=serializer.validated_data.get('floors'),
                 living_rooms=serializer.validated_data.get('livingRooms'),
-                rooms=serializer.validated_data.get('apartmentRooms'),
+                rooms=serializer.validated_data.get('rooms'),
                 floor_number=serializer.validated_data.get('floorNumber'),
                 number_of_streets=serializer.validated_data.get(
                     'numberOfStreets'),

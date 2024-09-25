@@ -33,6 +33,9 @@ class Property(models.Model):
         ('rented', 'Rented'),
     ]
 
+    OWNERSHIP_TYPE_CHOICES = [('independent', 'Independent'),
+                              ('multipleOwners', 'Multiple Owners'), ('agency', 'Agency')]
+
     # Basic property info
     property_id = models.AutoField(primary_key=True)
     # Reference to the custom User model
@@ -47,15 +50,22 @@ class Property(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    area = models.DecimalField(max_digits=10, decimal_places=2)
+    area = models.DecimalField(
+        max_digits=10, decimal_places=2, help_text="Size in square meters")
+
     price_per_meter = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True)
+
     location = models.CharField(max_length=255, blank=True, null=True)
     # Geographic coordinates (lat/lon)
-    coordinates = PointField(null=True, blank=True)
+    coordinates = PointField()
     listing_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, blank=True, null=True)
+
+    ownership_type = models.CharField(
+        max_length=50, choices=OWNERSHIP_TYPE_CHOICES)
+
     contact_information = models.TextField(blank=True, null=True)
 
     # Media fields
@@ -122,11 +132,11 @@ class Property(models.Model):
                 property_videos__len__lte=3), name="chk_property_videos")
         ]
 
-    # def save(self, *args, **kwargs):
-    #     # Automatically calculate price_per_meter before saving
-    #     if self.area and self.price:
-    #         self.price_per_meter = self.price / self.area
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        # Automatically calculate price_per_meter before saving
+        if self.area and self.price:
+            self.price_per_meter = self.price / self.area
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} - {self.property_type}"

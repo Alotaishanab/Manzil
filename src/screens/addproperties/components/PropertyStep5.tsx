@@ -39,6 +39,8 @@ const PropertyStep5 = ({
   handleNext,
   handleBack,
 }) => {
+
+  console.log('markerPosition', markerPosition);
   const navigation = useNavigation();
   const { intl } = useIntl();
   const { propertyFeatures } = useAddPropertiesProps();
