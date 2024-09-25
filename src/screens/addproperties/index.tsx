@@ -105,9 +105,13 @@ export const AddProperties = () => {
     if (step > 1) {
       setStep(prevStep => prevStep - 1);
     } else {
-      navigation.navigate('CenterScreen'); // Ensure 'ExploreProperties' is a valid route
+      // Navigating to a screen inside the tab navigator
+      navigation.navigate('BottomTabNavigator', {
+        screen: 'CenterScreen',
+      });
     }
   };
+  
 
   const handlePicker = async () => {
     try {
