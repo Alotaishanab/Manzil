@@ -27,6 +27,7 @@ import {useNavigation} from '@react-navigation/native';
 import {ag1, ag2, ag5, ag6, ag7} from '@assets';
 import { throttle } from 'lodash';
 import { LatLng } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const ExploreMaps = () => {
   const {intl} = useIntl();
@@ -49,6 +50,7 @@ export const ExploreMaps = () => {
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
   }, []);
+  const insets = useSafeAreaInsets();
   const [selectedPropertyType, setSelectedPropertyType] = useState(null);
   const [propertyFeature, setPropertyFeature] = useState(null);
   const [showPropertiesFeature, setShowPropertiesFeature] = useState(false);
@@ -396,65 +398,103 @@ const handleViewProperties = useCallback(() => {
     }
   }, []);
 
+  // Dynamic styles
+const drawYourSearchAreaViewStyle = {
+  position: 'absolute',
+  top: insets.top + 50, // Adjust as needed
+  alignSelf: 'center',
+  backgroundColor: 'green', // Accent color similar to Uber Eats
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 25, // Rounded corners for a pill shape
+  flexDirection: 'row',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3, // For Android shadow
+  zIndex: 1,
+};
+
+
   return (
-    <Screen padding={0} paddingHorizontal={0} showKeyboardAware={false}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 5 }}>
+    <View style={{ flex: 1 }}>
+      {/* MapView */}
+      <View style={{ flex: 1 }}>
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
+          style={StyleSheet.absoluteFillObject}
+          mapType={mapType}
+          onMarkerDragEnd={handleToggleDrawing}
+          onPanDrag={drawing ? handleMapPress : () => null}
+          region={{
+            latitude: 37.78825,
+            longitude: -122.4324,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.0121,
+          }}
+          scrollEnabled={!drawing}
+          zoomEnabled={!drawing}
+        >
+          {coordinates.length > 0 && (
+            <>
+              <Polyline coordinates={coordinates} strokeColor="#307e20" strokeWidth={4} />
+              <Marker
+                coordinate={coordinates[coordinates.length - 1]}
+                pinColor="#307e20"
+              />
+            </>
+          )}
+        </MapView>
+
+        {/* Optional draw area message */}
+        {showDrawArea && (
+          <View style={drawYourSearchAreaViewStyle}>
+            <Text style={styles.drawSearchText}>
+              {intl.formatMessage({ id: 'explore-search.draw-search-area' })}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Overlaying FilterHeader */}
+      <View
+        style={{
+          position: 'absolute',
+          top: insets.top + 10,
+          left: 0,
+          right: 0,
+          paddingHorizontal: 20,
+        }}
+      >
         <FilterHeader
           onFocusInput={onFocusInput}
           handleFilter={() => setShowPropertiesModal(true)}
         />
+
+        {/* Overlay Buttons */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
+        style={[styles.mapLayerBtn, { top: insets.top + 70 }]}
+      >
+        <MapLayerIcon width={30} height={30} />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={handleToggleDrawing}
+        style={[styles.mapLayerBtn, { top: insets.top + 120 }]}
+      >
+        <PenIcon width={30} height={30} />
+      </TouchableOpacity>
       </View>
 
-      <View>
-        <View style={[StyleSheet.absoluteFillObject, styles.container, { height: isFullScreen ? Dimensions.get('window').height : height }]}>
-          {showDrawArea && (
-            <View style={styles.drawYourSearchAreaView}>
-              <Text style={styles.drawSearchText}>
-                {intl.formatMessage({ id: 'explore-search.draw-search-area' })}
-              </Text>
-            </View>
-          )}
+      
 
-          <MapView
-            ref={mapRef}
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            mapType={mapType}
-            onMarkerDragEnd={handleToggleDrawing}
-            onPanDrag={drawing ? handleMapPress : () => null}
-            region={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.015,
-              longitudeDelta: 0.0121,
-            }}
-            scrollEnabled={!drawing}
-            zoomEnabled={!drawing}
-          >
-            {coordinates.length > 0 && (
-              <>
-                <Polyline coordinates={coordinates} strokeColor="#307e20" strokeWidth={4} />
-                <Marker coordinate={coordinates[coordinates.length - 1]} pinColor="#307e20" />
-              </>
-            )}
-          </MapView>
-        </View>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
-          style={styles.mapLayerBtn}
-        >
-          <MapLayerIcon width={30} height={30} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleToggleDrawing}
-          style={[styles.mapLayerBtn, { top: 20 }]}
-        >
-          <PenIcon width={30} height={30} />
-        </TouchableOpacity>
-      </View>
+      {/* Bottom Sheet */}
       <BottomSheet
         snapPoints={snapPoints}
         ref={bottomSheetRef}
@@ -476,7 +516,7 @@ const handleViewProperties = useCallback(() => {
             </TouchableOpacity>
           </View>
           <TopSpace top={10} />
-          < PropertyCard />
+          <PropertyCard />
         </BottomSheetScrollView>
       </BottomSheet>
 
@@ -576,6 +616,6 @@ const handleViewProperties = useCallback(() => {
         selectedProperties={selectedAmenitiesItems}
         handleSelectAmenities={handleSelectAmenities}
       />
-    </Screen>
+    </View>
   );
 };

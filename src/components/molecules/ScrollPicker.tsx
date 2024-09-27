@@ -1,80 +1,126 @@
-import React, { useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import HapticFeedback from 'react-native-haptic-feedback';
 
-export const ScrollPicker = ({ title, currentValue, setValue, options, IconComponent }) => {
-  const scrollViewRef = useRef(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+export const ScrollPicker = ({
+  title,
+  currentValue,
+  setValue,
+  options,
+  IconComponent,
+}) => {
+  const flatListRef = useRef(null);
+  const ITEM_WIDTH = 60; // Smaller for better design
+  const { width } = Dimensions.get('window');
 
-  const handleScrollEnd = (event) => {
-    let index = Math.round(event.nativeEvent.contentOffset.x / 50);
+  // Scroll animation
+  const scrollAnimatedValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const index = options.indexOf(currentValue);
+    if (index >= 0 && flatListRef.current) {
+      flatListRef.current.scrollToOffset({
+        offset: index * ITEM_WIDTH,
+        animated: true,
+      });
+    }
+  }, [currentValue, options]);
+
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollAnimatedValue } } }],
+    { useNativeDriver: false }
+  );
+
+  const renderItem = ({ item, index }) => {
+    const inputRange = [
+      (index - 2) * ITEM_WIDTH,
+      (index - 1) * ITEM_WIDTH,
+      index * ITEM_WIDTH,
+      (index + 1) * ITEM_WIDTH,
+      (index + 2) * ITEM_WIDTH,
+    ];
+
+    const scale = scrollAnimatedValue.interpolate({
+      inputRange,
+      outputRange: [0.8, 1.2, 1.4, 1.2, 0.8],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = scrollAnimatedValue.interpolate({
+      inputRange,
+      outputRange: [0.3, 0.6, 1, 0.6, 0.3],
+      extrapolate: 'clamp',
+    });
+
+    const isSelected = currentValue === item;
+
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          flatListRef.current.scrollToOffset({
+            offset: index * ITEM_WIDTH,
+            animated: true,
+          });
+          setValue(item);
+          HapticFeedback.trigger('selection');
+        }}
+        style={[
+          styles.itemContainer,
+          isSelected && styles.selectedItem, // Highlight selected item
+        ]}
+      >
+        <Animated.Text
+          style={[
+            styles.itemText,
+            {
+              transform: [{ scale }],
+              opacity,
+            },
+          ]}
+        >
+          {item}
+        </Animated.Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const handleMomentumScrollEnd = (event) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
     setValue(options[index]);
-    HapticFeedback.trigger('selection'); // Enhanced haptic feedback
-    console.log(`${title} selected value:`, options[index]); // Log the selected value
+    HapticFeedback.trigger('selection');
   };
 
   return (
     <View style={styles.pickerContainer}>
       <Text style={styles.title}>{title}</Text>
-      <View style={styles.square}>
-        <IconComponent width={60} height={60} style={styles.icon} />
-        <View style={styles.scrollContainer}>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={50} // Snap to each number
-            decelerationRate="fast"
-            onMomentumScrollEnd={handleScrollEnd}
-            contentContainerStyle={styles.scrollPickerContainer}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
-            )}
-            bounces={true} // Enable bounce effect
-          >
-            {/* Add padding to center the selected item */}
-            <View style={{ width: 25 }} />
-            {options.map((value, index) => {
-              const inputRange = [
-                (index - 1) * 50,
-                index * 50,
-                (index + 1) * 50,
-              ];
-              const scale = scrollX.interpolate({
-                inputRange,
-                outputRange: [0.8, 1.2, 0.8], // Enhance the scale effect for better emphasis
-                extrapolate: 'clamp',
-              });
-              const opacity = scrollX.interpolate({
-                inputRange,
-                outputRange: [0.5, 1, 0.5],
-                extrapolate: 'clamp',
-              });
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.numberContainer}
-                  onPress={() => {
-                    scrollViewRef.current.scrollTo({ x: index * 50, animated: true });
-                    setValue(value);
-                    HapticFeedback.trigger('selection'); // Haptic feedback on press
-                    console.log(`${title} pressed value:`, value); // Log the pressed value
-                  }}
-                >
-                  <Animated.Text style={[
-                    styles.numberText,
-                    { transform: [{ scale }], opacity }
-                  ]}>
-                    {value}
-                  </Animated.Text>
-                </TouchableOpacity>
-              );
-            })}
-            {/* Add padding to ensure the last item centers */}
-            <View style={{ width: 25 }} />
-          </ScrollView>
-        </View>
+      <View style={styles.picker}>
+        <IconComponent width={30} height={30} style={styles.icon} />
+        <Animated.FlatList
+          ref={flatListRef}
+          data={options}
+          keyExtractor={(item) => item.toString()}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={ITEM_WIDTH}
+          decelerationRate="fast"
+          bounces={false}
+          onScroll={onScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          contentContainerStyle={{
+            paddingHorizontal: (width - ITEM_WIDTH) / 2,
+          }}
+        />
+        {/* Overlay to highlight the selected item */}
+        <View style={styles.highlight} pointerEvents="none" />
       </View>
     </View>
   );
@@ -83,46 +129,48 @@ export const ScrollPicker = ({ title, currentValue, setValue, options, IconCompo
 const styles = StyleSheet.create({
   pickerContainer: {
     width: '45%',
+    alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    paddingVertical: 12,
+    elevation: 4, // Subtle shadow for depth
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
     textAlign: 'center',
+    color: '#333',
   },
-  square: {
+  picker: {
     width: '100%',
-    aspectRatio: 1,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 15,
-    padding: 10,
+    height: 150,
+  },
+  itemContainer: {
+    width: 50,
     alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+  },
+  selectedItem: {
+    backgroundColor: '#E6F4F1', // Subtle highlight for selected item
+    borderRadius: 8,
+    padding: 5,
+  },
+  itemText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1A1A1A',
   },
   icon: {
     marginBottom: 10,
   },
-  scrollContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  scrollPickerContainer: {
-    flexGrow: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numberContainer: {
-    width: 80, // Adjust width to ensure better scroll snapping
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
-  },
-  numberText: {
-    fontSize: 24, // Base font size for scale effect
-    color: '#333',
+  highlight: {
+    position: 'absolute',
+    top: 60,
+    bottom: 60,
+    left: 0,
+    right: 0,
+    borderColor: '#00BFA6',
+    borderWidth: 1,
   },
 });
-
-export default ScrollPicker;

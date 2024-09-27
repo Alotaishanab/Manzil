@@ -18,3 +18,4 @@ export * from './CompassDirectionModal';
 export * from './ScrollPicker';
 export * from './PickerField';
 export * from './FullScreenMap';
+export * from './PropertyCardSimpleWithAnalytics';

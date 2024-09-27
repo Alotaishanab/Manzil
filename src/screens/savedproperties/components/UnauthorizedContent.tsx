@@ -23,10 +23,6 @@ const UnauthorizedContent = ({setIsLoggedin}: any) => {
       </View>
 
       <View style={[styles.largeView, {marginTop: 2}]}>
-        <Text style={[styles.sortText, {textAlign: 'right'}]}>
-          {intl.formatMessage({id: 'savedPropertyScreen.sort'})}: Newest date
-          saved
-        </Text>
         <TopSpace top={40} />
         <Text style={styles.titleText}>
           {intl.formatMessage({

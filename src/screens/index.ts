@@ -51,3 +51,5 @@ export * from './listedproperties';
 export * from './allagencies';
 export * from './paymentcardsconfirmation';
 export * from './centerscreen';
+export * from './propertyfullscreen';
+export * from './addedproperties';

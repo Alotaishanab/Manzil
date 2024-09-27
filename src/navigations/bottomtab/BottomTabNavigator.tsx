@@ -1,85 +1,37 @@
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useEffect } from 'react';
-import { Animated, Easing, Platform, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  Dimensions,
+} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Account, Explore, ExploreMaps, SavedProperties, CenterScreen } from '@screens'; // Import CenterScreen
+import { Account, ExploreMaps, SavedProperties, CenterScreen } from '@screens';
 import { Colors } from '@colors';
-import { ExploreIcon, FavoriteIcon, MapTabIcon, PlusIcon, UserIcon } from '@svgs'; // Import relevant SVGs
+import {
+  ExploreIcon,
+  FavoriteIcon,
+  MapTabIcon,
+  PlusIcon,
+  UserIcon,
+} from '@svgs';
 import { fonts } from '../../../src/assets/fonts';
 import { ExploreStack } from '../explorestack';
 import { useIntl } from '@context';
 import { useNavigation } from '@react-navigation/native';
 
-type TabStackParamList = {
-  Account: undefined;
-  ExploreStack: undefined;
-  SavedProperties: undefined;
-  ExploreMaps: undefined;
-  AddOptions?: any;
-};
+const Tab = createBottomTabNavigator();
 
-const Tab = createBottomTabNavigator<TabStackParamList>();
+const { width: screenWidth } = Dimensions.get('window');
 
 export const BottomTabNavigator = () => {
   const { intl } = useIntl();
-  const navigation: any = useNavigation();
 
-  const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
-
-  // Animated values for scaling, rotating, and fading
-  const animations = {
-    ExploreStack: {
-      scale: useRef(new Animated.Value(1)).current,
-      rotate: useRef(new Animated.Value(0)).current,
-      opacity: useRef(new Animated.Value(1)).current,
-    },
-    ExploreMaps: {
-      scale: useRef(new Animated.Value(1)).current,
-      rotate: useRef(new Animated.Value(0)).current,
-      opacity: useRef(new Animated.Value(1)).current,
-    },
-    SavedProperties: {
-      scale: useRef(new Animated.Value(1)).current,
-      rotate: useRef(new Animated.Value(0)).current,
-      opacity: useRef(new Animated.Value(1)).current,
-    },
-    Account: {
-      scale: useRef(new Animated.Value(1)).current,
-      rotate: useRef(new Animated.Value(0)).current,
-      opacity: useRef(new Animated.Value(1)).current,
-    },
-    AddOptions: {
-      scale: useRef(new Animated.Value(1)).current,
-      rotate: useRef(new Animated.Value(0)).current,
-      opacity: useRef(new Animated.Value(1)).current,
-    },
-  };
-
-  const animateIcon = (routeName, callback) => {
-    Animated.sequence([
-      Animated.timing(animations[routeName].scale, {
-        toValue: 1.1, // Slight increase in scale
-        duration: 150,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-      Animated.timing(animations[routeName].scale, {
-        toValue: 1, // Return to original scale
-        duration: 150,
-        easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const handleTabPress = (routeName) => {
-    animateIcon(routeName);
-    navigation.navigate(routeName);
-  };
-
-  const customText = ({ text, focused }: any) => {
+  const customText = ({ text, focused }) => {
     const colorSelectionText = focused ? Colors.light.primaryBtn : Colors.light.headingTitle;
 
     return (
@@ -97,25 +49,117 @@ export const BottomTabNavigator = () => {
   };
 
   return (
-    <>
-      <Tab.Navigator
-      detachInactiveScreens={true}
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarShowLabel: true,
-        tabBarStyle: [styles.tabBarStyle],
-        tabBarLabelPosition: 'below-icon',
-        tabBarIcon: ({ focused }) => {
-          let Icon;
-          const animatedStyle = {
-            transform: [{ scale: animations[route.name].scale }],
-            opacity: animations[route.name].opacity,
+    <Tab.Navigator
+  detachInactiveScreens={true}
+  tabBar={(props) => <CustomTabBar {...props} />}
+>
+  <Tab.Screen
+    name="ExploreStack"
+    component={ExploreStack}
+    options={{
+      headerShown: false, // Remove header
+      tabBarLabel: ({ focused }) =>
+        customText({
+          text: intl.formatMessage({
+            id: 'buttons.explore',
+          }),
+          focused,
+        }),
+    }}
+  />
+
+  <Tab.Screen
+    name="ExploreMaps"
+    component={ExploreMaps}
+    options={{
+      headerShown: false, // Remove header
+      tabBarLabel: ({ focused }) =>
+        customText({
+          text: intl.formatMessage({
+            id: 'addpropertyScreen.map',
+          }),
+          focused,
+        }),
+    }}
+  />
+
+  <Tab.Screen
+    name="Manzili"
+    component={CenterScreen}
+    options={{
+      headerShown: false, // Remove header
+      tabBarLabel: () => null,
+    }}
+  />
+
+  <Tab.Screen
+    name="SavedProperties"
+    component={SavedProperties}
+    options={{
+      headerShown: false, // Remove header
+      tabBarLabel: ({ focused }) =>
+        customText({
+          text: intl.formatMessage({
+            id: 'buttons.saved',
+          }),
+          focused,
+        }),
+    }}
+  />
+
+  <Tab.Screen
+    name="Account"
+    component={Account}
+    options={{
+      headerShown: false, // Remove header
+      tabBarLabel: ({ focused }) =>
+        customText({
+          text: intl.formatMessage({
+            id: 'buttons.account',
+          }),
+          focused,
+        }),
+    }}
+  />
+</Tab.Navigator>
+
+  );
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const tabWidth = screenWidth / state.routes.length;
+  const indicatorPosition = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(indicatorPosition, {
+      toValue: state.index * tabWidth,
+      duration: 200,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  }, [state.index]);
+
+  return (
+    <View style={styles.tabBarStyle}>
+      <View style={styles.tabBarContainer}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
           };
 
-          useEffect(() => {
-            animateIcon(route.name);
-          }, [focused]);
-
+          let Icon;
           switch (route.name) {
             case 'ExploreStack':
               Icon = ExploreIcon;
@@ -123,11 +167,11 @@ export const BottomTabNavigator = () => {
             case 'ExploreMaps':
               Icon = MapTabIcon;
               break;
+            case 'Manzili':
+              Icon = PlusIcon;
+              break;
             case 'SavedProperties':
               Icon = FavoriteIcon;
-              break;
-            case 'AddOptions':
-              Icon = PlusIcon;
               break;
             case 'Account':
               Icon = UserIcon;
@@ -137,96 +181,46 @@ export const BottomTabNavigator = () => {
           }
 
           return (
-            <TouchableOpacity onPress={() => handleTabPress(route.name)}>
-              <Animated.View style={animatedStyle}>
-                <Icon
-                  width={route.name === 'AddOptions' ? 15 : 22}
-                  height={route.name === 'AddOptions' ? 15 : 22}
-                  fill={focused ? Colors.light.primaryBtn : Colors.light.headingTitle}
-                />
-              </Animated.View>
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              onPress={onPress}
+              style={styles.tabBarItemStyle}
+            >
+              <Icon
+                width={route.name === 'Manzili' ? 28 : 22}
+                height={route.name === 'Manzili' ? 28 : 22}
+                fill={isFocused ? Colors.light.primaryBtn : Colors.light.headingTitle}
+              />
+              {options.tabBarLabel ? (
+                options.tabBarLabel({ focused: isFocused })
+              ) : (
+                <Text
+                  style={[
+                    styles.tabText,
+                    { color: isFocused ? Colors.light.primaryBtn : Colors.light.headingTitle },
+                  ]}
+                >
+                  {route.name}
+                </Text>
+              )}
             </TouchableOpacity>
           );
-        },
-      })}
-    >
-        <Tab.Screen
-          name="ExploreStack"
-          component={ExploreStack}
-          options={{
-            tabBarLabel: ({ focused }) =>
-              customText({
-                text: intl.formatMessage({
-                  id: 'buttons.explore',
-                }),
-                focused,
-              }),
-          }}
-        />
-
-        <Tab.Screen
-          name="ExploreMaps"
-          component={ExploreMaps}
-          options={{
-            tabBarLabel: ({ focused }) =>
-              customText({
-                text: intl.formatMessage({
-                  id: 'addpropertyScreen.map',
-                }),
-                focused,
-              }),
-          }}
-        />
-
-<Tab.Screen
-        name="AddOptions"
-        component={CenterScreen}
-        options={{
-          tabBarLabel: () => null,
-          tabBarButton: () => (
-            <View style={styles.addOptionsButton}>
-              <TouchableOpacity
-                style={styles.roundedCircle}
-                onPress={() => handleTabPress('AddOptions')}
-              >
-                <Animated.View style={{ transform: [{ scale: animations['AddOptions'].scale }] }}>
-                  <PlusIcon width={20} height={20} fill={Colors.light.headingTitle} />
-                </Animated.View>
-              </TouchableOpacity>
-            </View>
-          ),
-        }}
+        })}
+      </View>
+      {/* Indicator */}
+      <Animated.View
+        style={[
+          styles.indicator,
+          {
+            width: tabWidth,
+            transform: [{ translateX: indicatorPosition }],
+          },
+        ]}
       />
-
-        <Tab.Screen
-          name="SavedProperties"
-          component={SavedProperties}
-          options={{
-            tabBarLabel: ({ focused }) =>
-              customText({
-                text: intl.formatMessage({
-                  id: 'buttons.saved',
-                }),
-                focused,
-              }),
-          }}
-        />
-
-        <Tab.Screen
-          name="Account"
-          component={Account}
-          options={{
-            tabBarLabel: ({ focused }) =>
-              customText({
-                text: intl.formatMessage({
-                  id: 'buttons.account',
-                }),
-                focused,
-              }),
-          }}
-        />
-      </Tab.Navigator>
-    </>
+    </View>
   );
 };
 
@@ -237,42 +231,28 @@ const styles = StyleSheet.create({
   },
   tabBarStyle: {
     backgroundColor: Colors.light.secondaryBackground,
-    flexDirection: 'row',
     borderRadius: 20,
     margin: 4,
-    marginBottom: 15,
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
-    height: Platform.OS === 'ios' ? 60 : 45,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    height: Platform.OS === 'ios' ? 70 : 55,
+  },
+  tabBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
   tabBarItemStyle: {
-    height: Platform.OS === 'ios' ? 60 : 45,
-    padding: 4,
-    marginTop: 10,
-    bottom: Platform.OS === 'ios' ? 14 : 8,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 5,
   },
-  roundedCircle: {
-    height: 20,
-    width: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 25,
-    borderColor: Colors.light.headingTitle,
-    borderWidth: 1.5,
-  },
-  addOptionsButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeTabIndicator: {
+  indicator: {
+    height: 4,
+    backgroundColor: 'green', // Green horizontal line
     position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: 'green',
   },
 });
 

@@ -28,6 +28,7 @@ import {Colors} from '@colors';
 import {styles} from './styles';
 import {ArrowForIcon, ArrowForwardIcon} from '@svgs';
 import {ag1, ag2, ag5, ag6, ag7} from '@assets';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const Explore = () => {
   const navigation: any = useNavigation();
@@ -327,6 +328,19 @@ export const Explore = () => {
           onFocusInput={onFocusInput}
           handleFilter={togglePropertyModal}
         />
+
+        {/* Updated Smart Search with AI Option */}
+<TouchableOpacity
+  onPress={() => navigation.navigate('PropertyFullScreen')}
+  style={styles.aiSearchContainer}
+>
+  <View style={styles.aiSearchContent}>
+    <Text style={styles.aiSearchText}>Explore with AI   </Text>
+    <Icon name="robot-outline" size={20} color={Colors.light.primaryBtn} />
+    <View style={styles.underline} />
+  </View>
+</TouchableOpacity>
+
 
         <FlatList
           // ListFooterComponent={<View style={{marginBottom: 120}} />}

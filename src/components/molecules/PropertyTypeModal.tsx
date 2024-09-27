@@ -16,6 +16,7 @@ import { fonts } from '@fonts';
 import * as SVGs from '../../assets/svgs'; // Ensure SVGs are correctly imported
 import { useIntl } from '@context';
 import { globalStyles } from '@globalStyles';
+import { Easing } from 'react-native';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -23,35 +24,45 @@ export const PropertyTypeModal = ({
   isVisible,
   toggleModal = () => {},
   handleClick,
-  panY,
 }: any) => {
   const { intl } = useIntl();
+  const panY = useRef(new Animated.Value(screenHeight)).current;
 
   const resetPositionAnim = Animated.timing(panY, {
     toValue: 0,
     duration: 300,
+    easing: Easing.out(Easing.ease),
     useNativeDriver: true,
   });
 
   const closeAnim = Animated.timing(panY, {
     toValue: screenHeight,
     duration: 300,
+    easing: Easing.in(Easing.ease),
     useNativeDriver: true,
   });
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        const { target } = evt.nativeEvent;
+
+        // Ignore touches on buttons or interactive elements
+        if (target && target.className === 'RCTText') {
+          return false; // Don't allow PanResponder to intercept the gesture for buttons/texts
+        }
+        return gestureState.dy > 0; // Allow drag when swiping down
+      },
       onPanResponderMove: (evt, gestureState) => {
-        if (gestureState.dy > 0) {  // Only allow dragging downwards
+        if (gestureState.dy > 0) {
           panY.setValue(gestureState.dy);
         }
       },
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 150) {  // Trigger closing animation if dragged more than 150 pixels
+        if (gestureState.dy > 150) {
           closeAnim.start(() => toggleModal());
         } else {
-          resetPositionAnim.start();  // Reset to the top if not dragged enough
+          resetPositionAnim.start();
         }
       },
     })
@@ -108,7 +119,7 @@ export const PropertyTypeModal = ({
     },
     {
       id: '5',
-      icon: 'ChalatIcon', // Ensure this icon is correctly exported and named
+      icon: 'ChalatIcon',
       name: intl.formatMessage({
         id: 'requestPropertyScreen.properties-type.chalet',
       }),
@@ -197,7 +208,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darkens background for effect
   },
   modalContainer: {
     backgroundColor: Colors.light.offWhite,
@@ -205,8 +216,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 20,
-    paddingBottom: 20, // Reduce padding to remove extra space
-    maxHeight: screenHeight * 0.8,
+    paddingBottom: 20,
+    maxHeight: screenHeight * 0.8, // Takes 80% of screen height
   },
   dragHandleContainer: {
     width: '100%',

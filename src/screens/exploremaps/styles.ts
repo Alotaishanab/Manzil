@@ -2,6 +2,8 @@ import {StyleSheet} from 'react-native';
 import {Colors} from '@colors';
 import {fonts} from '../../../src/assets/fonts';
 // import {globalStyles} from '../../../src/styles/globalStyles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 export const styles = StyleSheet.create({
   imageBgStyle: {
@@ -37,7 +39,10 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
 
-  container: {},
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+  },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
@@ -64,21 +69,21 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 5,
   },
-  drawYourSearchAreaView: {
-    alignSelf: 'center',
-    zIndex: 1000,
-    backgroundColor: Colors.light.background,
-    borderRadius: 30,
-    top: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    overflow: 'visible',
-  },
+  // Modify the style
+drawYourSearchAreaView: {
+  position: 'absolute',
+  alignSelf: 'center',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  padding: 8,
+  borderRadius: 5,
+  zIndex: 1,
+},
+
   drawSearchText: {
     overflow: 'visible',
     fontFamily: fonts.secondary.regular,
     fontSize: 12,
-    color: Colors.light.headingTitle,
+    color: Colors.light.offWhite,
     textAlign: 'center',
     zIndex: 1000,
   },

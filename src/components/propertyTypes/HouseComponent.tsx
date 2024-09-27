@@ -1,10 +1,21 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BedIcon, BathroomIcon, FloorIcon, LivingRoomIcon } from '@svgs';
-import ScrollPicker from '../molecules/ScrollPicker';
+import { ScrollPicker } from '../molecules/ScrollPicker';
 
-export const HouseComponent = ({ beds, setBeds, baths, setBaths, floors, setFloors, livingRooms, setLivingRooms }) => {
-  console.log('HouseComponent - Current Values:', { beds, baths, floors, livingRooms });
+export const HouseComponent = ({
+  beds,
+  setBeds,
+  baths,
+  setBaths,
+  floors,
+  setFloors,
+  livingRooms,
+  setLivingRooms,
+  direction,
+  setDirection,
+}) => {
+  console.log('HouseComponent - Current Values:', { beds, baths, floors, livingRooms, direction });
 
   return (
     <View style={styles.container}>
@@ -12,20 +23,14 @@ export const HouseComponent = ({ beds, setBeds, baths, setBaths, floors, setFloo
         <ScrollPicker
           title="Beds"
           currentValue={beds}
-          setValue={(value) => {
-            setBeds(value);
-            console.log('Updated Beds:', value); // Log the updated value
-          }}
+          setValue={setBeds}
           options={Array.from({ length: 10 }, (_, i) => i + 1)}
           IconComponent={BedIcon}
         />
         <ScrollPicker
           title="Baths"
           currentValue={baths}
-          setValue={(value) => {
-            setBaths(value);
-            console.log('Updated Baths:', value); // Log the updated value
-          }}
+          setValue={setBaths}
           options={Array.from({ length: 10 }, (_, i) => i + 1)}
           IconComponent={BathroomIcon}
         />
@@ -34,21 +39,24 @@ export const HouseComponent = ({ beds, setBeds, baths, setBaths, floors, setFloo
         <ScrollPicker
           title="Floors"
           currentValue={floors}
-          setValue={(value) => {
-            setFloors(value);
-            console.log('Updated Floors:', value); // Log the updated value
-          }}
+          setValue={setFloors}
           options={Array.from({ length: 10 }, (_, i) => i + 1)}
           IconComponent={FloorIcon}
         />
         <ScrollPicker
           title="Living Rooms"
           currentValue={livingRooms}
-          setValue={(value) => {
-            setLivingRooms(value);
-            console.log('Updated Living Rooms:', value); // Log the updated value
-          }}
+          setValue={setLivingRooms}
           options={Array.from({ length: 10 }, (_, i) => i + 1)}
+          IconComponent={LivingRoomIcon}
+        />
+      </View>
+      <View style={styles.row}>
+        <ScrollPicker
+          title="Direction"
+          currentValue={direction}
+          setValue={setDirection}
+          options={['North', 'East', 'South', 'West']}
           IconComponent={LivingRoomIcon}
         />
       </View>
@@ -56,16 +64,18 @@ export const HouseComponent = ({ beds, setBeds, baths, setBaths, floors, setFloo
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    backgroundColor: '#f9f9f9',
+    flex: 1,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    marginBottom: 20,
   },
 });
 

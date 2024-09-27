@@ -101,4 +101,26 @@ export const styles = StyleSheet.create({
     width: '100%', // Full width for text background
     paddingVertical: 5, // Padding for text
   },
+  aiSearchContainer: {
+    marginTop: 10,
+    marginLeft: 15, // Align to the left
+  },
+  aiSearchContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiSearchText: {
+    color: Colors.light.primaryBtn,  // Match your primary color
+    fontSize: 16,  // Adjust font size as desired
+    fontFamily: fonts.primary.medium,  // Medium weight for the font
+    marginLeft: 5,  // Space between icon and text
+    textDecorationLine: 'underline', // Underline the text
+  },
+  underline: {
+    height: 1,
+    backgroundColor: '#E0E0E0',  // Light gray color for the underline
+    marginTop: 5,
+    marginLeft: 15,
+    marginRight: 15,
+  },
 });

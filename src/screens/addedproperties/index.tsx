@@ -1,0 +1,130 @@
+import React from 'react';
+import { View, FlatList, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { fonts } from '../../assets/fonts/index';
+import { PropertyCardSimpleWithAnalytics } from '@components';
+import { Colors } from '@colors';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+// Sample data for added properties
+export const addedPropertiesData = [
+  {
+    id: '1',
+    title: 'Shop in Dammam',
+    price: 3500000,
+    views: 300,
+    saves: 120,
+    clicks: 85,
+    imageUrl: 'https://via.placeholder.com/150',
+    dateAdded: '09/05/2024',
+  },
+  {
+    id: '2',
+    title: 'Warehouse in Makkah',
+    price: 1800000,
+    views: 200,
+    saves: 80,
+    clicks: 60,
+    imageUrl: 'https://via.placeholder.com/150',
+    dateAdded: '08/10/2024',
+  },
+  {
+    id: '3',
+    price: 2000000,
+    views: 250,
+    saves: 100,
+    clicks: 75,
+    imageUrl: 'https://via.placeholder.com/150',
+    dateAdded: '07/12/2024',
+  },
+];
+
+export const AddedProperties = () => {
+  const navigation = useNavigation(); // Initialize navigation
+
+  const handleViewAnalytics = (propertyId) => {
+    console.log(`Viewing analytics for property ID: ${propertyId}`);
+    // Navigation to analytics screen can be implemented here
+  };
+
+  const handlePropertyClick = () => {
+    console.log('Property card clicked. Navigating to PropertyScreen.');
+    navigation.navigate('PropertyScreen'); // Navigate to PropertyScreen when a card is clicked
+  };
+
+  const renderPropertyItem = ({ item }) => (
+    <View style={styles.propertyCard}>
+      <PropertyCardSimpleWithAnalytics
+        item={item}
+        handleClick={() => {
+          console.log(`Clicked on property: ${item.title}`);
+          handlePropertyClick(); // Use handlePropertyClick to navigate
+        }}
+      />
+    </View>
+  );
+
+  return (
+    <View>
+      <Text style={styles.subTitle}>Your Properties</Text>
+      <FlatList
+        data={addedPropertiesData}
+        renderItem={renderPropertyItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.flatListContent}
+        showsHorizontalScrollIndicator={false}
+        horizontal={true}
+        pagingEnabled={true} // Makes the FlatList snap to the width of each item
+        ItemSeparatorComponent={() => <View style={{ width: 15 }} />} // Add spacing between items
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  flatListContent: {
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontFamily: fonts.primary.bold,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subTitle: {
+    fontSize: 18,
+    fontFamily: fonts.primary.medium,
+    color: Colors.light.headingTitle,
+    marginBottom: 10,
+  },
+  propertyCard: {
+    width: screenWidth * 0.8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    elevation: 3, // Shadow for better design
+  },
+  propertyInfo: {
+    marginTop: 10,
+  },
+  propertyStats: {
+    fontFamily: fonts.primary.medium,
+    fontSize: 14,
+    marginVertical: 2,
+  },
+  analyticsButton: {
+    marginTop: 10,
+    backgroundColor: '#307e20',
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  analyticsButtonText: {
+    color: '#fff',
+    fontFamily: fonts.primary.bold,
+    fontSize: 14,
+  },
+});
+
+export default AddedProperties;
