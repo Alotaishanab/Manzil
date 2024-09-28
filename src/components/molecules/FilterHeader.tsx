@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   filterBtn: {
     borderWidth: 1.5,
     borderRadius: 17,
+    backgroundColor: 'white',
     width: 50,
     height: 50,
     marginLeft: 10,

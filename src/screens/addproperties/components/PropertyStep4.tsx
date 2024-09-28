@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,55 +6,47 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Modal,
-  Animated,
-  PanResponder,
   Vibration,
-  TouchableWithoutFeedback,
-  Dimensions,
 } from 'react-native';
-import { AreaIcon, DoubleTcIcon, ArrowDownIcon } from '@svgs';
+import { CustomButton } from '@components'; // Assuming CustomButton is imported properly
 import { fonts } from '@fonts';
 import { Colors } from '@colors';
-import { globalStyles } from '@globalStyles';
 import { useIntl } from '@context';
-import { CustomButton, TopSpace } from '@components';
-import { CompassDirectionModal } from '../../../components/molecules/CompassDirectionModal';
 
-const { height: screenHeight } = Dimensions.get('window');
-
-const PropertyStep4 = 
-({ selectedType,
+const PropertyStep4 = ({
+  propertyType, // rent or sale
   price,
   setPrice,
+  rentDuration,
+  setRentDuration,
   handleNext,
-  handleBack
-   }: any) => {
+  handleBack,
+}) => {
   const { intl } = useIntl();
   const [errors, setErrors] = useState({});
 
-  const handlePriceChange = (text: string) => {
+  const handlePriceChange = (text) => {
     const sanitizedText = text.replace(/[^0-9]/g, '');
-    if (sanitizedText.length > 9) {
-      return;
-    }
+    if (sanitizedText.length > 9) return;
 
     const formattedText = sanitizedText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setPrice(formattedText);
     setErrors((prev) => ({ ...prev, price: null }));
   };
 
-
   const handleSubmit = () => {
     let valid = true;
-    const newErrors: any = {};
-
+    const newErrors = {};
 
     if (!price) {
       newErrors.price = 'Please enter a price.';
       valid = false;
     }
 
+    if (propertyType === 'rent' && !rentDuration) {
+      newErrors.rentDuration = 'Please select a rent duration.';
+      valid = false;
+    }
 
     if (!valid) {
       Vibration.vibrate(50);
@@ -65,9 +57,17 @@ const PropertyStep4 =
     handleNext();
   };
 
+  const renderPriceLabel = () => {
+    if (propertyType === 'rent' && rentDuration) {
+      return ` / ${rentDuration === 'semi-annual' ? '6 months' : rentDuration}`;
+    }
+    return '';
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* Price Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>
             {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
@@ -81,13 +81,47 @@ const PropertyStep4 =
               value={price}
               onChangeText={handlePriceChange}
             />
-            <Text style={styles.priceCurrency}>SAR</Text>
+            <Text style={styles.priceLabel}>
+              SAR{renderPriceLabel()}
+            </Text>
           </View>
           {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
         </View>
-          
-        
 
+        {/* Rent Duration Options (if propertyType is rent) */}
+        {propertyType === 'Rent' && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              {intl.formatMessage({ id: 'requestPropertyScreen.select-rent-duration' })}
+            </Text>
+            <View style={styles.rentDurationContainer}>
+              {['monthly', 'quarterly', 'semi-annual', 'annual'].map((duration) => (
+                <TouchableOpacity
+                  key={duration}
+                  style={[
+                    styles.rentDurationButton,
+                    rentDuration === duration && styles.rentDurationSelected,
+                  ]}
+                  onPress={() => setRentDuration(duration)}
+                >
+                  <Text
+                    style={[
+                      styles.rentDurationText,
+                      rentDuration === duration && styles.rentDurationTextSelected,
+                    ]}
+                  >
+                    {duration === 'semi-annual' ? 'Semi-Annual' : duration.charAt(0).toUpperCase() + duration.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {errors.rentDuration && (
+              <Text style={styles.errorText}>{errors.rentDuration}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Submit Button */}
         <CustomButton
           btnWidth={'100%'}
           borderRadius={30}
@@ -96,9 +130,6 @@ const PropertyStep4 =
           title={intl.formatMessage({ id: 'buttons.next' })}
           showRightIconButton={true}
         />
-
-        
-            
       </View>
     </SafeAreaView>
   );
@@ -111,12 +142,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
-  dimOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-  },
   container: {
     flex: 1,
+    paddingHorizontal: 20,
   },
   inputContainer: {
     marginBottom: 30,
@@ -126,52 +154,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
     marginBottom: 5,
     fontSize: 16,
-  },
-  textInputFullWidth: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-    justifyContent: 'center',
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 30,
-  },
-  halfWidthContainer: {
-    width: '48%',
-  },
-  textInputHalfWidth: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  errorBorder: {
-    borderColor: 'red',
-  },
-  directionLabel: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
-    marginBottom: 5,
-    fontSize: 16,
-    marginTop: 10,
   },
   priceContainer: {
     flexDirection: 'row',
@@ -189,15 +171,43 @@ const styles = StyleSheet.create({
     color: Colors.light.black,
     fontFamily: fonts.primary.bold,
   },
-  priceCurrency: {
+  priceLabel: {
     marginRight: 10,
     fontSize: 18,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.bold,
   },
-  buttonContainer: {
-    marginTop: 20,
-    paddingHorizontal: 0,
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
+  },
+  errorBorder: {
+    borderColor: 'red',
+  },
+  rentDurationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  rentDurationButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.primaryBtn,
+    borderRadius: 5,
+    backgroundColor: Colors.light.inputBg,
+    marginRight: 5,
+  },
+  rentDurationSelected: {
+    backgroundColor: Colors.light.primaryBtn,
+  },
+  rentDurationText: {
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+    textTransform: 'capitalize',
+  },
+  rentDurationTextSelected: {
+    color: 'white',
   },
 });
-

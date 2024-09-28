@@ -86,26 +86,22 @@ const PropertyStep5 = ({
     launchImageLibrary(
       {
         mediaType: 'mixed', // Allow both images and videos
-        selectionLimit: 0, // Allow multiple media selection
+        selectionLimit: 0,  // Allow multiple media selection
       },
       (response) => {
         if (!response.didCancel && response.assets) {
-          const currentImages = media.filter((item) =>
-            item.type.startsWith('image')
-          );
-          const currentVideos = media.filter((item) =>
-            item.type.startsWith('video')
-          );
-
+          // Ensure 'media' is always an array or empty array
+          const currentImages = Array.isArray(media) ? media.filter((item) => item.type.startsWith('image')) : [];
+          const currentVideos = Array.isArray(media) ? media.filter((item) => item.type.startsWith('video')) : [];
+  
           // Filter selected media
           const selectedMedia = response.assets.filter((asset) => {
             const isImage = asset.type.startsWith('image');
             const isVideo = asset.type.startsWith('video');
-
-            // Common formats supported for images and videos
+  
             const supportedImageFormats = ['image/jpeg', 'image/png', 'image/jpg'];
             const supportedVideoFormats = ['video/mp4', 'video/quicktime'];
-
+  
             if (isImage && supportedImageFormats.includes(asset.type)) {
               return true;
             }
@@ -114,36 +110,31 @@ const PropertyStep5 = ({
             }
             return false;
           });
-
+  
           let newImages = [];
           let newVideos = [];
-
+  
           selectedMedia.forEach((asset) => {
-            if (
-              asset.type.startsWith('image') &&
-              currentImages.length + newImages.length < 10
-            ) {
+            if (asset.type.startsWith('image') && currentImages.length + newImages.length < 10) {
               newImages.push({
                 uri: asset.uri,
-                type: asset.type, // Image type
+                type: asset.type,
               });
             }
-            if (
-              asset.type.startsWith('video') &&
-              currentVideos.length + newVideos.length < 3
-            ) {
+            if (asset.type.startsWith('video') && currentVideos.length + newVideos.length < 3) {
               newVideos.push({
                 uri: asset.uri,
-                type: asset.type, // Video type
+                type: asset.type,
               });
             }
           });
-
+  
           setMedia((prevMedia) => [...prevMedia, ...newImages, ...newVideos]);
         }
       }
     );
   };
+  
 
   // Validation function to ensure required fields are filled
   const validateFields = () => {

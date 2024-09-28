@@ -76,7 +76,6 @@ export const AddedProperties = () => {
         showsHorizontalScrollIndicator={false}
         horizontal={true}
         pagingEnabled={true} // Makes the FlatList snap to the width of each item
-        ItemSeparatorComponent={() => <View style={{ width: 15 }} />} // Add spacing between items
       />
     </View>
   );
@@ -87,43 +86,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20, // Reduced size
     fontFamily: fonts.primary.bold,
-    marginBottom: 10,
+    marginBottom: 8, // Reduced margin
     textAlign: 'center',
   },
   subTitle: {
-    fontSize: 18,
+    fontSize: screenWidth * 0.045,  // Slightly smaller subtitle size
     fontFamily: fonts.primary.medium,
     color: Colors.light.headingTitle,
-    marginBottom: 10,
+    marginBottom: 5,  // Reduced margin
   },
   propertyCard: {
-    width: screenWidth * 0.8,
+    width: screenWidth * 0.60, // Reduced card width
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 10,
+    padding: 8, // Reduced padding inside the cards
     elevation: 3, // Shadow for better design
   },
   propertyInfo: {
-    marginTop: 10,
+    marginTop: 8, // Reduced margin
   },
   propertyStats: {
     fontFamily: fonts.primary.medium,
-    fontSize: 14,
-    marginVertical: 2,
+    fontSize: 12, // Reduced font size
+    marginVertical: 1, // Reduced vertical spacing
   },
   analyticsButton: {
-    marginTop: 10,
+    marginTop: 8, // Reduced top margin
     backgroundColor: '#307e20',
-    paddingVertical: 8,
+    paddingVertical: 6, // Reduced padding
     borderRadius: 5,
     alignItems: 'center',
   },
   analyticsButtonText: {
     color: '#fff',
     fontFamily: fonts.primary.bold,
-    fontSize: 14,
+    fontSize: 12, // Reduced font size
   },
 });
 

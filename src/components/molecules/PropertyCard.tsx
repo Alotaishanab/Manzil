@@ -64,7 +64,9 @@ export const PropertyCard = ({
   };
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={handleClick}
       style={[
         styles.mainWrapper,
         {
@@ -118,9 +120,9 @@ export const PropertyCard = ({
                   style={styles.imageBgContainer}
                   imageStyle={styles.imageBgStyle}>
                   {/* Save Button on Image */}
-                  <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.8}>
+                  <View style={styles.favoriteButton}>
                     <HeartIcon width={30} height={30} />
-                  </TouchableOpacity>
+                  </View>
                 </ImageBackground>
               </Animated.View>
             );
@@ -128,67 +130,63 @@ export const PropertyCard = ({
         />
       </View>
 
-      <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
-        <TopSpace top={10} />
+      <TopSpace top={10} />
 
-        {/* Price and Location */}
-        <View style={styles.priceLocationContainer}>
-          
-            <Text style={styles.priceText}>
-              {item?.price ? item.price.toLocaleString() : '799,997'}﷼
-            </Text>
-          
-          <Text style={styles.placeText}>
-            {item?.location || 'Riyadh, Saudi Arabia'}
+      {/* Price and Location */}
+      <View style={styles.priceLocationContainer}>
+        <Text style={styles.priceText}>
+          {item?.price ? item.price.toLocaleString() : '799,997'}﷼
+        </Text>
+        <Text style={styles.placeText}>
+          {item?.location || 'Riyadh, Saudi Arabia'}
+        </Text>
+      </View>
+
+      <TopSpace top={5} />
+      <View style={styles.infoContainer}>
+        <View style={styles.underlineContainer}>
+          <Text style={styles.descriptionText}>
+            {item?.description || 'House for Sale'}
           </Text>
         </View>
 
         <TopSpace top={5} />
-        <View style={styles.infoContainer}>
-          <View style={styles.underlineContainer}>
-            <Text style={styles.descriptionText}>
-              {item?.description || 'House for Sale'}
+        <View style={styles.iconRow}>
+          <View style={styles.iconWrapper}>
+            <BedIcon width={20} height={20} />
+            <Text style={styles.countText}>
+              {item?.beds ? `${item.beds} Beds` : '2 Beds'}
             </Text>
           </View>
 
-          <TopSpace top={5} />
-          <View style={styles.iconRow}>
-            <View style={styles.iconWrapper}>
-              <BedIcon width={20} height={20} />
-              <Text style={styles.countText}>
-                {item?.beds ? `${item.beds} Beds` : '2 Beds'}
-              </Text>
-            </View>
-
-            <View style={styles.iconWrapper}>
-              <BathroomIcon width={28} height={28} />
-              <Text style={styles.countText}>
-                {item?.baths ? `${item.baths} Baths` : '2 Baths'}
-              </Text>
-            </View>
-
-            <View style={styles.iconWrapper}>
-              <AreaIcon width={24} height={24} />
-              <Text style={styles.countText}>
-                {item?.size ? item.size : '819 sq ft'}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <TopSpace top={20} />
-        <View style={styles.footerWrap}>
-          <View style={styles.underlineContainer}>
-            <Text style={styles.dateText}>
-              {item?.dateAdded ? `Added on ${item.dateAdded}` : 'Added on 09/05/2024'}
+          <View style={styles.iconWrapper}>
+            <BathroomIcon width={28} height={28} />
+            <Text style={styles.countText}>
+              {item?.baths ? `${item.baths} Baths` : '2 Baths'}
             </Text>
           </View>
-          <TouchableOpacity activeOpacity={0.8} onPress={handleShare}>
-            <ShareIcon width={28} height={28} />
-          </TouchableOpacity>
+
+          <View style={styles.iconWrapper}>
+            <AreaIcon width={24} height={24} />
+            <Text style={styles.countText}>
+              {item?.size ? item.size : '819 sq ft'}
+            </Text>
+          </View>
         </View>
-      </TouchableOpacity>
-    </View>
+      </View>
+
+      <TopSpace top={20} />
+      <View style={styles.footerWrap}>
+        <View style={styles.underlineContainer}>
+          <Text style={styles.dateText}>
+            {item?.dateAdded ? `Added on ${item.dateAdded}` : 'Added on 09/05/2024'}
+          </Text>
+        </View>
+        <View style={styles.shareButton}>
+          <ShareIcon width={28} height={28} />
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -244,7 +242,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.serialNoGreen,
     marginBottom: 5,
-    alignSelf: 'flex-start', // Make sure underline is only as wide as text
+    alignSelf: 'flex-start',
   },
   priceText: {
     color: Colors.light.headingTitle,
@@ -290,6 +288,9 @@ const styles = StyleSheet.create({
     color: Colors.light.serialNoGreen,
     fontFamily: fonts.primary.regular,
     fontSize: 12,
+  },
+  shareButton: {
+    paddingHorizontal: 5,
   },
 });
 

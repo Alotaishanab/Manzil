@@ -317,6 +317,8 @@
   "requestPropertyScreen.add-description": "أضف وصف",
   "requestPropertyScreen.add-description-placeholder": "على سبيل المثال... شقة جميلة للبيع",
 
+  "requestPropertyScreen.select-rent-duration": "اختر المدة",
+
   "paymentHistoryScreen.header": "تاريخ الدفع",
   "paymentHistoryScreen.property-listing": "قائمة العقارات",
   "paymentHistoryScreen.promotion": "ترقية",
@@ -342,6 +344,16 @@
   "subscriptionScreen.individual.yearly": "2379.999 ريال سعودي شهريًا",
   "subscriptionScreen.corporate.monthly": "659.999 ريال سعودي شهريًا",
   "subscriptionScreen.corporate.yearly": "6599.999 ريال سعودي شهريًا",
+
+  "savedPropertyScreen.search": "بحث",
+"savedSearchModal.title": "البحث المحفوظ",
+"savedSearch.mostExpensive": "الأعلى سعراً",
+"savedSearch.mostCheap": "الأقل سعراً",
+"savedSearch.newestDateSaved": "الأحدث",
+"savedSearch.oldestDateSaved": "الأقدم",
+
+
+
 
   "chatWithUsScreen.header": "دردش معنا",
   "chatWithUsScreen.dear-customer": "مرحبا عزيزي العميل في المنزل،",

@@ -1,24 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import {
-  Animated,
-  Easing,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-  Dimensions,
-} from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, TouchableOpacity, View, Text, Dimensions } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Haptic from 'react-native-haptic-feedback';  // Import Haptic API
 import { Account, ExploreMaps, SavedProperties, CenterScreen } from '@screens';
 import { Colors } from '@colors';
-import {
-  ExploreIcon,
-  FavoriteIcon,
-  MapTabIcon,
-  PlusIcon,
-  UserIcon,
-} from '@svgs';
+import { ExploreIcon, FavoriteIcon, MapTabIcon, PlusIcon, UserIcon } from '@svgs';
 import { fonts } from '../../../src/assets/fonts';
 import { ExploreStack } from '../explorestack';
 import { useIntl } from '@context';
@@ -50,79 +36,78 @@ export const BottomTabNavigator = () => {
 
   return (
     <Tab.Navigator
-  detachInactiveScreens={true}
-  tabBar={(props) => <CustomTabBar {...props} />}
->
-  <Tab.Screen
-    name="ExploreStack"
-    component={ExploreStack}
-    options={{
-      headerShown: false, // Remove header
-      tabBarLabel: ({ focused }) =>
-        customText({
-          text: intl.formatMessage({
-            id: 'buttons.explore',
-          }),
-          focused,
-        }),
-    }}
-  />
+      detachInactiveScreens={true}
+      tabBar={(props) => <CustomTabBar {...props} />}
+    >
+      <Tab.Screen
+        name="ExploreStack"
+        component={ExploreStack}
+        options={{
+          headerShown: false, // Remove header
+          tabBarLabel: ({ focused }) =>
+            customText({
+              text: intl.formatMessage({
+                id: 'buttons.explore',
+              }),
+              focused,
+            }),
+        }}
+      />
 
-  <Tab.Screen
-    name="ExploreMaps"
-    component={ExploreMaps}
-    options={{
-      headerShown: false, // Remove header
-      tabBarLabel: ({ focused }) =>
-        customText({
-          text: intl.formatMessage({
-            id: 'addpropertyScreen.map',
-          }),
-          focused,
-        }),
-    }}
-  />
+      <Tab.Screen
+        name="ExploreMaps"
+        component={ExploreMaps}
+        options={{
+          headerShown: false, // Remove header
+          tabBarLabel: ({ focused }) =>
+            customText({
+              text: intl.formatMessage({
+                id: 'addpropertyScreen.map',
+              }),
+              focused,
+            }),
+        }}
+      />
 
-  <Tab.Screen
-    name="Manzili"
-    component={CenterScreen}
-    options={{
-      headerShown: false, // Remove header
-      tabBarLabel: () => null,
-    }}
-  />
+      <Tab.Screen
+        name="Manzili"
+        component={CenterScreen}
+        options={{
+          headerShown: false, // Remove header
+          tabBarLabel: () => null,
+        }}
+      />
 
-  <Tab.Screen
-    name="SavedProperties"
-    component={SavedProperties}
-    options={{
-      headerShown: false, // Remove header
-      tabBarLabel: ({ focused }) =>
-        customText({
-          text: intl.formatMessage({
-            id: 'buttons.saved',
-          }),
-          focused,
-        }),
-    }}
-  />
+      <Tab.Screen
+        name="SavedProperties"
+        component={SavedProperties}
+        options={{
+          headerShown: false, // Remove header
+          tabBarLabel: ({ focused }) =>
+            customText({
+              text: intl.formatMessage({
+                id: 'buttons.saved',
+              }),
+              focused,
+            }),
+        }}
+      />
 
-  <Tab.Screen
-    name="Account"
-    component={Account}
-    options={{
-      headerShown: false, // Remove header
-      tabBarLabel: ({ focused }) =>
-        customText({
-          text: intl.formatMessage({
-            id: 'buttons.account',
-          }),
-          focused,
-        }),
-    }}
-  />
-</Tab.Navigator>
-
+      <Tab.Screen
+        name="Account"
+        component={Account}
+        options={{
+          headerShown: false, // Remove header
+          tabBarLabel: ({ focused }) =>
+            customText({
+              text: intl.formatMessage({
+                id: 'buttons.account',
+              }),
+              focused,
+            }),
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
@@ -138,6 +123,14 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
       useNativeDriver: true,
     }).start();
   }, [state.index]);
+
+  const handleHapticFeedback = () => {
+    const options = {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    };
+    Haptic.trigger('impactLight', options);  // Trigger a light haptic feedback
+  };
 
   return (
     <View style={styles.tabBarStyle}>
@@ -155,6 +148,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             });
 
             if (!isFocused && !event.defaultPrevented) {
+              handleHapticFeedback();  // Call haptic feedback function
               navigation.navigate(route.name);
             }
           };

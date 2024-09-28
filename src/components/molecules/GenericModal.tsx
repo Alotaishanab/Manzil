@@ -65,8 +65,8 @@ const GenericModalComponent: React.FC<GenericModalType> = ({
       animationIn="slideInUp"
       // customBackdrop={undefined}
       animationOut="slideOutDown"
-      // animationInTiming={400} // Adjust the timing for smoothness
-      // animationOutTiming={400}
+      animationInTiming={100} // Adjust the timing for smoothness
+      animationOutTiming={100}
       isVisible={isVisible}>
       <View
         style={[

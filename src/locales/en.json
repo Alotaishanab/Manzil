@@ -328,6 +328,8 @@
   "requestPropertyScreen.add-description": "Add Description",
   "requestPropertyScreen.add-description-placeholder": "For example...a Beautiful Apartment for sell",
 
+
+  "requestPropertyScreen.select-rent-duration": "Select Duration",
   "paymentHistoryScreen.header": "Payment History",
   "paymentHistoryScreen.property-listing": "Property Listing",
   "paymentHistoryScreen.promotion": "Promotion",
@@ -356,6 +358,16 @@
   "subscriptionScreen.individual.yearly": "SAR 2379.999/month",
   "subscriptionScreen.corporate.monthly": "SAR 659.999/month",
   "subscriptionScreen.corporate.yearly": "SAR 6599.999/month",
+
+  "savedPropertyScreen.search": "Search",
+  "savedSearchModal.title": "Saved Search",
+  "savedSearch.mostExpensive": "Most Expensive",
+  "savedSearch.mostCheap": "Least Expensive",
+  "savedSearch.newestDateSaved": "Most Recent",
+  "savedSearch.oldestDateSaved": "Least Recent",
+
+
+
 
   "chatWithUsScreen.header": "Chat With Us",
   "chatWithUsScreen.dear-customer": "Hello Dear Customer in Manzil,",

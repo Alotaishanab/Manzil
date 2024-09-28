@@ -31,11 +31,10 @@ export const AddProperties = () => {
   const [floor, setFloor] = useState('');
   const [selectedPropertyType, setSelectedPropertyType] = useState('House');
   const [title, setTitle] = useState('awdawdaw');
-  const [price, setPrice] = useState('4444');
   const [description, setDescription] = useState('dwadawdawdawd');
   const [size, setSize] = useState('333');
   const [propertyAge, setPropertyAge] = useState('3');
-  const [propertyType, setPropertyType] = useState('Sell');
+  const [propertyType, setPropertyType] = useState('Rent');
   const [direction, setDirection] = useState('');
   const [errors, setErrors] = useState({}); // Error state for validation
 
@@ -59,6 +58,10 @@ export const AddProperties = () => {
   const [waterAccess, setWaterAccess] = useState('Yes');
   const [electricityAccess, setElectricityAccess] = useState('Yes');
   const [sewageSystem, setSewageSystem] = useState('Yes');
+
+  // Step 4
+  const [rentDuration, setRentDuration] = useState(''); // monthly, quarterly, etc.
+  const [price, setPrice] = useState('4444');
 
   // Step 5
   const [floorPlan, setFloorPlan] = useState('');
@@ -176,7 +179,15 @@ export const AddProperties = () => {
         ownershipType,
       };
   
-      // Conditional logic based on the property type
+      // If the property is for rent, include rentDuration in the property data
+      if (propertyType === 'rent') {
+        propertyData = {
+          ...propertyData,
+          rentDuration, // Assuming rentDuration is available in the state
+        };
+      }
+  
+      // Conditional logic based on the selected property type
       switch (selectedPropertyType) {
         case 'House':
           propertyData = {
@@ -320,6 +331,7 @@ export const AddProperties = () => {
   };
   
   
+  
 
   const handleSubmit = () => {
     let valid = true;
@@ -430,12 +442,14 @@ export const AddProperties = () => {
 
         {step === 4 && (
           <PropertyStep4
-            selectedPropertyType={selectedPropertyType}
-            setPrice={setPrice}
-            price={price}
-            handleNext={handleNext}
-            handleBack={handleBack}
-          />
+          propertyType={propertyType} // This should hold either 'rent' or 'sale'
+          price={price}
+          setPrice={setPrice}
+          rentDuration={rentDuration}
+          setRentDuration={setRentDuration}
+          handleNext={handleNext}
+          handleBack={handleBack}
+        />
         )}
 
         {step === 5 && (

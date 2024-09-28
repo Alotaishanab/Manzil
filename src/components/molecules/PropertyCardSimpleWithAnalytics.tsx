@@ -16,12 +16,11 @@ import { useNavigation } from '@react-navigation/native';
 import { EyeOpenIcon, HeartIcon, TouchIcon } from '@svgs'; // Example icons
 
 const { width: screenWidth } = Dimensions.get('window');
-const ITEM_WIDTH = screenWidth * 0.5; // Reduce the card width to 50% of the screen
+const ITEM_WIDTH = screenWidth * 0.55; // Increase card width slightly to make it bigger
 
 export const PropertyCardSimpleWithAnalytics = ({ item }) => {
   const navigation = useNavigation();
 
-  // Example images array (adjust accordingly if your `item` contains more than one image)
   const images = [
     { uri: item.imageUrl },
     { uri: 'https://via.placeholder.com/75' }, // Smaller image placeholders
@@ -38,14 +37,6 @@ export const PropertyCardSimpleWithAnalytics = ({ item }) => {
     navigation.navigate('AnalyticsScreen', { propertyId: item.id });
   };
 
-  const handleIncompleteOrderClick = (order) => {
-    navigation.navigate('ContinueOrder', { orderId: order.id });
-  };
-
-  const handleCompletedOrderClick = (order) => {
-    navigation.navigate('ViewOrder', { orderId: order.id });
-  };
-
   return (
     <View style={styles.mainWrapper}>
       <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
@@ -55,31 +46,32 @@ export const PropertyCardSimpleWithAnalytics = ({ item }) => {
 
         <TopSpace top={10} /> 
 
-  <View style={styles.actionRow}>
-    <TouchableOpacity onPress={() => handleCompletedOrderClick(item)}>
-      <Text style={styles.continueText}>View Details</Text>
-    </TouchableOpacity>
+        <View style={styles.actionRow}>
+          <TouchableOpacity onPress={handleClick}>
+            <Text style={styles.continueText}>View Details</Text>
+          </TouchableOpacity>
 
-    <Text onPress={handleViewAnalytics} style={styles.viewAnalyticsText}>
-      View Analytics
-    </Text>
-  </View>
+          <Text onPress={handleViewAnalytics} style={styles.viewAnalyticsText}>
+            View Analytics
+          </Text>
+        </View>
+
         <View style={styles.infoContainer}>
           <View style={styles.analyticsContainer}>
             <View style={styles.analyticsItem}>
-              <EyeOpenIcon width={14} height={14} />
-              <Text style={styles.analyticsValue}>{item.views}</Text>
-              <Text style={styles.analyticsLabel}>Views</Text>
-            </View>
-
-            <View style={styles.analyticsItem}>
-              <HeartIcon width={14} height={14} />
+              <HeartIcon width={18} height={18} />
               <Text style={styles.analyticsValue}>{item.saves}</Text>
               <Text style={styles.analyticsLabel}>Saves</Text>
             </View>
 
             <View style={styles.analyticsItem}>
-              <TouchIcon width={14} height={14} />
+              <EyeOpenIcon width={18} height={18} />
+              <Text style={styles.analyticsValue}>{item.views}</Text>
+              <Text style={styles.analyticsLabel}>Views</Text>
+            </View>
+
+            <View style={styles.analyticsItem}>
+              <TouchIcon width={18} height={18} />
               <Text style={styles.analyticsValue}>{item.clicks}</Text>
               <Text style={styles.analyticsLabel}>Clicks</Text>
             </View>
@@ -94,6 +86,8 @@ const styles = StyleSheet.create({
   mainWrapper: {
     paddingVertical: 0,
     borderRadius: 20,
+    borderWidth: 1, // Added border to the card
+    borderColor: Colors.light.serialNoGreen, // Border color
     shadowColor: 'rgba(0, 0, 0, 0.1)',
     backgroundColor: Colors.light.background,
     shadowOffset: { width: 0, height: 4 },
@@ -101,25 +95,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     marginBottom: 15,
-    height: 350, // Adjust height as needed
-    width: ITEM_WIDTH, // Smaller card width
+    height: 275, // Adjust height to make it bigger
+    width: ITEM_WIDTH, // Slightly increased card width
     overflow: 'hidden',
     marginRight: 20,
-  },
-  orderText: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
-    fontSize: 16,
-    marginBottom: 8,
   },
   continueText: {
     color: Colors.light.primaryBtn,
     fontFamily: fonts.primary.regular,
-    fontSize: 14,
-    textDecorationLine: 'underline',
+    fontSize: 16, // Increased text size for "View Details"
+    textDecorationLine: 'underline', // Keep underline, remove the border
   },
   imageContainer: {
-    height: 150, // Increased the height for a taller picture
+    height: 160, // Increased height for a bigger image
     width: '100%',
     overflow: 'hidden',
   },
@@ -128,50 +116,17 @@ const styles = StyleSheet.create({
     width: '100%',
     resizeMode: 'cover', // Ensure the images cover the entire space
   },
-  orderCard: {
-    backgroundColor: Colors.light.cardBackground,
-    borderRadius: 10,
-    padding: 15,
-    marginRight: 15,
-    width: 220,
-    justifyContent: 'center',
-    elevation: 2,
-  },
-  priceLocationContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    paddingHorizontal: 15, // Reduced padding for a tighter layout
-    paddingTop: 10,
-  },
-  priceText: {
-    color: Colors.light.headingTitle,
-    fontSize: 20, // Adjusted text size for price
-    fontFamily: fonts.primary.bold,
-    marginBottom: 5,
-  },
-  placeText: {
-    color: Colors.light.serialNoGreen,
-    fontSize: 12, // Smaller text for location
-    fontFamily: fonts.primary.medium,
-  },
-  descriptionText: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
-    fontSize: 14, // Adjusted text size for title
-    marginVertical: 5,
-    paddingHorizontal: 15,
+  actionRow: {
+    flexDirection: 'row', // Arrange "View Details" and "View Analytics" in a row
+    justifyContent: 'space-between', // Evenly space out the elements
+    marginTop: 5,
+    paddingHorizontal: 10,
   },
   analyticsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
-    paddingHorizontal: 10, // Adjust padding to fit the new layout
-  },
-  actionRow: {
-    flexDirection: 'row', // Arrange "View Details" and "View Analytics" in a row
-    justifyContent: 'space-between', // Evenly space out the elements
-    paddingHorizontal: 15,
-    marginTop: 5,
+    paddingHorizontal: 10,
   },
   analyticsItem: {
     alignItems: 'center',
@@ -179,31 +134,20 @@ const styles = StyleSheet.create({
   },
   analyticsValue: {
     fontFamily: fonts.primary.bold,
-    fontSize: 12, // Reduced size for analytics values
+    fontSize: 18, // Increased size for the analytics values
     color: Colors.light.headingTitle,
     marginTop: 3,
   },
   analyticsLabel: {
     fontFamily: fonts.primary.regular,
-    fontSize: 10, // Minimized size for labels
+    fontSize: 12, // Adjusted size for labels
     color: Colors.light.subText,
   },
   viewAnalyticsText: {
     color: Colors.light.primaryBtn,
     fontFamily: fonts.primary.regular,
-    fontSize: 14,
+    fontSize: 16, // Increased size for the text
     textDecorationLine: 'underline',
-    textAlign: 'center',
-  },
-  footerWrap: {
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    justifyContent: 'flex-start',
-  },
-  dateText: {
-    color: Colors.light.serialNoGreen,
-    fontFamily: fonts.primary.regular,
-    fontSize: 10, // Minimized date text
   },
 });
 
