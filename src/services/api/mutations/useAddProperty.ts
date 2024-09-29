@@ -132,10 +132,7 @@ const addProperty = async (payload: AddPropertyPayload) => {
     }
 
     formData.append('direction', payload.direction || '');
-
-    payload.media.forEach((image, index) => {
-      formData.append(`media[${index}]`, image);
-    });
+    formData.append('media', payload.media);
 
     formData.append('propertyFeature', JSON.stringify(payload.propertyFeature));
 

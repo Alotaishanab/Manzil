@@ -89,26 +89,36 @@ def add_property(request):
 
 
 def store_property_media(request, property_instance):
-    images = request.FILES.getlist('media')
-    videos = request.FILES.getlist('media')
+    media_files = request.FILES.getlist('media')
+    media_count = len(media_files)
 
-    print('images', images)
+    if (media_count == 0):
+        print('Media count is 0')
+        return
 
-    # Store the URLs of uploaded images
+    print('media_files', media_files)
     image_urls = []
-    for image in images:
-        image_url = upload_to_s3(
-            image, image.name, property_instance.property_id)
-        image_urls.append(image_url)
-
-        # Store the URLs of uploaded videos
     video_urls = []
-    for video in videos:
-        video_url = upload_to_s3(
-            video, video.name, property_instance.property_id)
-        video_urls.append(video_url)
 
-    print('image_urls', image_urls)
+    for file in media_files:
+        # Check the MIME type of the file to differentiate between images and videos
+        mime_type = file.content_type
+
+        print('mime_type', mime_type)
+        print('file', file)
+
+        if mime_type.startswith('image'):
+            # It's an image file
+            image_url = upload_to_s3(
+                file, file.name, property_instance.property_id)
+            image_urls.append(image_url)
+
+        elif mime_type.startswith('video'):
+            # It's a video file
+            video_url = upload_to_s3(
+                file, file.name, property_instance.property_id)
+            video_urls.append(video_url)
+
     property_instance.property_images = image_urls
     property_instance.property_videos = video_urls
     property_instance.save(

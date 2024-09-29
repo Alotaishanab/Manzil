@@ -16,6 +16,8 @@ def upload_to_s3(file, file_name, folder):
     try:
         s3.upload_fileobj(file, bucket_name, s3_file_path)
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_file_path}"
+
+        print('s3_url', s3_url)
         return s3_url
     except Exception as e:
         print(f"Failed to upload {file_name} to S3: {e}")
