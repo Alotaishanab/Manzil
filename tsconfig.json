@@ -21,6 +21,7 @@
       "@useDimension":["src/hooks/useDimension.ts"],
     }
   },
+  "include": ["src","env.d.ts"],
   // "files": ["svg.d.ts"],
   "exclude": [
     "node_modules",

@@ -7,6 +7,21 @@ class PropertyFeatureSerializer(serializers.Serializer):
     icon = serializers.CharField()
 
 
+class MarkerPositionSerializer(serializers.Serializer):
+    latitude = serializers.DecimalField(max_digits=20, decimal_places=17)
+    longitude = serializers.DecimalField(max_digits=20, decimal_places=17)
+
+
+class PropertyOwnerShipSerializer(serializers.Serializer):
+    instrumentNumber = serializers.CharField(required=True)
+    ownerIDNumber = serializers.CharField(required=False)
+    ownerDOB = serializers.CharField(required=False)
+    agencyNumber = serializers.CharField(required=False)
+    commercialRegNumber = serializers.CharField(required=False)
+    agentIDNumber = serializers.CharField(required=False)
+    agentDOB = serializers.CharField(required=False)
+
+
 class AddPropertySerializer(serializers.Serializer):
     propertyType = serializers.CharField()
     propertyCategory = serializers.CharField()
@@ -17,13 +32,9 @@ class AddPropertySerializer(serializers.Serializer):
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     area = serializers.DecimalField(max_digits=10, decimal_places=2)
     location = serializers.CharField(required=False)
-    markerPosition = serializers.CharField(required=True)
+    markerPosition = MarkerPositionSerializer(required=True)
     status = serializers.CharField(required=False)
-    ownership = serializers.CharField(required=True)
-    propertyImages = serializers.ListField(
-        child=serializers.CharField(), required=False)
-    propertyVideos = serializers.ListField(
-        child=serializers.CharField(), required=False)
+    ownership = PropertyOwnerShipSerializer(required=True)
     bedrooms = serializers.IntegerField(required=False)
     bathrooms = serializers.IntegerField(required=False)
     waterAccess = serializers.BooleanField(default=False)
@@ -43,4 +54,9 @@ class AddPropertySerializer(serializers.Serializer):
     storageCapacity = serializers.IntegerField(required=False)
     numberOfUnits = serializers.IntegerField(required=False)
     propertyFeature = serializers.ListField(
-        child=PropertyFeatureSerializer(), required=False)
+        child=serializers.CharField(), required=False)
+    media = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        allow_empty=True
+    )

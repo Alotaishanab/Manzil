@@ -27,6 +27,7 @@ import {
   AddPropertyPayload,
   DirectionType,
   FootTrafficType,
+  MarkerPosition,
   OwnershipType,
   PropertyFeature,
   useAddProperty,
@@ -43,7 +44,7 @@ export const AddProperties = () => {
   const [size, setSize] = useState('333');
   const [propertyAge, setPropertyAge] = useState('3');
   const [propertyType, setPropertyType] = useState('Sell');
-  const [direction, setDirection] = useState('');
+  const [direction, setDirection] = useState('North');
   const [errors, setErrors] = useState({}); // Error state for validation
 
   // Step 2 fields
@@ -71,7 +72,9 @@ export const AddProperties = () => {
   const [floorPlan, setFloorPlan] = useState('');
   const [media, setMedia] = useState<any[]>([]);
   const [selectedPropertyFeatures, setSelectedPropertyFeatures] = useState([]);
-  const [markerPosition, setMarkerPosition] = useState<any>(null); // Coordinates
+  const [markerPosition, setMarkerPosition] = useState<MarkerPosition | null>(
+    null,
+  ); // Coordinates
 
   // Step 6
   const [ownershipType, setOwnershipType] =
@@ -467,7 +470,7 @@ export const AddProperties = () => {
             setMarkerPosition={setMarkerPosition}
             floorPlan={floorPlan}
             setFloorPlan={setFloorPlan}
-            handleNext={handleSubmit}
+            handleNext={handleNext}
             handleBack={handleBack}
             propertyFeature={propertyFeature}
             setPropertyFeature={onChangePropertyFeature}

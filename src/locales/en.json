@@ -461,6 +461,7 @@
   "form-errors.first-name": "First name is required",
   "form-errors.last-name": "Last name is required",
   "form-errors.description": "Description is required",
+  "errors.addMedia": "Please add at least one media item.",
 
   "buttons.sign-in": "Sign in",
   "buttons.sign-up": "Sign up",

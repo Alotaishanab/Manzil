@@ -19,6 +19,8 @@ export type PropertyFeature = {
 
 export type OwnershipType = 'independent' | 'multipleOwners' | 'agency';
 
+export type MarkerPosition = {latitude: number; longitude: number};
+
 export interface AddPropertyPayload {
   propertyType: string;
   area: string; // Maps to area in backend
@@ -36,7 +38,7 @@ export interface AddPropertyPayload {
   waterAccess: boolean;
 
   price: string;
-  markerPosition: any;
+  markerPosition: MarkerPosition | null;
 
   ownership?: unknown;
 
@@ -72,12 +74,81 @@ export interface AddPropertyPayload {
 
 const addProperty = async (payload: AddPropertyPayload) => {
   try {
-    const data = await api.post<AddPropertyResponse>(
+    const formData = new FormData();
+
+    // Append the non-file data fields
+    formData.append('propertyType', payload.propertyType);
+    formData.append('area', payload.area);
+    formData.append('propertyCategory', payload.propertyCategory);
+    formData.append('title', payload.title);
+    formData.append('propertyAge', payload.propertyAge);
+    formData.append('description', payload.description);
+    formData.append('ownershipType', payload.ownershipType);
+    formData.append('floorPlan', payload.floorPlan);
+    formData.append('electricityAccess', String(payload.electricityAccess));
+    formData.append('sewageSystem', String(payload.sewageSystem));
+    formData.append('waterAccess', String(payload.waterAccess));
+    formData.append('price', payload.price);
+
+    if (payload.markerPosition) {
+      formData.append(
+        'markerPosition.latitude',
+        String(payload.markerPosition.latitude),
+      );
+
+      formData.append(
+        'markerPosition.longitude',
+        String(payload.markerPosition.longitude),
+      );
+    }
+
+    if (payload.bedrooms) {
+      formData.append('bedrooms', String(payload.bedrooms));
+    }
+    if (payload.bathrooms) {
+      formData.append('bathrooms', String(payload.bathrooms));
+    }
+    if (payload.floors) {
+      formData.append('floors', String(payload.floors));
+    }
+    if (payload.livingRooms) {
+      formData.append('livingRooms', String(payload.livingRooms));
+    }
+
+    if (payload.ownership) {
+      for (const ownershipKey of Object.keys(payload.ownership)) {
+        formData.append(
+          `ownership.${ownershipKey}`,
+          String(payload.ownership[ownershipKey]),
+        );
+      }
+    }
+
+    if (payload.rooms) {
+      formData.append('rooms', String(payload.rooms));
+    }
+    if (payload.floorNumber) {
+      formData.append('floorNumber', String(payload.floorNumber));
+    }
+
+    formData.append('direction', payload.direction || '');
+
+    payload.media.forEach((image, index) => {
+      formData.append(`media[${index}]`, image);
+    });
+
+    formData.append('propertyFeature', JSON.stringify(payload.propertyFeature));
+
+    const response = await api.post<AddPropertyResponse>(
       apiUrls.addProperty,
-      payload,
+      formData,
+      true,
+      true,
     );
 
-    return data;
+    console.log('Add property response', response);
+
+    return response;
   } catch (error) {
     console.log('error adding property', error);
     throw error;

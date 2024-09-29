@@ -1,14 +1,14 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  AxiosRequestConfig,
-} from 'axios';
+import axios, {AxiosInstance, AxiosResponse, AxiosRequestConfig} from 'axios';
 // import { showToast } from '../helpers';
 import AsyncHelper from '../../helpers/asyncHelper';
+//import {API_URL} from '@env';
+
 // import * as RootNavigation from '../navigation/NavigationService';
 // import { QA } from './urls';
 
-const QA = 'http://127.0.0.1:8000/'; // Set your QA base URL
+//console.log('API_URL', API_URL);
+
+const QA = 'http://10.0.2.2:8000'; // Set your QA base URL
 
 type ApiResponse<T> = Promise<AxiosResponse<T>>;
 
@@ -38,7 +38,7 @@ class Api {
   private initializeInterceptors() {
     this.client.interceptors.request.use(
       async (config: AxiosRequestConfig) => {
-         const token = await AsyncHelper.getToken();
+        const token = await AsyncHelper.getToken();
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -120,7 +120,7 @@ class Api {
   }
 
   private async logout(): Promise<void> {
-     await AsyncHelper.removeToken();
+    await AsyncHelper.removeToken();
     // await AsyncHelper.removeRefreshToken();
     // await AsyncHelper.removeFCMToken();
     // await AsyncHelper.removeUserId();
@@ -128,9 +128,9 @@ class Api {
 
   private async addAuthToken(config: AxiosRequestConfig) {
     //const token = '';
-     const token = await AsyncHelper.getToken();
+    const token = await AsyncHelper.getToken();
 
-     console.log("addAuthToken ", token)
+    console.log('addAuthToken ', token);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -151,7 +151,9 @@ class Api {
     multipart = false,
   ): ApiResponse<T> {
     const config: AxiosRequestConfig = {
-      headers: multipart ? {'Content-Type': 'multipart/form-data'} : {"Content-Type": "application/json"},
+      headers: multipart
+        ? {'Content-Type': 'multipart/form-data'}
+        : {'Content-Type': 'application/json'},
     };
     if (sendAuthToken) {
       await this.addAuthToken(config);
@@ -164,7 +166,9 @@ class Api {
     params: any,
     sendAuthToken = false,
   ): ApiResponse<T> {
-    const config: AxiosRequestConfig = {headers: {"Content-Type": "application/json"}};
+    const config: AxiosRequestConfig = {
+      headers: {'Content-Type': 'application/json'},
+    };
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
