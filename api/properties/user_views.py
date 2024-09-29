@@ -29,7 +29,7 @@ def add_property(request):
 
             # Create a Property instance, but don't save it yet
             property_instance = Property(
-                user_id=1,  # request.user.user_id,
+                user_id=request.user.user_id,
                 property_type=serializer.validated_data['propertyType'],
                 property_category=serializer.validated_data['propertyCategory'],
                 property_age=serializer.validated_data.get('propertyAge'),
