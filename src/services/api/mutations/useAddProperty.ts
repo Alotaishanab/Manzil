@@ -132,7 +132,10 @@ const addProperty = async (payload: AddPropertyPayload) => {
     }
 
     formData.append('direction', payload.direction || '');
-    formData.append('media', payload.media);
+
+    payload.media.forEach(file => {
+      formData.append('media', file);
+    });
 
     formData.append('propertyFeature', JSON.stringify(payload.propertyFeature));
 
