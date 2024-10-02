@@ -7,9 +7,12 @@ from . import user_serializers
 from .models import Property
 from .utils import upload_to_s3
 from django.contrib.gis.geos import Point
+from django.db import connection
+from django.http import JsonResponse
+from django.contrib.gis.measure import D
+from django.contrib.gis.db.models.functions import Distance
 
 
-@permission_classes([AllowAny])
 @api_view(["POST"])
 def add_property(request):
     if request.method == 'POST':
@@ -123,3 +126,40 @@ def store_property_media(request, property_instance):
     property_instance.property_videos = video_urls
     property_instance.save(
         update_fields=['property_images', 'property_videos'])
+
+
+@api_view(["GET"])
+def explore_properties_by_location(request):
+
+    serializer = user_serializers.SearchNearbyPropertiesSerializer(
+        data=request.GET)
+
+    if not serializer.is_valid():
+        return JsonResponse({"error": serializer.errors}, status=400)
+
+    user_id = request.user.user_id,
+    user_lat = float(serializer.validated_data['latitude'])
+    user_lon = float(serializer.validated_data['longitude'])
+    limit = serializer.validated_data['limit']
+    offset = serializer.validated_data['offset']
+
+    distance_meters = 50000
+    user_location = Point(user_lon, user_lat)
+
+    properties = (Property.objects
+                  .exclude(user_id=user_id)
+                  .filter(property_type__in=['Sell', 'Rent'])
+                  .filter(coordinates__distance_lte=(user_location, D(km=50)))
+                  .annotate(distance=Distance('coordinates', user_location))
+                  .order_by('distance')
+                  [offset:offset + limit])
+
+    result = [{"property_id": property.property_id,
+               "property_type": property.property_type,
+               "title": property.title,
+               "description": property.description,
+               "price": property.price,
+               "contact_information": property.contact_information,
+               "distance": property.distance.m} for property in properties]
+
+    return JsonResponse({"properties": result})

@@ -60,3 +60,10 @@ class AddPropertySerializer(serializers.Serializer):
         required=False,
         allow_empty=True
     )
+
+
+class SearchNearbyPropertiesSerializer(serializers.Serializer):
+    latitude = serializers.DecimalField(max_digits=20, decimal_places=17)
+    longitude = serializers.DecimalField(max_digits=20, decimal_places=17)
+    limit = serializers.IntegerField(default=20)
+    offset = serializers.IntegerField(default=0)
