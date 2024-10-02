@@ -161,9 +161,12 @@ def explore_properties_by_location(request):
                "description": property.description,
                "price": property.price,
                "contact_information": property.contact_information,
+               "property_images": property.property_images,
+               "property_videos": property.property_videos,
                "distance": property.distance.m} for property in properties]
 
     return JsonResponse({"properties": result})
+
 
 @api_view(["GET"])
 def explore_properties_by_interests(request):
@@ -197,6 +200,8 @@ def explore_properties_by_interests(request):
                 "price": prop.price,
                 "property_type": prop.property_type,
                 "contact_information": prop.contact_information,
+                "property_images": prop.property_images,
+                "property_videos": prop.property_videos,
             }
             for prop in all_properties
         ]
@@ -214,6 +219,8 @@ def explore_properties_by_interests(request):
 
     # Return the list of similar properties as JSON
     properties = [{"property_id": prop.property_id, "title": prop.title,
+                   "property_images": prop.property_images,
+                   "property_videos": prop.property_videos,
                    "price": prop.price, "property_type": prop.property_type, "contact_information": prop.contact_information, } for prop in similar_properties]
 
     return JsonResponse({"properties": properties})
