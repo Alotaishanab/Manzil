@@ -4,13 +4,14 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from . import user_serializers
-from .models import Property
+from .models import Property, PropertyView, PropertyShare, PropertyClick, PropertyInquiry
 from .utils import upload_to_s3
 from django.contrib.gis.geos import Point
 from django.db import connection
 from django.http import JsonResponse
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
+from django.db.models import F, Q, Subquery
 
 
 @api_view(["POST"])
@@ -163,3 +164,56 @@ def explore_properties_by_location(request):
                "distance": property.distance.m} for property in properties]
 
     return JsonResponse({"properties": result})
+
+@api_view(["GET"])
+def explore_properties_by_interests(request):
+
+    serializer = user_serializers.SearchInterestedPropertiesSerializer(
+        data=request.GET)
+    if not serializer.is_valid():
+        return JsonResponse({"error": serializer.errors}, status=400)
+
+    user_id = request.user.user_id,
+    limit = serializer.validated_data['limit']
+    offset = serializer.validated_data['offset']
+
+    # Get properties the user has interacted with (viewed, shared, clicked, inquired)
+    user_engagement = Property.objects.filter(
+        Q(views__user_id=user_id) |
+        Q(shares__user_id=user_id) |
+        Q(clicks__user_id=user_id) |
+        Q(inquiries__user_id=user_id)
+    ).distinct().values('property_type', 'area', 'price')
+
+    if not user_engagement.exists():
+        # If no engagement, return all properties except those by the current user
+        all_properties = Property.objects.exclude(user_id=user_id).order_by(
+            '-listing_date')[offset:offset + limit]
+
+        properties = [
+            {
+                "property_id": prop.property_id,
+                "title": prop.title,
+                "price": prop.price,
+                "property_type": prop.property_type,
+                "contact_information": prop.contact_information,
+            }
+            for prop in all_properties
+        ]
+
+        return JsonResponse({"properties": properties})
+
+    # Now find properties similar to those the user has engaged with
+    similar_properties = Property.objects.exclude(user_id=user_id).filter(
+        Q(property_type__in=user_engagement.values('property_type')) &
+        Q(area__in=user_engagement.values('area')) &
+        Q(price__in=user_engagement.values('price'))
+    ).annotate(price_difference=F('price') - Subquery(user_engagement.values('price')[:1])).filter(
+        price_difference__lte=10000  # Customize price range difference
+    ).order_by('-listing_date')[offset:offset + limit]
+
+    # Return the list of similar properties as JSON
+    properties = [{"property_id": prop.property_id, "title": prop.title,
+                   "price": prop.price, "property_type": prop.property_type, "contact_information": prop.contact_information, } for prop in similar_properties]
+
+    return JsonResponse({"properties": properties})

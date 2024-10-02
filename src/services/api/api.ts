@@ -136,12 +136,12 @@ class Api {
     }
   }
 
-  async get<T>(route: string, sendAuthToken = false): ApiResponse<T> {
+  async get<T>(route: string, sendAuthToken = true): ApiResponse<T> {
     const config: AxiosRequestConfig = {headers: {}};
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.get(route, config);
+    return await this.client.get(route, config);
   }
 
   async post<T>(

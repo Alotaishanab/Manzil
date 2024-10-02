@@ -18,7 +18,11 @@ import {
   View,
 } from 'react-native';
 import Share from 'react-native-share';
-
+import {
+  useGetNearbyProperties,
+  UserLocation,
+  useGetInterestedProperties,
+} from '@services';
 import {Colors} from '@colors';
 import {useIntl} from '@context';
 import {styles} from './styles';
@@ -37,20 +41,23 @@ import TitleValueRow from '../agencydetails/components/TitleValueRow';
 import {useNavigation} from '@react-navigation/native';
 
 export const ExploreProperty = () => {
+  const location: UserLocation = {
+    latitude: 37.76816965856596, // Example latitude
+    longitude: -122.4264693260193, // Example longitude
+  };
   const {intl} = useIntl();
   const navigation: any = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-
   const [isModalVisible, setModalVisible] = useState(false);
+  const {data: nearByProperties, isLoading,} = useGetNearbyProperties(location);
+  const {data: interestedProperties} = useGetInterestedProperties();
+
+  console.log('nearByProperties', nearByProperties);
+  console.log('interestedProperties', interestedProperties);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+
   const [showReportAd, setShowReportAd] = useState(false);
   const toggleReportAd = () => {
     setShowReportAd(!showReportAd);
@@ -108,6 +115,7 @@ export const ExploreProperty = () => {
   ];
 
   const renderPropertiesFeatures = ({item}: any) => {
+    // @ts-ignore
     const Icon = SVGs[item?.icon];
     return (
       <Pressable style={styles.featuredPropertyCard}>

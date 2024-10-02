@@ -67,3 +67,8 @@ class SearchNearbyPropertiesSerializer(serializers.Serializer):
     longitude = serializers.DecimalField(max_digits=20, decimal_places=17)
     limit = serializers.IntegerField(default=20)
     offset = serializers.IntegerField(default=0)
+
+
+class SearchInterestedPropertiesSerializer(serializers.Serializer):
+    limit = serializers.IntegerField(default=20)
+    offset = serializers.IntegerField(default=0)

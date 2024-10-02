@@ -15,6 +15,8 @@ export const apiUrls = {
   resendPhoneCode: '/account/user/resend/code',
 
   addProperty: '/properties/add',
+  exploreNearbyProperties: '/properties/explore/near-by',
+  exploreInterestedProperties: '/properties/explore/interested',
 
   userProfile: '/api/user/',
 };

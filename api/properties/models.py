@@ -140,3 +140,43 @@ class Property(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.property_type}"
+
+
+class PropertyView(models.Model):
+    view_id = models.AutoField(primary_key=True)
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name='views')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    view_date = models.DateTimeField(auto_now_add=True)
+    duration_seconds = models.IntegerField(
+        null=True, blank=True)  # Optional field
+    geo_location = PointField()
+
+
+class PropertyShare(models.Model):
+    share_id = models.AutoField(primary_key=True)
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name='shares')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    share_date = models.DateTimeField(auto_now_add=True)
+    # Platform where the property was shared
+    platform = models.CharField(max_length=50)
+
+
+class PropertyClick(models.Model):
+    click_id = models.AutoField(primary_key=True)
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name='clicks')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    click_date = models.DateTimeField(auto_now_add=True)
+    click_type = models.CharField(max_length=50)  # Type of click
+
+
+class PropertyInquiry(models.Model):
+    inquiry_id = models.AutoField(primary_key=True)
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name='inquiries')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    inquiry_date = models.DateTimeField(auto_now_add=True)
+    inquiry_type = models.CharField(max_length=50)  # Type of inquiry
+    inquiry_details = models.TextField(blank=True)
