@@ -14,5 +14,9 @@ export const apiUrls = {
   resetUserPassword: '/account/user/reset-password',
   resendPhoneCode: '/account/user/resend/code',
 
+  addProperty: '/properties/add',
+  exploreNearbyProperties: '/properties/explore/near-by',
+  exploreInterestedProperties: '/properties/explore/interested',
+
   userProfile: '/api/user/',
 };

@@ -1,4 +1,6 @@
-import React, { Fragment, useState } from 'react';
+/* eslint-disable react/no-unstable-nested-components */
+/* eslint-disable react-native/no-inline-styles */
+import React, {Fragment, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -7,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Vibration,
+  Platform,
 } from 'react-native';
 import {
   CustomButton,
@@ -16,14 +19,14 @@ import {
   FullScreenMap,
 } from '@components';
 import ImageCarouselPicker from './ImageCorouselPicker'; // Ensure this is the correct import path
-import { fonts } from '@fonts';
-import { Colors } from '@colors';
-import { globalStyles } from '@globalStyles';
-import { useIntl } from '@context';
+import {fonts} from '@fonts';
+import {Colors} from '@colors';
+import {globalStyles} from '@globalStyles';
+import {useIntl} from '@context';
 import * as SVGs from '../../../assets/svgs';
-import { useAddPropertiesProps } from '../useAddPropertiesProps';
-import { useNavigation } from '@react-navigation/native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {useAddPropertiesProps} from '../useAddPropertiesProps';
+import {useNavigation} from '@react-navigation/native';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const PropertyStep5 = ({
   media,
@@ -37,9 +40,10 @@ const PropertyStep5 = ({
   handleNext,
   handleBack,
 }) => {
-  const navigation = useNavigation();
-  const { intl } = useIntl();
-  const { propertyFeatures } = useAddPropertiesProps();
+  console.log('markerPosition', markerPosition);
+  console.log('media', media);
+  const {intl} = useIntl();
+  const {propertyFeatures} = useAddPropertiesProps();
 
   const [mapType, setMapType] = useState<string>('standard');
   const [mapVisible, setMapVisible] = useState(false); // Map modal visibility state
@@ -47,9 +51,9 @@ const PropertyStep5 = ({
 
   // Function to toggle property feature selection
   const toggleFeature = (feature: string) => {
-    setSelectedPropertyFeatures((prevFeatures) => {
+    setSelectedPropertyFeatures(prevFeatures => {
       if (prevFeatures.includes(feature)) {
-        return prevFeatures.filter((f) => f !== feature);
+        return prevFeatures.filter(f => f !== feature);
       } else {
         return [...prevFeatures, feature];
       }
@@ -57,7 +61,7 @@ const PropertyStep5 = ({
   };
 
   // Handle location selection from FullScreenMap
-  const handleLocationSelect = (location) => {
+  const handleLocationSelect = location => {
     setMarkerPosition(location); // Store the selected location
     console.log('Selected Location:', location); // Log coordinates for testing
   };
@@ -73,12 +77,16 @@ const PropertyStep5 = ({
         mediaType: 'photo',
         selectionLimit: 1,
       },
-      (response) => {
-        if (!response.didCancel && response.assets && response.assets.length > 0) {
+      response => {
+        if (
+          !response.didCancel &&
+          response.assets &&
+          response.assets.length > 0
+        ) {
           const asset = response.assets[0];
           setFloor(asset.uri);
         }
-      }
+      },
     );
   };
 
@@ -88,20 +96,32 @@ const PropertyStep5 = ({
         mediaType: 'mixed', // Allow both images and videos
         selectionLimit: 0,  // Allow multiple media selection
       },
-      (response) => {
+      response => {      
+        console.log(
+          '!response.didCancel && response.assets',
+          !response.didCancel && response.assets,
+        );
+
         if (!response.didCancel && response.assets) {
-          // Ensure 'media' is always an array or empty array
-          const currentImages = Array.isArray(media) ? media.filter((item) => item.type.startsWith('image')) : [];
-          const currentVideos = Array.isArray(media) ? media.filter((item) => item.type.startsWith('video')) : [];
-  
+          const currentMedia = media || [];
+          const currentImages = currentMedia.filter(item =>
+            item.type.startsWith('image'),
+          );
+          const currentVideos = currentMedia.filter(item =>
+            item.type.startsWith('video'),
+          );
+
+          console.log('currentImages', currentImages);
+
           // Filter selected media
-          const selectedMedia = response.assets.filter((asset) => {
+          const selectedMedia = response.assets.filter(asset => {
             const isImage = asset.type.startsWith('image');
             const isVideo = asset.type.startsWith('video');
-  
+
+            // Common formats supported for images and videos
             const supportedImageFormats = ['image/jpeg', 'image/png', 'image/jpg'];
             const supportedVideoFormats = ['video/mp4', 'video/quicktime'];
-  
+
             if (isImage && supportedImageFormats.includes(asset.type)) {
               return true;
             }
@@ -110,28 +130,50 @@ const PropertyStep5 = ({
             }
             return false;
           });
-  
+
           let newImages = [];
           let newVideos = [];
-  
-          selectedMedia.forEach((asset) => {
-            if (asset.type.startsWith('image') && currentImages.length + newImages.length < 10) {
+
+          selectedMedia.forEach(asset => {
+            if (
+              asset.type.startsWith('image') &&
+              currentImages.length + newImages.length < 10 &&
+              asset.uri
+            ) {
               newImages.push({
-                uri: asset.uri,
-                type: asset.type,
+                uri:
+                  Platform.OS === 'android'
+                    ? asset.uri
+                    : asset.uri.replace('file://', ''),
+                type: asset.type, // Image type
+                name: asset.fileName,
               });
             }
-            if (asset.type.startsWith('video') && currentVideos.length + newVideos.length < 3) {
+            if (
+              asset.type.startsWith('video') &&
+              currentVideos.length + newVideos.length < 3 &&
+              asset.uri
+            ) {
               newVideos.push({
-                uri: asset.uri,
-                type: asset.type,
+                uri:
+                  Platform.OS === 'android'
+                    ? asset.uri
+                    : asset.uri.replace('file://', ''),
+                type: asset.type, // Video type
+                name: asset.fileName,
               });
             }
           });
-  
-          setMedia((prevMedia) => [...prevMedia, ...newImages, ...newVideos]);
+
+          if (newImages && newVideos) {
+            setMedia([...currentMedia, ...newImages, ...newVideos]);
+          } else if (newImages) {
+            setMedia([...currentMedia, ...newImages]);
+          } else if (newVideos) {
+            setMedia([...currentMedia, ...newVideos]);
+          }
         }
-      }
+      },
     );
   };
   
@@ -141,21 +183,24 @@ const PropertyStep5 = ({
     const currentErrors = {};
 
     if (media.length === 0) {
-      currentErrors.media = intl.formatMessage({
-        id: 'errors.addMedia', // Ensure you have this key in your localization files
-      }) || 'Please add at least one media item.';
+      currentErrors.media =
+        intl.formatMessage({
+          id: 'errors.addMedia', // Ensure you have this key in your localization files
+        }) || 'Please add at least one media item.';
     }
 
     if (!markerPosition) {
-      currentErrors.markerPosition = intl.formatMessage({
-        id: 'errors.selectLocation', // Ensure you have this key in your localization files
-      }) || 'Please select a location on the map.';
+      currentErrors.markerPosition =
+        intl.formatMessage({
+          id: 'errors.selectLocation', // Ensure you have this key in your localization files
+        }) || 'Please select a location on the map.';
     }
 
     if (selectedPropertyFeatures.length === 0) {
-      currentErrors.selectedPropertyFeatures = intl.formatMessage({
-        id: 'errors.selectFeatures', // Ensure you have this key in your localization files
-      }) || 'Please select at least one property feature.';
+      currentErrors.selectedPropertyFeatures =
+        intl.formatMessage({
+          id: 'errors.selectFeatures', // Ensure you have this key in your localization files
+        }) || 'Please select at least one property feature.';
     }
 
     if (Object.keys(currentErrors).length > 0) {
@@ -167,7 +212,8 @@ const PropertyStep5 = ({
     }
   };
 
-  const renderPropertyType = ({ item }: any) => {
+  const renderPropertyType = ({item}: any) => {
+    //@ts-ignore
     const Icon = SVGs[item?.icon];
     const isSelected = selectedPropertyFeatures.includes(item?.name); // Check if the feature is selected
     return (
@@ -180,8 +226,7 @@ const PropertyStep5 = ({
               ? Colors.light.primaryBtn
               : Colors.light.propertyCardLine,
           },
-        ]}
-      >
+        ]}>
         <Icon width={50} height={50} />
         <Text numberOfLines={2} style={globalStyles.propertyTypeCardText}>
           {item?.name}
@@ -204,8 +249,7 @@ const PropertyStep5 = ({
         style={[
           styles.mapContainer,
           errors.markerPosition && styles.errorBorder, // Apply red border if there's an error
-        ]}
-      >
+        ]}>
         <CustomMap
           height={250}
           showHome={true}
@@ -236,10 +280,11 @@ const PropertyStep5 = ({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() =>
-          setMapType((prevType) => (prevType === 'standard' ? 'satellite' : 'standard'))
+          setMapType(prevType =>
+            prevType === 'standard' ? 'satellite' : 'standard',
+          )
         }
-        style={styles.mapToggleButton}
-      >
+        style={styles.mapToggleButton}>
         <SVGs.MapLayerIcon width={25} height={25} />
       </TouchableOpacity>
 
@@ -248,11 +293,10 @@ const PropertyStep5 = ({
       <TouchableOpacity
         onPress={handleAddFloorPicker}
         activeOpacity={0.8}
-        style={styles.addFloorplanBtn}
-      >
+        style={styles.addFloorplanBtn}>
         {floor ? (
           <Image
-            source={{ uri: floor }}
+            source={{uri: floor}}
             style={{
               width: '100%',
               height: '100%',
@@ -279,7 +323,7 @@ const PropertyStep5 = ({
         borderRadius={30}
         disabled={false}
         handleClick={validateFields} // Validate before proceeding
-        title={intl.formatMessage({ id: 'buttons.next' })}
+        title={intl.formatMessage({id: 'buttons.next'})}
         showRightIconButton={true}
       />
     </>
@@ -292,8 +336,7 @@ const PropertyStep5 = ({
         style={[
           styles.mediaContainer,
           errors.media && styles.errorBorder, // Apply red border if there's an error
-        ]}
-      >
+        ]}>
         <ImageCarouselPicker media={media} handlePicker={handlePicker} />
       </View>
       {errors.media && <Text style={styles.errorText}>{errors.media}</Text>}
@@ -308,9 +351,8 @@ const PropertyStep5 = ({
         style={[
           styles.propertyFeaturesContainer,
           errors.selectedPropertyFeatures && styles.errorBorder, // Apply red border if there's an error
-        ]}
-      >
-        <View style={{ marginVertical: 10 }}>
+        ]}>
+        <View style={{marginVertical: 10}}>
           <Text style={styles.featuredPropertyText}>Property Features</Text>
         </View>
         <FlatList

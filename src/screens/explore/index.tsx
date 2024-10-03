@@ -29,8 +29,26 @@ import {styles} from './styles';
 import {ArrowForIcon, ArrowForwardIcon} from '@svgs';
 import {ag1, ag2, ag5, ag6, ag7} from '@assets';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  useGetNearbyProperties,
+  UserLocation,
+  useGetInterestedProperties,
+} from '@services';
 
 export const Explore = () => {
+  const [location, setLocation] = useState<UserLocation>({
+    latitude: 37.76816965856596, // Example latitude
+    longitude: -122.4264693260193, // Example longitude
+  });
+  // const location: UserLocation = {
+  //   latitude: 37.76816965856596, // Example latitude
+  //   longitude: -122.4264693260193, // Example longitude
+  // };
+  const {data: nearByProperties} = useGetNearbyProperties(location);
+  const {data: interestedProperties} = useGetInterestedProperties();
+
+  console.log('nearByProperties', nearByProperties);
+  console.log('interestedProperties', interestedProperties);
   const navigation: any = useNavigation();
   const {
     exploreList,
@@ -84,7 +102,7 @@ export const Explore = () => {
   const toggleArea = () => {
     setShowArea(!showArea);
   };
-  const [location, setLocation] = useState(null);
+  
   const allAreas = [
     {label: 'Riyadh', value: 'Riyadh'},
     {label: 'Jeddah', value: 'Jeddah'},

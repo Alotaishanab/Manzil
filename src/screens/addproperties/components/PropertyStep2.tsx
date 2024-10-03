@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -277,6 +278,8 @@ const PropertyStep2 = ({
         break;
     }
 
+    console.log('newErrors on Step2', newErrors);
+
     if (!valid) {
       Vibration.vibrate(50);
       setErrors(newErrors);
@@ -303,7 +306,7 @@ const PropertyStep2 = ({
     const maxLength = 200;
 
     if (text.length < minLength) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         description: `Description must be at least ${minLength} characters long.`,
       }));
@@ -311,7 +314,8 @@ const PropertyStep2 = ({
     }
 
     if (text.length > maxLength) {
-      setErrors((prev) => ({
+      //@ts-ignore
+      setErrors(prev => ({
         ...prev,
         description: `Description cannot exceed ${maxLength} characters.`,
       }));
@@ -484,8 +488,8 @@ const PropertyStep2 = ({
 
   return (
     <ScrollView style={styles.container}>
-       {/* Ad Title */}
-       <View style={styles.inputContainer}>
+      {/* Ad Title */}
+      <View style={styles.inputContainer}>
         <Text style={styles.label}>Ad Title</Text>
         <TopSpace top={10} />
         <TextInput
@@ -493,14 +497,13 @@ const PropertyStep2 = ({
           placeholderTextColor={Colors.light.black}
           style={[
             styles.textInputFullWidth,
-            errors.title && styles.errorBorder,
+            !!errors.title && styles.errorBorder,
           ]}
           value={title}
           onChangeText={handleTitleChange}
         />
         {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
       </View>
-
 
       {renderFieldsForPropertyType()}
 
@@ -510,7 +513,7 @@ const PropertyStep2 = ({
         <TextInput
           style={[
             styles.descriptionInput,
-            errors.description && styles.errorBorder,
+            !!errors.description && styles.errorBorder,
           ]}
           placeholder="Enter a brief description of the property"
           placeholderTextColor={Colors.light.black}
@@ -518,7 +521,9 @@ const PropertyStep2 = ({
           onChangeText={handleDescriptionChange}
           multiline
         />
-        {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
+        {errors.description && (
+          <Text style={styles.errorText}>{errors.description}</Text>
+        )}
       </View>
 
       <CustomButton
@@ -526,7 +531,7 @@ const PropertyStep2 = ({
         borderRadius={30}
         disabled={false}
         handleClick={handleSubmit}
-        title={intl.formatMessage({ id: 'buttons.next' })}
+        title={intl.formatMessage({id: 'buttons.next'})}
         showRightIconButton={true}
       />    
     </ScrollView>
@@ -537,6 +542,10 @@ const PropertyStep2 = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  pickerContainer: {
+    width: '45%',
+    marginBottom: 20,
   },
   row: {
     flexDirection: 'row',
@@ -640,7 +649,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
@@ -672,7 +681,7 @@ const styles = StyleSheet.create({
     borderColor: '#4caf50',
     borderWidth: 2,
     borderRadius: 30, // Makes the selected option more rounded
-    backgroundColor: '#f0f0f0'
+    backgroundColor: '#f0f0f0',
   },
   optionText: {
     fontSize: 16,
@@ -692,7 +701,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  pickerText: {
+    fontSize: 16,
+    color: '#333',
+  },
 });
-
 
 export default PropertyStep2;

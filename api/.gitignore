@@ -90,13 +90,16 @@ celerybeat-schedule.*
 
 # Environments 
 .env 
-.venv 
-env/ 
+.venv
+._venv 
+env/
 venv/ 
+venv/*
+_venv/* 
 ENV/ 
 env.bak/ 
 venv.bak/ 
-
+venv/bin/*
 # mkdocs documentation 
 /site 
 

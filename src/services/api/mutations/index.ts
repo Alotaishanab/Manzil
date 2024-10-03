@@ -6,3 +6,4 @@ export * from './useLogOutUser';
 export * from './useChangeUserPassword';
 export * from './useResetUserPassword';
 export * from './useResendPhoneCode';
+export * from './useAddProperty';

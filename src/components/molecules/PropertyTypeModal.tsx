@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -11,14 +11,14 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import { Colors } from '@colors';
-import { fonts } from '@fonts';
+import {Colors} from '@colors';
+import {fonts} from '@fonts';
 import * as SVGs from '../../assets/svgs'; // Ensure SVGs are correctly imported
 import { useIntl } from '@context';
 import { globalStyles } from '@globalStyles';
 import { Easing } from 'react-native';
 
-const { height: screenHeight } = Dimensions.get('window');
+const {height: screenHeight} = Dimensions.get('window');
 
 export const PropertyTypeModal = ({
   isVisible,
@@ -65,13 +65,14 @@ export const PropertyTypeModal = ({
           resetPositionAnim.start();
         }
       },
-    })
+    }),
   ).current;
 
   useEffect(() => {
     if (isVisible) {
       resetPositionAnim.start();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   const allPropertyType = [
@@ -147,7 +148,10 @@ export const PropertyTypeModal = ({
     },
   ];
 
-  const renderPropertyType = ({ item }: any) => {
+  const renderPropertyType = ({item}: any) => {
+    console.log('Property type item', item);
+
+    // @ts-ignore
     const Icon = SVGs[item?.icon];
     if (!Icon) {
       console.warn(`Icon ${item?.icon} is not found in SVGs.`);
@@ -157,8 +161,7 @@ export const PropertyTypeModal = ({
     return (
       <TouchableOpacity
         onPress={() => handleClick(item?.name)}
-        style={globalStyles.propertTypeCard}
-      >
+        style={globalStyles.propertTypeCard}>
         <Icon width={50} height={50} />
         <Text style={globalStyles.propertyTypeCardText}>{item?.name}</Text>
       </TouchableOpacity>
@@ -173,11 +176,10 @@ export const PropertyTypeModal = ({
             style={[
               styles.modalContainer,
               {
-                transform: [{ translateY: panY }],
+                transform: [{translateY: panY}],
               },
             ]}
-            {...panResponder.panHandlers}
-          >
+            {...panResponder.panHandlers}>
             {/* Draggable Handle */}
             <View style={styles.dragHandleContainer}>
               <View style={styles.dragHandle} />
@@ -193,8 +195,8 @@ export const PropertyTypeModal = ({
               numColumns={3}
               showsVerticalScrollIndicator={false}
               horizontal={false}
-              ListFooterComponent={<View style={{ marginBottom: 10 }} />}
-              ListFooterComponentStyle={{ marginBottom: 20 }}
+              ListFooterComponent={<View style={{marginBottom: 10}} />}
+              ListFooterComponentStyle={{marginBottom: 20}}
               columnWrapperStyle={styles.propertyColumnWrap}
             />
           </Animated.View>

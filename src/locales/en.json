@@ -293,6 +293,7 @@
   "requestPropertyScreen.properties-type.warehouse": "Warehouse",
   "requestPropertyScreen.properties-type.tower": "Tower",
   "requestPropertyScreen.properties-type.floor": "Floor",
+  "requestPropertyScreen.properties-type.villa": "Villa",
   "requestPropertyScreen.select-price": "Price",
   "requestPropertyScreen.bathrooms": "Bathrooms",
   "requestPropertyScreen.bedrooms": "Bedrooms",
@@ -472,6 +473,7 @@
   "form-errors.first-name": "First name is required",
   "form-errors.last-name": "Last name is required",
   "form-errors.description": "Description is required",
+  "errors.addMedia": "Please add at least one media item.",
 
   "buttons.sign-in": "Sign in",
   "buttons.sign-up": "Sign up",

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {Fragment, useState, useRef} from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,14 +7,20 @@ import {
   StyleSheet,
   TouchableOpacity,
   Vibration,
+  Dimensions,
 } from 'react-native';
-import { CustomButton } from '@components'; // Assuming CustomButton is imported properly
-import { fonts } from '@fonts';
-import { Colors } from '@colors';
-import { useIntl } from '@context';
+import {AreaIcon, DoubleTcIcon, ArrowDownIcon} from '@svgs';
+import {fonts} from '@fonts';
+import {Colors} from '@colors';
+import {globalStyles} from '@globalStyles';
+import {useIntl} from '@context';
+import {CustomButton, TopSpace} from '@components';
+import {CompassDirectionModal} from '../../../components/molecules/CompassDirectionModal';
+
+const {height: screenHeight} = Dimensions.get('window');
 
 const PropertyStep4 = ({
-  propertyType, // rent or sale
+  selectedType, // assuming this replaces `propertyType`
   price,
   setPrice,
   rentDuration,
@@ -22,7 +28,7 @@ const PropertyStep4 = ({
   handleNext,
   handleBack,
 }) => {
-  const { intl } = useIntl();
+  const {intl} = useIntl();
   const [errors, setErrors] = useState({});
 
   const handlePriceChange = (text) => {
@@ -31,19 +37,20 @@ const PropertyStep4 = ({
 
     const formattedText = sanitizedText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setPrice(formattedText);
-    setErrors((prev) => ({ ...prev, price: null }));
+    /** @ts-ignore */
+    setErrors((prev) => ({...prev, price: null}));
   };
 
   const handleSubmit = () => {
     let valid = true;
-    const newErrors = {};
+    const newErrors: any = {};
 
     if (!price) {
       newErrors.price = 'Please enter a price.';
       valid = false;
     }
 
-    if (propertyType === 'rent' && !rentDuration) {
+    if (selectedType === 'rent' && !rentDuration) {
       newErrors.rentDuration = 'Please select a rent duration.';
       valid = false;
     }
@@ -58,7 +65,7 @@ const PropertyStep4 = ({
   };
 
   const renderPriceLabel = () => {
-    if (propertyType === 'rent' && rentDuration) {
+    if (selectedType === 'rent' && rentDuration) {
       return ` / ${rentDuration === 'semi-annual' ? '6 months' : rentDuration}`;
     }
     return '';
@@ -70,9 +77,13 @@ const PropertyStep4 = ({
         {/* Price Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>
-            {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
+            {intl.formatMessage({id: 'requestPropertyScreen.select-price'})}
           </Text>
-          <View style={[styles.priceContainer, errors.price && styles.errorBorder]}>
+          <View
+            style={[
+              styles.priceContainer,
+              !!errors.price && styles.errorBorder,
+            ]}>
             <TextInput
               placeholder="2,000,000"
               placeholderTextColor={Colors.light.grey}
@@ -81,39 +92,42 @@ const PropertyStep4 = ({
               value={price}
               onChangeText={handlePriceChange}
             />
-            <Text style={styles.priceLabel}>
-              SAR{renderPriceLabel()}
-            </Text>
+            <Text style={styles.priceLabel}>SAR{renderPriceLabel()}</Text>
           </View>
           {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
         </View>
 
-        {/* Rent Duration Options (if propertyType is rent) */}
-        {propertyType === 'Rent' && (
+        {/* Rent Duration Options (if selectedType is rent) */}
+        {selectedType === 'rent' && (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>
-              {intl.formatMessage({ id: 'requestPropertyScreen.select-rent-duration' })}
+              {intl.formatMessage({
+                id: 'requestPropertyScreen.select-rent-duration',
+              })}
             </Text>
             <View style={styles.rentDurationContainer}>
-              {['monthly', 'quarterly', 'semi-annual', 'annual'].map((duration) => (
-                <TouchableOpacity
-                  key={duration}
-                  style={[
-                    styles.rentDurationButton,
-                    rentDuration === duration && styles.rentDurationSelected,
-                  ]}
-                  onPress={() => setRentDuration(duration)}
-                >
-                  <Text
+              {['monthly', 'quarterly', 'semi-annual', 'annual'].map(
+                (duration) => (
+                  <TouchableOpacity
+                    key={duration}
                     style={[
-                      styles.rentDurationText,
-                      rentDuration === duration && styles.rentDurationTextSelected,
+                      styles.rentDurationButton,
+                      rentDuration === duration && styles.rentDurationSelected,
                     ]}
-                  >
-                    {duration === 'semi-annual' ? 'Semi-Annual' : duration.charAt(0).toUpperCase() + duration.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    onPress={() => setRentDuration(duration)}>
+                    <Text
+                      style={[
+                        styles.rentDurationText,
+                        rentDuration === duration &&
+                          styles.rentDurationTextSelected,
+                      ]}>
+                      {duration === 'semi-annual'
+                        ? 'Semi-Annual'
+                        : duration.charAt(0).toUpperCase() + duration.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
             </View>
             {errors.rentDuration && (
               <Text style={styles.errorText}>{errors.rentDuration}</Text>
@@ -127,7 +141,7 @@ const PropertyStep4 = ({
           borderRadius={30}
           disabled={false}
           handleClick={handleSubmit}
-          title={intl.formatMessage({ id: 'buttons.next' })}
+          title={intl.formatMessage({id: 'buttons.next'})}
           showRightIconButton={true}
         />
       </View>
