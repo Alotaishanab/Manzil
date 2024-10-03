@@ -18,10 +18,10 @@ export const ScrollPicker = ({
   IconComponent,
 }) => {
   const flatListRef = useRef(null);
-  const ITEM_WIDTH = 60; // Smaller for better design
-  const { width } = Dimensions.get('window');
+  const screenWidth = Dimensions.get('window').width;
+  const ITEM_WIDTH = screenWidth * 0.35;  // Slightly larger items for better visibility
 
-  // Scroll animation
+  // Smooth scrolling effect
   const scrollAnimatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -39,6 +39,12 @@ export const ScrollPicker = ({
     { useNativeDriver: false }
   );
 
+  const handleMomentumScrollEnd = (event) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
+    setValue(options[index]);
+    HapticFeedback.trigger('selection');
+  };
+
   const renderItem = ({ item, index }) => {
     const inputRange = [
       (index - 2) * ITEM_WIDTH,
@@ -50,13 +56,13 @@ export const ScrollPicker = ({
 
     const scale = scrollAnimatedValue.interpolate({
       inputRange,
-      outputRange: [0.8, 1.2, 1.4, 1.2, 0.8],
+      outputRange: [0.9, 1.2, 1.5, 1.2, 0.9],
       extrapolate: 'clamp',
     });
 
     const opacity = scrollAnimatedValue.interpolate({
       inputRange,
-      outputRange: [0.3, 0.6, 1, 0.6, 0.3],
+      outputRange: [0.5, 0.8, 1, 0.8, 0.5],
       extrapolate: 'clamp',
     });
 
@@ -74,7 +80,8 @@ export const ScrollPicker = ({
         }}
         style={[
           styles.itemContainer,
-          isSelected && styles.selectedItem, // Highlight selected item
+          isSelected && styles.selectedItem,
+          { width: ITEM_WIDTH },  // Ensure the itemContainer uses the dynamic width
         ]}
       >
         <Animated.Text
@@ -92,17 +99,11 @@ export const ScrollPicker = ({
     );
   };
 
-  const handleMomentumScrollEnd = (event) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
-    setValue(options[index]);
-    HapticFeedback.trigger('selection');
-  };
-
   return (
     <View style={styles.pickerContainer}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.picker}>
-        <IconComponent width={30} height={30} style={styles.icon} />
+        <IconComponent width={40} height={40} style={styles.icon} />
         <Animated.FlatList
           ref={flatListRef}
           data={options}
@@ -116,10 +117,9 @@ export const ScrollPicker = ({
           onScroll={onScroll}
           onMomentumScrollEnd={handleMomentumScrollEnd}
           contentContainerStyle={{
-            paddingHorizontal: (width - ITEM_WIDTH) / 2,
+            paddingHorizontal: (screenWidth - ITEM_WIDTH) / 2,
           }}
         />
-        {/* Overlay to highlight the selected item */}
         <View style={styles.highlight} pointerEvents="none" />
       </View>
     </View>
@@ -128,49 +128,44 @@ export const ScrollPicker = ({
 
 const styles = StyleSheet.create({
   pickerContainer: {
-    width: '45%',
+    width: '45%',  // Adjust width for each picker container
     alignItems: 'center',
     marginBottom: 20,
     backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    paddingVertical: 12,
-    elevation: 4, // Subtle shadow for depth
+    borderRadius: 20,
+    paddingVertical: 16,
+    elevation: 6,
   },
   title: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 10,
     textAlign: 'center',
     color: '#333',
   },
   picker: {
     width: '100%',
-    height: 150,
+    height: 160,
   },
   itemContainer: {
-    width: 50,
     alignItems: 'center',
   },
   selectedItem: {
-    backgroundColor: '#E6F4F1', // Subtle highlight for selected item
-    borderRadius: 8,
-    padding: 5,
+    backgroundColor: '#A0F0E0',
+    borderRadius: 12,
+    padding: 10,
+    borderColor: '#00BFA6',
+    borderWidth: 2,
   },
   itemText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1A1A1A',
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#000000',
   },
   icon: {
-    marginBottom: 10,
+    marginBottom: 15,
+    width: 40,
+    height: 40,
   },
-  highlight: {
-    position: 'absolute',
-    top: 60,
-    bottom: 60,
-    left: 0,
-    right: 0,
-    borderColor: '#00BFA6',
-    borderWidth: 1,
-  },
+
 });
