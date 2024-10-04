@@ -14,6 +14,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F, Q, Subquery
 from .helper import map_property
 from django.shortcuts import get_object_or_404
+from .ownership_validator import verify_property_ownership
 
 
 @api_view(["POST"])
@@ -25,6 +26,16 @@ def add_property(request):
 
         # Validate the data
         if serializer.is_valid():
+
+            ownership_info = serializer.validated_data.get('ownership')
+            ownership_type = serializer.validated_data.get('ownershipType')
+
+            ownership_validation = verify_property_ownership(
+                ownership_info, ownership_type)
+
+            if not ownership_validation:
+                return JsonResponse({'error': 'Ownership validation failed'}, status=400)
+
             coordinates = None
             marker_position = serializer.validated_data.get('markerPosition')
             if marker_position:

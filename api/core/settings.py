@@ -116,6 +116,10 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
+# api.wathq.sa/moj/ api key
+MOJ_API_KEY = os.getenv("MOJ_API_KEY")
+
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
