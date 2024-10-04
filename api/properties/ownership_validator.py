@@ -16,7 +16,7 @@ def verify_property_ownership(ownership_info, ownership_type):
         agency_number = ownership_info.get('agentIDNumber')
         return validate_property_agency_ownership(agency_number)
     elif ownership_type == 'multipleOwners':
-        commercial_reg_number = ownership_info.get('commercialRegNumber')
+        commercial_reg_number = ownership_info.get('ownerIDNumber')
         return validate_property_multiple_ownership(commercial_reg_number)
 
 
