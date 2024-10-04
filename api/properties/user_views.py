@@ -13,6 +13,7 @@ from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F, Q, Subquery
 from .helper import map_property
+from django.shortcuts import get_object_or_404
 
 
 @api_view(["POST"])
@@ -204,3 +205,10 @@ def explore_properties_by_interests(request):
     properties = [map_property(prop) for prop in similar_properties]
 
     return JsonResponse({"properties": properties})
+
+
+@api_view(["GET"])
+def get_property_by_id(request, property_id):
+    property_instance = get_object_or_404(Property, pk=property_id)
+    property_data = map_property(property_instance)
+    return Response(property_data, status=status.HTTP_200_OK)
