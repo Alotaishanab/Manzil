@@ -1,7 +1,22 @@
+from core import settings
+import requests
+
+
 def map_property(property_instance, distance=None):
+
+    address = None
+    if property_instance.coordinates:
+        lat = property_instance.coordinates.y
+        lng = property_instance.coordinates.x
+        address = get_property_address(lat, lng)
+
     property_data = {
         "property_id": property_instance.property_id,
         "property_type": property_instance.property_type,
+        "property_category": property_instance.property_category,
+        "listing_date": property_instance.listing_date,
+        "location": property_instance.location,
+        "area": property_instance.area,
         "title": property_instance.title,
         "description": property_instance.description,
         "price": property_instance.price,
@@ -26,6 +41,7 @@ def map_property(property_instance, distance=None):
         "storage_capacity": property_instance.storage_capacity,
         "number_of_units": property_instance.number_of_units,
         "property_features": property_instance.property_features,
+        "address": address
     }
 
     # Only add distance if it is available (for nearby property searches)
@@ -33,3 +49,26 @@ def map_property(property_instance, distance=None):
         property_data["distance"] = distance.m  # meters
 
     return property_data
+
+
+def get_property_address(lat, lng):
+    api_key = settings.GOOGLE_API_KEY
+    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={api_key}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        data = response.json()
+        if data['status'] == 'OK':
+            address = data['results'][0]['formatted_address']
+            return address
+        else:
+            print(f"Error from Geocoding API: {data['status']}")
+            return None
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+        return None
