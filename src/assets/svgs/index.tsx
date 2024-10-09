@@ -40,6 +40,7 @@ export * from './CctvIcon';
 export * from './DoubleTvIcon';
 export * from './DangerIcon';
 export * from './DriverIcon';
+export * from './DirectionIcon';
 
 // E
 export * from './EmailIcon';
@@ -61,6 +62,7 @@ export * from './ForwardArrowIcon';
 export * from './FullScreenIcon';
 export * from './FalicenseIcon';
 export * from './FeedbackIcon';
+export * from './FootTraficIcon';
 
 // G
 export * from './GoogleIcon';
@@ -69,6 +71,7 @@ export * from './GlobalIcon';
 export * from './GalleryIcon';
 export * from './GraphUpDownIcon';
 export * from './GymIcon';
+export * from './GateIcon';
 
 // H
 export * from './HomeIcon';
@@ -147,6 +150,8 @@ export * from './SendFeedbackIcon';
 export * from './SwimmingpoolIcon';
 export * from './SmokingIcon';
 export * from './StorageIcon';
+export * from './StreetIcon';
+export * from './SewageIcon';
 
 // T
 export * from './TrashIcon';

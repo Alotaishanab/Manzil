@@ -9,18 +9,25 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import {globalStyles} from '../../styles/globalStyles';
-import {fonts} from '../../../src/assets/fonts';
-import {Colors} from '@colors';
 import Share from 'react-native-share';
 import {TopSpace} from '@components';
+import {Colors} from '@colors';
+import {fonts} from '@fonts';
 import {
   AreaIcon,
   BathroomIcon,
   BedIcon,
-  GalleryIcon,
   HeartIcon,
   ShareIcon,
+  LivingRoomIcon,
+  GateIcon,
+  StreetIcon,
+  FootTrafficIcon,
+  StorageIcon,
+  FloorIcon,
+  WaterIcon,
+  ElectricityIcon,
+  SewageIcon,
 } from '@svgs';
 import {useIntl} from '@context';
 
@@ -34,21 +41,20 @@ export const PropertyCard = ({
   marginBottom = 15,
   handleClick = () => {},
 }) => {
-  const {intl} = useIntl();
+  const { intl } = useIntl();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const scrollX = React.useRef(new Animated.Value(0)).current;
 
-  const images = [
-    {uri: 'https://picsum.photos/500/300', id: 1},
-    {uri: 'https://picsum.photos/500/301', id: 2},
-    {uri: 'https://picsum.photos/500/302', id: 3},
-    {uri: 'https://picsum.photos/500/303', id: 4},
-  ];
+  // Debugging: Log the item object to see the full data
+  console.log('PropertyCard item:', item);
+
+  // Combine and filter out invalid media
+  const media = [...(item?.property_images || []), ...(item?.property_videos || [])].filter(m => m?.uri);
 
   const options = {
     title: 'Share this property',
     message: 'Check out this property!',
-    url: images[currentIndex]?.uri,
+    url: media[currentIndex]?.uri,
   };
 
   const handleShare = () => {
@@ -63,6 +69,89 @@ export const PropertyCard = ({
     setCurrentIndex(index);
   };
 
+  // Function to render property icons based on available data
+  const renderPropertyIcons = () => {
+    const { property_type } = item || {}; // Safe access to item
+
+    return (
+      <View style={styles.iconRow}>
+        {item?.area && (
+          <View style={styles.iconWrapper}>
+            <AreaIcon width={24} height={24} />
+            <Text style={styles.countText}>{`${item.area} sq ft`}</Text>
+          </View>
+        )}
+        {property_type === 'House' && (
+          <>
+            {item?.bedrooms && (
+              <View style={styles.iconWrapper}>
+                <BedIcon width={20} height={20} />
+                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
+              </View>
+            )}
+            {item?.bathrooms && (
+              <View style={styles.iconWrapper}>
+                <BathroomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
+              </View>
+            )}
+            {item?.living_rooms && (
+              <View style={styles.iconWrapper}>
+                <LivingRoomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
+              </View>
+            )}
+          </>
+        )}
+        {property_type === 'Land' && (
+          <>
+            {item?.has_water && (
+              <View style={styles.iconWrapper}>
+                <WaterIcon width={28} height={28} />
+                <Text style={styles.countText}>Has Water</Text>
+              </View>
+            )}
+            {item?.has_electricity && (
+              <View style={styles.iconWrapper}>
+                <ElectricityIcon width={28} height={28} />
+                <Text style={styles.countText}>Has Electricity</Text>
+              </View>
+            )}
+            {item?.has_sewage && (
+              <View style={styles.iconWrapper}>
+                <SewageIcon width={28} height={28} />
+                <Text style={styles.countText}>Has Sewage</Text>
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    );
+  };
+
+  // Render the property type and whether it's for sale or rent
+const renderPropertyDetails = () => {
+  const propertyType = item?.property_type?.toLowerCase() || 'unknown';
+
+  let propertyStatus = '';
+
+  // Handle different types of property statuses based on property_type
+  if (propertyType === 'sell') {
+    propertyStatus = 'For Sale';
+  } else if (propertyType === 'rent') {
+    propertyStatus = 'For Rent';
+  } else {
+    propertyStatus = 'Unknown'; // Fallback for unexpected or undefined values
+  }
+
+  return (
+    <Text style={styles.propertyTypeText}>
+      {propertyStatus} {/* Instead of 'Sell - Sell' or 'Rent - Rent', it will now show 'For Sale' or 'For Rent' */}
+    </Text>
+  );
+};
+
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -74,60 +163,64 @@ export const PropertyCard = ({
         },
       ]}>
       <View style={styles.carouselContainer}>
-        <Animated.FlatList
-          data={images}
-          horizontal
-          keyExtractor={(item) => item.id.toString()}
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={ITEM_WIDTH + SPACING}
-          decelerationRate="fast"
-          pagingEnabled
-          onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {x: scrollX}}}],
-            {useNativeDriver: false},
-          )}
-          style={{overflow: 'visible'}}
-          contentContainerStyle={{paddingHorizontal: SPACING}}
-          renderItem={({item, index}) => {
-            const inputRange = [
-              (index - 1) * (ITEM_WIDTH + SPACING),
-              index * (ITEM_WIDTH + SPACING),
-              (index + 1) * (ITEM_WIDTH + SPACING),
-            ];
+        {media.length > 0 ? (
+          <Animated.FlatList
+            data={media}
+            horizontal
+            keyExtractor={(item, index) => item.uri ? `${item.uri}-${index}` : `media-${index}`}
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={ITEM_WIDTH + SPACING}
+            decelerationRate="fast"
+            renderItem={({ item, index }) => {
+              const inputRange = [
+                (index - 1) * (ITEM_WIDTH + SPACING),
+                index * (ITEM_WIDTH + SPACING),
+                (index + 1) * (ITEM_WIDTH + SPACING),
+              ];
 
-            const scale = scrollX.interpolate({
-              inputRange,
-              outputRange: [0.8, 1, 0.8],
-              extrapolate: 'clamp',
-            });
+              const scale = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.8, 1, 0.8],
+                extrapolate: 'clamp',
+              });
 
-            const translateX = scrollX.interpolate({
-              inputRange,
-              outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
-              extrapolate: 'clamp',
-            });
+              const translateX = scrollX.interpolate({
+                inputRange,
+                outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
+                extrapolate: 'clamp',
+              });
 
-            return (
-              <Animated.View
-                style={[
-                  styles.imageContainer,
-                  {
-                    transform: [{scale}, {translateX}],
-                  },
-                ]}>
-                <ImageBackground
-                  source={{uri: item.uri}}
-                  style={styles.imageBgContainer}
-                  imageStyle={styles.imageBgStyle}>
-                  {/* Save Button on Image */}
-                  <View style={styles.favoriteButton}>
-                    <HeartIcon width={30} height={30} />
-                  </View>
-                </ImageBackground>
-              </Animated.View>
-            );
-          }}
-        />
+              return item?.uri ? (
+                <Animated.View
+                  style={[
+                    styles.imageContainer,
+                    {
+                      transform: [{ scale }, { translateX }],
+                    },
+                  ]}
+                >
+                  {item.uri.includes('video') ? (
+                    <View style={styles.videoContainer}>
+                      <Text style={styles.videoText}>Video</Text>
+                    </View>
+                  ) : (
+                    <ImageBackground
+                      source={{ uri: item.uri }}
+                      style={styles.imageBgContainer}
+                      imageStyle={styles.imageBgStyle}
+                    >
+                      <View style={styles.favoriteButton}>
+                        <HeartIcon width={30} height={30} />
+                      </View>
+                    </ImageBackground>
+                  )}
+                </Animated.View>
+              ) : null;
+            }}
+          />
+        ) : (
+          <Text>No media available</Text>
+        )}
       </View>
 
       <TopSpace top={10} />
@@ -135,56 +228,30 @@ export const PropertyCard = ({
       {/* Price and Location */}
       <View style={styles.priceLocationContainer}>
         <Text style={styles.priceText}>
-          {item?.price ? item.price.toLocaleString() : '799,997'}﷼
+          {item?.price ? item.price.toLocaleString() : 'Price not available'} ﷼
         </Text>
         <Text style={styles.placeText}>
-          {item?.location || 'Riyadh, Saudi Arabia'}
+          {item?.location || 'Location not available'}
         </Text>
+        {/* Property Type and Sale/Rent Status */}
+        {renderPropertyDetails()}
       </View>
 
       <TopSpace top={5} />
-      <View style={styles.infoContainer}>
-        <View style={styles.underlineContainer}>
-          <Text style={styles.descriptionText}>
-            {item?.description || 'House for Sale'}
-          </Text>
-        </View>
 
-        <TopSpace top={5} />
-        <View style={styles.iconRow}>
-          <View style={styles.iconWrapper}>
-            <BedIcon width={20} height={20} />
-            <Text style={styles.countText}>
-              {item?.beds ? `${item.beds} Beds` : '2 Beds'}
-            </Text>
-          </View>
-
-          <View style={styles.iconWrapper}>
-            <BathroomIcon width={28} height={28} />
-            <Text style={styles.countText}>
-              {item?.baths ? `${item.baths} Baths` : '2 Baths'}
-            </Text>
-          </View>
-
-          <View style={styles.iconWrapper}>
-            <AreaIcon width={24} height={24} />
-            <Text style={styles.countText}>
-              {item?.size ? item.size : '819 sq ft'}
-            </Text>
-          </View>
-        </View>
-      </View>
+      {/* Render property icons */}
+      {renderPropertyIcons()}
 
       <TopSpace top={20} />
       <View style={styles.footerWrap}>
         <View style={styles.underlineContainer}>
           <Text style={styles.dateText}>
-            {item?.dateAdded ? `Added on ${item.dateAdded}` : 'Added on 09/05/2024'}
+            {item?.listing_date ? `Added on ${new Date(item.listing_date).toLocaleDateString()}` : 'Date not available'}
           </Text>
         </View>
-        <View style={styles.shareButton}>
+        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
           <ShareIcon width={28} height={28} />
-        </View>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -257,10 +324,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.primary.medium,
   },
-  descriptionText: {
+  propertyTypeText: {
     color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
     fontSize: 16,
+    fontFamily: fonts.primary.bold,
+    marginTop: 5,
   },
   countText: {
     marginLeft: 5,

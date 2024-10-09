@@ -44,11 +44,33 @@ export const Explore = () => {
   //   latitude: 37.76816965856596, // Example latitude
   //   longitude: -122.4264693260193, // Example longitude
   // };
+  const [properties, setProperties] = useState([]);
   const {data: nearByProperties} = useGetNearbyProperties(location);
   const {data: interestedProperties} = useGetInterestedProperties();
 
   console.log('nearByProperties', nearByProperties);
   console.log('interestedProperties', interestedProperties);
+
+  // Load nearby properties into state when available
+  useEffect(() => {
+    if (nearByProperties && nearByProperties.properties) {
+      setProperties(nearByProperties.properties);
+    }
+  }, [nearByProperties]);
+
+  const renderItem = ({ item }) => {
+    // Ensure that the item has valid data before rendering
+    if (item && item.property_id) {
+      return (
+        <PropertyCard
+          item={item}
+          handleClick={() => handleCard(item.property_id)}
+        />
+      );
+    }
+    return null;
+  };
+
   const navigation: any = useNavigation();
   const {
     exploreList,
@@ -360,31 +382,19 @@ export const Explore = () => {
 </TouchableOpacity>
 
 
+        <View style={{ flex: 1 }}>
+      {properties.length > 0 ? (
         <FlatList
-          // ListFooterComponent={<View style={{marginBottom: 120}} />}
-          data={exploreList}
-          keyExtractor={item => item?.toString()}
-          // onScroll={handleScroll}
-          scrollEventThrottle={16}
+          data={properties}
+          keyExtractor={(item) => item.property_id.toString()}
+          renderItem={renderItem}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.firstFlatListContentContainerStyle}
-          // refreshControl={
-          //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          // }
-          // onScrollToTop={onRefresh}
-          renderItem={({item, index}: any) => {
-            if (index < 1) {
-              return (
-                <PropertyCard
-                  sliderWidth={'100%'}
-                  item={item}
-                  handleClick={handleCard}
-                />
-              );
-            }
-            return null;
-          }}
+          contentContainerStyle={{ paddingBottom: 120 }}
         />
+      ) : (
+        <Text>No properties available</Text>
+      )}
+    </View>
 
         {/* <TopSpace top={30} /> */}
 
@@ -415,59 +425,23 @@ export const Explore = () => {
 
           <TopSpace top={10} />
 
-          <FlatList
-            horizontal
-            data={agencies}
-            contentContainerStyle={{
-              justifyContent: 'space-between',
-              paddingHorizontal: 4, // Adjust padding as needed
-            }}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({item}) => {
-              return (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('AgencyDetails');
-                  }}
-                  style={[
-                    styles.agencyBtn,
-                  ]}>
-                  <Image source={item} style={styles.agencyImg} />
-                </TouchableOpacity>
-              );
-            }}
-          />
+          <View style={{ flex: 1 }}>
+      {properties.length > 0 ? (
+        <FlatList
+          data={properties}
+          keyExtractor={(item) => item.property_id.toString()}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        />
+      ) : (
+        <Text>No properties available</Text>
+      )}
+    </View>
         </View>
         <TopSpace top={30} />
 
-        <View>
-          <FlatList
-            data={exploreList}
-            keyExtractor={item => item?.toString()}
-            // onScroll={handleScroll}
-            scrollEventThrottle={16}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              marginTop: 3,
-              paddingHorizontal: 3,
-              overflow: 'hidden',
-              width: '100%',
-            }}
-            // onScrollToTop={onRefresh}
-            renderItem={({item, index}: any) => {
-              if (index > 0) {
-                return (
-                  <PropertyCard
-                    sliderWidth={'100%'}
-                    item={item}
-                    handleClick={handleCard}
-                  />
-                );
-              }
-              return null;
-            }}
-          />
-        </View>
+        
       </ScrollView>
       <PropertyTypeModal
         isVisible={showPropertiesModal}
