@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -11,14 +11,13 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import {Colors} from '@colors';
-import {fonts} from '@fonts';
+import { Colors } from '@colors';
+import { fonts } from '@fonts';
 import * as SVGs from '../../assets/svgs'; // Ensure SVGs are correctly imported
 import { useIntl } from '@context';
 import { globalStyles } from '@globalStyles';
-import { Easing } from 'react-native';
 
-const {height: screenHeight} = Dimensions.get('window');
+const { height: screenHeight } = Dimensions.get('window');
 
 export const PropertyTypeModal = ({
   isVisible,
@@ -28,51 +27,41 @@ export const PropertyTypeModal = ({
   const { intl } = useIntl();
   const panY = useRef(new Animated.Value(screenHeight)).current;
 
-  const resetPositionAnim = Animated.timing(panY, {
+  const resetPositionAnim = Animated.spring(panY, {
     toValue: 0,
-    duration: 300,
-    easing: Easing.out(Easing.ease),
+    tension: 50,
+    friction: 10,
     useNativeDriver: true,
   });
 
   const closeAnim = Animated.timing(panY, {
     toValue: screenHeight,
-    duration: 300,
-    easing: Easing.in(Easing.ease),
+    duration: 400,
     useNativeDriver: true,
   });
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        const { target } = evt.nativeEvent;
-
-        // Ignore touches on buttons or interactive elements
-        if (target && target.className === 'RCTText') {
-          return false; // Don't allow PanResponder to intercept the gesture for buttons/texts
-        }
-        return gestureState.dy > 0; // Allow drag when swiping down
-      },
-      onPanResponderMove: (evt, gestureState) => {
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 0, // Enable responder only if swiping down
+      onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
-          panY.setValue(gestureState.dy);
+          panY.setValue(gestureState.dy); // Update the Y position as you drag down
         }
       },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 150) {
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 150) { // Close if dragged more than 150 units
           closeAnim.start(() => toggleModal());
         } else {
-          resetPositionAnim.start();
+          resetPositionAnim.start(); // Otherwise, reset to original position
         }
       },
-    }),
+    })
   ).current;
 
   useEffect(() => {
     if (isVisible) {
-      resetPositionAnim.start();
+      resetPositionAnim.start(); // Reset position when modal becomes visible
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   const allPropertyType = [
@@ -120,7 +109,7 @@ export const PropertyTypeModal = ({
     },
     {
       id: '5',
-      icon: 'ChalatIcon',
+      icon: 'ChaletIcon',
       name: intl.formatMessage({
         id: 'requestPropertyScreen.properties-type.chalet',
       }),
@@ -148,10 +137,7 @@ export const PropertyTypeModal = ({
     },
   ];
 
-  const renderPropertyType = ({item}: any) => {
-    console.log('Property type item', item);
-
-    // @ts-ignore
+  const renderPropertyType = ({ item }: any) => {
     const Icon = SVGs[item?.icon];
     if (!Icon) {
       console.warn(`Icon ${item?.icon} is not found in SVGs.`);
@@ -161,7 +147,8 @@ export const PropertyTypeModal = ({
     return (
       <TouchableOpacity
         onPress={() => handleClick(item?.name)}
-        style={globalStyles.propertTypeCard}>
+        style={globalStyles.propertTypeCard}
+      >
         <Icon width={50} height={50} />
         <Text style={globalStyles.propertyTypeCardText}>{item?.name}</Text>
       </TouchableOpacity>
@@ -176,10 +163,11 @@ export const PropertyTypeModal = ({
             style={[
               styles.modalContainer,
               {
-                transform: [{translateY: panY}],
+                transform: [{ translateY: panY }],
               },
             ]}
-            {...panResponder.panHandlers}>
+            {...panResponder.panHandlers}
+          >
             {/* Draggable Handle */}
             <View style={styles.dragHandleContainer}>
               <View style={styles.dragHandle} />
@@ -195,8 +183,8 @@ export const PropertyTypeModal = ({
               numColumns={3}
               showsVerticalScrollIndicator={false}
               horizontal={false}
-              ListFooterComponent={<View style={{marginBottom: 10}} />}
-              ListFooterComponentStyle={{marginBottom: 20}}
+              ListFooterComponent={<View style={{ marginBottom: 10 }} />}
+              ListFooterComponentStyle={{ marginBottom: 20 }}
               columnWrapperStyle={styles.propertyColumnWrap}
             />
           </Animated.View>

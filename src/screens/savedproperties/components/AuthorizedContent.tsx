@@ -5,7 +5,7 @@ import { Colors } from '@colors';
 import AuthorizedHeader from './AuthorizedHeader';
 import { PropertyCard, TabButtons, TopSpace } from '@components';
 import { useIntl } from '@context';
-import SavedCardSkeleton from './SavedCardSkeleton';
+import SavedCardSkeleton from '../../../components/molecules/CardSkeleton';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '@globalStyles';
 

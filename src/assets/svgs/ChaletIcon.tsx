@@ -9,7 +9,7 @@ import Svg, {
   SvgProps,
 } from 'react-native-svg';
 /* SVGR has dropped some elements not supported by react-native-svg: filter */
-export const ChalatIcon = (
+export const ChaletIcon = (
   props: React.JSX.IntrinsicAttributes &
     React.JSX.IntrinsicClassAttributes<Svg> &
     Pick<

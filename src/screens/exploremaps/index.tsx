@@ -6,7 +6,6 @@ import {
   PropertiesFeaturesModal,
   PropertyTypeModal,
   Screen,
-  PropertyCardSimple,
   TopSpace,
 } from '@components';
 import FilterHeader from '../../../src/components/molecules/FilterHeader';
@@ -422,75 +421,78 @@ const drawYourSearchAreaViewStyle = {
     <View style={{ flex: 1 }}>
       {/* MapView */}
       <View style={{ flex: 1 }}>
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFillObject}
-          mapType={mapType}
-          onMarkerDragEnd={handleToggleDrawing}
-          onPanDrag={drawing ? handleMapPress : () => null}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
-          scrollEnabled={!drawing}
-          zoomEnabled={!drawing}
-        >
-          {coordinates.length > 0 && (
-            <>
-              <Polyline coordinates={coordinates} strokeColor="#307e20" strokeWidth={4} />
-              <Marker
-                coordinate={coordinates[coordinates.length - 1]}
-                pinColor="#307e20"
-              />
-            </>
-          )}
-        </MapView>
-
-        {/* Optional draw area message */}
-        {showDrawArea && (
-          <View style={drawYourSearchAreaViewStyle}>
-            <Text style={styles.drawSearchText}>
-              {intl.formatMessage({ id: 'explore-search.draw-search-area' })}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Overlaying FilterHeader */}
-      <View
-        style={{
-          position: 'absolute',
-          top: insets.top + 10,
-          left: 0,
-          right: 0,
-          paddingHorizontal: 20,
-        }}
-      >
-        <FilterHeader
-          onFocusInput={onFocusInput}
-          handleFilter={() => setShowPropertiesModal(true)}
+  <MapView
+    ref={mapRef}
+    provider={PROVIDER_GOOGLE}
+    style={StyleSheet.absoluteFillObject}
+    mapType={mapType}
+    onMarkerDragEnd={handleToggleDrawing}
+    onPanDrag={drawing ? handleMapPress : () => null}
+    region={{
+      latitude: 37.78825,
+      longitude: -122.4324,
+      latitudeDelta: 0.015,
+      longitudeDelta: 0.0121,
+    }}
+    scrollEnabled={!drawing}
+    zoomEnabled={!drawing}
+  >
+    {coordinates.length > 0 && (
+      <>
+        <Polyline coordinates={coordinates} strokeColor="#307e20" strokeWidth={4} />
+        <Marker
+          coordinate={coordinates[coordinates.length - 1]}
+          pinColor="#307e20"
         />
+      </>
+    )}
+  </MapView>
 
-        {/* Overlay Buttons */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
-        style={[styles.mapLayerBtn, { top: insets.top + 70 }]}
-      >
-        <MapLayerIcon width={30} height={30} />
-      </TouchableOpacity>
+  {/* Optional draw area message */}
+  {showDrawArea && (
+    <View style={drawYourSearchAreaViewStyle}>
+      <Text style={styles.drawSearchText}>
+        {intl.formatMessage({ id: 'explore-search.draw-search-area' })}
+      </Text>
+    </View>
+  )}
+</View>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={handleToggleDrawing}
-        style={[styles.mapLayerBtn, { top: insets.top + 120 }]}
-      >
-        <PenIcon width={30} height={30} />
-      </TouchableOpacity>
-      </View>
+{/* Overlaying FilterHeader */}
+<View
+  style={{
+    position: 'absolute',
+    top: insets.top + 10,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+  }}
+>
+  <FilterHeader
+    onFocusInput={onFocusInput}
+    handleFilter={() => setShowPropertiesModal(true)}
+  />
+
+  {/* Overlay Buttons */}
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
+    style={[styles.mapLayerBtn, { top: insets.top + 70 }]}
+  >
+    <MapLayerIcon width={30} height={30} />
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={handleToggleDrawing}
+    style={[styles.mapLayerBtn, { top: insets.top + 120 }]}
+  >
+    <PenIcon width={30} height={30} />
+  </TouchableOpacity>
+
+</View>
+
+
 
       
 

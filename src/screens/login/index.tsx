@@ -16,10 +16,12 @@ import { globalStyles } from '../../../src/styles/globalStyles';
 import { useNavigation } from '@react-navigation/native';
 import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
 import { useLoginUser } from '@services';
+// Importing AsyncHelper for token handling
+import AsyncHelper from '../../../src/helpers/asyncHelper'; 
 
 export const Login = () => {
   const { intl } = useIntl();
-   const { mutate: login } = useLoginUser();
+  const { mutate: login } = useLoginUser();
   const navigation: any = useNavigation();
   const { loginSchema } = useValidations();
 
@@ -34,7 +36,7 @@ export const Login = () => {
     formState: { isValid },
   } = useForm<FormData>({
     defaultValues: {
-      email: 'zulqarnain.fastian@gmail.com',
+      email: 'Alotaishanab@gmail.com',
       password: 'Password@123',
     },
     mode: 'onSubmit',
@@ -42,20 +44,26 @@ export const Login = () => {
   });
 
   const handleLogin = (data: FormData) => {
-    // Your login logic here
     const { email, password } = data;
     if (isValid) {
-      login({ email, password }, {
-        onSuccess: () => {
-          // Navigate on success
-          navigation.navigate('BottomTabNavigator');
-          showCustomFlashMessage('Login successful');
-        },
-        onError: () => {
-          // Handle login failure
-          showCustomFlashMessage('Login failed. Please try again.');
+      login(
+        { email, password },
+        {
+          onSuccess: async (response) => {
+            // Save token using AsyncHelper
+            await AsyncHelper.setToken(response.token.access);
+            await AsyncHelper.setRefreshToken(response.token.refresh);
+
+            // Navigate on success
+            navigation.navigate('BottomTabNavigator');
+            showCustomFlashMessage('Login successful');
+          },
+          onError: () => {
+            // Handle login failure
+            showCustomFlashMessage('Login failed. Please try again.');
+          },
         }
-      });
+      );
     }
   };
 
@@ -63,13 +71,13 @@ export const Login = () => {
   const togglePassword = () => {
     setHidePassword(!hidePassword);
   };
-  
+
   const handleGoogleLogin = () => {};
   const handleAppleLogin = () => {};
   const handleRegister = () => {
     navigation.navigate('Signup');
   };
-  
+
   const handleForgot = () => {
     navigation.navigate('ForgotPassword');
   };
@@ -78,7 +86,7 @@ export const Login = () => {
     <Screen showKeyboardAware={true}>
       <HeaderBackButtonTitle text={intl.formatMessage({ id: 'signinScreen.header' })} />
       <TopSpace top={50} />
-      
+
       <Text style={styles.inputTitleStyle}>
         {intl.formatMessage({ id: 'signinScreen.email-address' })}
       </Text>
@@ -108,7 +116,6 @@ export const Login = () => {
         keyboardType="default"
         returnKeyType="done"
         isRequired={true}
-        //secureTextEntry={true}
         placeholderColor={''}
         maxLength={70}
         multiLine={false}
@@ -127,21 +134,21 @@ export const Login = () => {
         title={intl.formatMessage({ id: 'buttons.sign-in' })}
         showRightIconButton={true}
       />
-      
+
       <TopSpace top={20} />
-      
+
       <TouchableOpacity onPress={handleForgot} style={globalStyles.centeredBtn}>
         <Text style={styles.forgotPasswordText}>
           {intl.formatMessage({ id: 'buttons.forgot-password?' })}
         </Text>
       </TouchableOpacity>
-      
+
       <TopSpace top={10} />
-      
+
       <Text style={styles.orText}>
         {intl.formatMessage({ id: 'signinScreen.or' })}
       </Text>
-      
+
       <TopSpace top={10} />
 
       <View
@@ -168,9 +175,9 @@ export const Login = () => {
           disabled={false}
         />
       </View>
-      
+
       <TopSpace top={50} />
-      
+
       <View style={[globalStyles.simpleRow, { justifyContent: 'center' }]}>
         <Text style={styles.forgotPasswordText}>
           {intl.formatMessage({ id: 'signinScreen.no-account' })}

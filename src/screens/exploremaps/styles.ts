@@ -28,15 +28,33 @@ export const styles = StyleSheet.create({
     fontSize: 14,
   },
   mapLayerBtn: {
-    backgroundColor: Colors.light.background,
-    height: 45,
-    justifyContent: 'center',
+    backgroundColor: Colors.light.primary, // Your button style
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: 'center',
-    width: 45,
-    borderRadius: 8,
-    right: 10,
-    top: 10,
-    alignSelf: 'flex-end',
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 20,
+  },
+  filterButton: {
+    backgroundColor: Colors.light.primary, // Adjust to match your FilterHeader
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10, // This will place it right under the filter header
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  filterButtonText: {
+    color: Colors.light.text, // Adjust to match your text style
+    fontSize: 16,
+    fontFamily: 'YourFont', // Replace with your font for consistency
   },
 
   container: {

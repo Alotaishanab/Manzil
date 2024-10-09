@@ -31,7 +31,7 @@ export * from './ClockIcon';
 export * from './Close';
 
 export * from './CloseIcon';
-export * from './ChalatIcon';
+export * from './ChaletIcon';
 export * from './CheckedWindow';
 export * from './CctvIcon';
 

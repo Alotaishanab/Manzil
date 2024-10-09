@@ -9,6 +9,7 @@ import {
   PropertyTypeModal,
   Screen,
   TopSpace,
+  CardSkeleton,
 } from '@components';
 import {useExploreProps} from './useExploreProps';
 import FilterHeader from '../../../src/components/molecules/FilterHeader';
@@ -40,11 +41,10 @@ export const Explore = () => {
     latitude: 37.76816965856596, // Example latitude
     longitude: -122.4264693260193, // Example longitude
   });
-  // const location: UserLocation = {
-  //   latitude: 37.76816965856596, // Example latitude
-  //   longitude: -122.4264693260193, // Example longitude
-  // };
+  
   const [properties, setProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // State for loading
+  
   const {data: nearByProperties} = useGetNearbyProperties(location);
   const {data: interestedProperties} = useGetInterestedProperties();
 
@@ -55,6 +55,9 @@ export const Explore = () => {
   useEffect(() => {
     if (nearByProperties && nearByProperties.properties) {
       setProperties(nearByProperties.properties);
+      setIsLoading(false);  // Set loading to false once data is fetched
+    } else {
+      setIsLoading(true);  // Keep loading true while fetching
     }
   }, [nearByProperties]);
 
@@ -382,8 +385,16 @@ export const Explore = () => {
 </TouchableOpacity>
 
 
-        <View style={{ flex: 1 }}>
-      {properties.length > 0 ? (
+<View style={{ flex: 1 }}>
+      {isLoading ? (
+        // Render skeleton loader while loading
+        <>
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </>
+      ) : properties.length > 0 ? (
+        // Render the property list once loading is complete
         <FlatList
           data={properties}
           keyExtractor={(item) => item.property_id.toString()}

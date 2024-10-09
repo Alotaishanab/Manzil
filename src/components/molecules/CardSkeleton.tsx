@@ -3,7 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {Colors} from '@colors';
 
-const SavedCardSkeleton = () => {
+export const CardSkeleton = () => {
   return (
     <View style={skeletonStyle.skeletonWrapper}>
       <SkeletonPlaceholder
@@ -126,7 +126,7 @@ const SavedCardSkeleton = () => {
   );
 };
 
-export default SavedCardSkeleton;
+export default CardSkeleton;
 
 const skeletonStyle = StyleSheet.create({
   skeletonWrapper: {
