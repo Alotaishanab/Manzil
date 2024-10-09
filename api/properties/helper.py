@@ -2,6 +2,10 @@ def map_property(property_instance, distance=None):
     property_data = {
         "property_id": property_instance.property_id,
         "property_type": property_instance.property_type,
+        "property_category": property_instance.property_category,
+        "listing_date": property_instance.listing_date,
+        "location": property_instance.location,
+        "area": property_instance.area,
         "title": property_instance.title,
         "description": property_instance.description,
         "price": property_instance.price,
