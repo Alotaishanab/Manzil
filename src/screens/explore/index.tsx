@@ -41,9 +41,20 @@ export const Explore = () => {
     latitude: 37.76816965856596, // Example latitude
     longitude: -122.4264693260193, // Example longitude
   });
+
+  const [favorites, setFavorites] = useState({});
+
+  // Toggle favorite status for a specific property
+  const handleFavoriteClick = (propertyId) => {
+    setFavorites((prevFavorites) => ({
+      ...prevFavorites,
+      [propertyId]: !prevFavorites[propertyId], // Toggle favorite status
+    }));
+  };
   
   const [properties, setProperties] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // State for loading
+  const [isLoading, setIsLoading] = useState(true); 
+  const [mediaLoading, setMediaLoading] = useState(true); 
   
   const {data: nearByProperties} = useGetNearbyProperties(location);
   const {data: interestedProperties} = useGetInterestedProperties();
@@ -51,28 +62,33 @@ export const Explore = () => {
   console.log('nearByProperties', nearByProperties);
   console.log('interestedProperties', interestedProperties);
 
-  // Load nearby properties into state when available
   useEffect(() => {
     if (nearByProperties && nearByProperties.properties) {
       setProperties(nearByProperties.properties);
-      setIsLoading(false);  // Set loading to false once data is fetched
+      setIsLoading(false); // Stop main loading when data is fetched
     } else {
-      setIsLoading(true);  // Keep loading true while fetching
+      setIsLoading(true); // Keep loading while fetching data
     }
   }, [nearByProperties]);
 
+  const handleMediaLoadComplete = () => {
+    setMediaLoading(false); // Stop media loading once all media is loaded
+  };
+
   const renderItem = ({ item }) => {
-    // Ensure that the item has valid data before rendering
     if (item && item.property_id) {
       return (
         <PropertyCard
           item={item}
-          handleClick={() => handleCard(item.property_id)}
+          isFavorite={favorites[item.property_id]} // Check if the property is favorited
+          handleFavoriteClick={() => handleFavoriteClick(item.property_id)} // Pass the favorite handler
         />
       );
     }
     return null;
   };
+
+
 
   const navigation: any = useNavigation();
   const {
@@ -387,14 +403,12 @@ export const Explore = () => {
 
 <View style={{ flex: 1 }}>
       {isLoading ? (
-        // Render skeleton loader while loading
         <>
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
         </>
       ) : properties.length > 0 ? (
-        // Render the property list once loading is complete
         <FlatList
           data={properties}
           keyExtractor={(item) => item.property_id.toString()}
@@ -437,7 +451,13 @@ export const Explore = () => {
           <TopSpace top={10} />
 
           <View style={{ flex: 1 }}>
-      {properties.length > 0 ? (
+      {isLoading ? (
+        <>
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </>
+      ) : properties.length > 0 ? (
         <FlatList
           data={properties}
           keyExtractor={(item) => item.property_id.toString()}

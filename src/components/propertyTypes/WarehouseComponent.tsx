@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import ScrollPicker from '../molecules/ScrollPicker';
+import { ScrollPicker } from '../molecules/ScrollPicker';
 import { StorageIcon } from '@svgs'; // Assume these icons exist
 
 interface WarehouseProps {

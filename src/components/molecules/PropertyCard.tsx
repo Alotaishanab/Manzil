@@ -1,5 +1,4 @@
-import React from 'react';
-import {
+import React, { useState, useEffect } from 'react';import {
   Animated,
   FlatList,
   ImageBackground,
@@ -9,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Share from 'react-native-share';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; // Make sure this package is installed
@@ -20,6 +20,7 @@ import {
   BathroomIcon,
   BedIcon,
   HeartIcon,
+  HeartOutlineIcon,
   ShareIcon,
   LivingRoomIcon,
   GateIcon,
@@ -42,13 +43,18 @@ export const PropertyCard = ({
   item,
   marginBottom = 15,
   handleClick = () => {},
-  isLoading = false, // Added isLoading prop to show the skeleton loader
+  isFavorite = false, // Whether the property is favorited
+  handleFavoriteClick = () => {}, // To toggle favorite status
 }) => {
   const {intl} = useIntl();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const scrollX = React.useRef(new Animated.Value(0)).current;
 
-  const media = [...(item?.property_images || []), ...(item?.property_videos || [])].filter(m => m?.uri);
+
+
+  const media = [...(item?.property_images || []), ...(item?.property_videos || [])].filter(Boolean);
+
+
 
   const options = {
     title: 'Share this property',
@@ -68,20 +74,28 @@ export const PropertyCard = ({
     setCurrentIndex(index);
   };
 
-  const renderPropertyIcons = () => {
-    const {property_type} = item || {}; // Safe access to item
+  const formatPrice = (price) => {
+    // Format the price and remove .00 if exists
+    return parseFloat(price).toLocaleString();
+  };
 
+
+  const renderPropertyIcons = () => {
+    const { property_category } = item || {}; // Use property_category instead of property_type
+    
     return (
       <View style={styles.iconRow}>
-        {item?.area && (
-          <View style={styles.iconWrapper}>
-            <AreaIcon width={24} height={24} />
-            <Text style={styles.countText}>{`${item.area} sq ft`}</Text>
-          </View>
-        )}
+        {/* Row 1: Area */}
+      {item?.area && (
+        <View style={styles.iconWrapper}>
+          <AreaIcon width={24} height={24} />
+          <Text style={styles.countText}>{`${parseInt(item.area).toLocaleString()} sq ft`}</Text>
+        </View>
+      )}
 
+  
         {/* House specific icons */}
-        {property_type === 'House' && (
+        {property_category === 'House' && (
           <>
             {item?.bedrooms && (
               <View style={styles.iconWrapper}>
@@ -103,9 +117,9 @@ export const PropertyCard = ({
             )}
           </>
         )}
-
+  
         {/* Land specific icons */}
-        {property_type === 'Land' && (
+        {property_category === 'Land' && (
           <>
             {item?.has_water && (
               <View style={styles.iconWrapper}>
@@ -138,9 +152,9 @@ export const PropertyCard = ({
             )}
           </>
         )}
-
+  
         {/* Warehouse specific icons */}
-        {property_type === 'Warehouse' && (
+        {property_category === 'Warehouse' && (
           <>
             {item?.number_of_gates && (
               <View style={styles.iconWrapper}>
@@ -156,9 +170,111 @@ export const PropertyCard = ({
             )}
           </>
         )}
-
+  
+        {/* Office specific icons */}
+        {property_category === 'Office' && (
+          <>
+            {item?.floors && (
+              <View style={styles.iconWrapper}>
+                <FloorIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
+              </View>
+            )}
+            {item?.living_rooms && (
+              <View style={styles.iconWrapper}>
+                <LivingRoomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
+              </View>
+            )}
+          </>
+        )}
+  
+        {/* Chalet specific icons */}
+        {property_category === 'Chalet' && (
+          <>
+            {item?.bedrooms && (
+              <View style={styles.iconWrapper}>
+                <BedIcon width={20} height={20} />
+                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
+              </View>
+            )}
+            {item?.bathrooms && (
+              <View style={styles.iconWrapper}>
+                <BathroomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
+              </View>
+            )}
+            {item?.living_rooms && (
+              <View style={styles.iconWrapper}>
+                <LivingRoomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
+              </View>
+            )}
+          </>
+        )}
+  
+        {/* Farmhouse specific icons */}
+        {property_category === 'Farmhouse' && (
+          <>
+            {item?.bedrooms && (
+              <View style={styles.iconWrapper}>
+                <BedIcon width={20} height={20} />
+                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
+              </View>
+            )}
+            {item?.bathrooms && (
+              <View style={styles.iconWrapper}>
+                <BathroomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
+              </View>
+            )}
+            {item?.living_rooms && (
+              <View style={styles.iconWrapper}>
+                <LivingRoomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
+              </View>
+            )}
+          </>
+        )}
+  
+        {/* Tower specific icons */}
+        {property_category === 'Tower' && (
+          <>
+            {item?.floors && (
+              <View style={styles.iconWrapper}>
+                <FloorIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
+              </View>
+            )}
+            {item?.number_of_units && (
+              <View style={styles.iconWrapper}>
+                <BedIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
+              </View>
+            )}
+          </>
+        )}
+  
+        {/* Workers' Residence specific icons */}
+        {property_category === 'Workers Residence' && (
+          <>
+            {item?.number_of_units && (
+              <View style={styles.iconWrapper}>
+                <BedIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
+              </View>
+            )}
+            {item?.living_rooms && (
+              <View style={styles.iconWrapper}>
+                <LivingRoomIcon width={28} height={28} />
+                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
+              </View>
+            )}
+          </>
+        )}
+  
         {/* Shop specific icons */}
-        {property_type === 'Shop' && (
+        {property_category === 'Shop' && (
           <>
             {item?.foot_traffic && (
               <View style={styles.iconWrapper}>
@@ -168,209 +284,112 @@ export const PropertyCard = ({
             )}
           </>
         )}
-
-        {/* Office specific icons */}
-        {property_type === 'Office' && (
-          <>
-            {item?.floors && (
-              <View style={styles.iconWrapper}>
-                <FloorIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Farmhouse specific icons */}
-        {property_type === 'Farmhouse' && (
-          <>
-            {item?.bedrooms && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={20} height={20} />
-                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
-              </View>
-            )}
-            {item?.bathrooms && (
-              <View style={styles.iconWrapper}>
-                <BathroomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Tower specific icons */}
-        {property_type === 'Tower' && (
-          <>
-            {item?.floors && (
-              <View style={styles.iconWrapper}>
-                <FloorIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
-              </View>
-            )}
-            {item?.number_of_units && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Chalet specific icons */}
-        {property_type === 'Chalet' && (
-          <>
-            {item?.bedrooms && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={20} height={20} />
-                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
-              </View>
-            )}
-            {item?.bathrooms && (
-              <View style={styles.iconWrapper}>
-                <BathroomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Workers' Residence specific icons */}
-        {property_type === 'Workers Residence' && (
-          <>
-            {item?.number_of_units && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
       </View>
     );
   };
+  
+  
 
   const renderPropertyDetails = () => {
-    const propertyType = item?.property_type?.toLowerCase() || 'unknown';
-
-    let propertyStatus = '';
-    if (propertyType.includes('sale')) {
-      propertyStatus = 'For Sale';
-    } else if (propertyType.includes('rent')) {
-      propertyStatus = 'For Rent';
-    } else {
-      propertyStatus = 'Unknown';
-    }
+    const propertyCategory = item?.property_category || 'Home';
+    const propertyType = item?.property_type?.toLowerCase() || 'sale'; // Assuming default 'sale'
+    const saleOrRent = propertyType === 'sell' ? 'For Sale' : 'For Rent';
 
     return (
       <Text style={styles.propertyTypeText}>
-        {`${item?.title || 'Property'} - ${propertyStatus}`}
+        {`${propertyCategory} ${saleOrRent}`}
       </Text>
     );
   };
 
-  if (isLoading) {
-    // Skeleton loader during loading
+  const renderContent = () => {
     return (
-      <SkeletonPlaceholder>
-        <View style={styles.skeletonCard}>
-          <View style={styles.skeletonImage} />
-          <View style={styles.skeletonText} />
-          <View style={styles.skeletonText} />
-          <View style={styles.skeletonText} />
-        </View>
-      </SkeletonPlaceholder>
+      <View style={styles.propertyContainer}>
+        {/* Property Details */}
+        {renderPropertyDetails()}
+  
+        {/* Property Icons */}
+        {renderPropertyIcons()}
+      </View>
     );
-  }
+  };
+
+  const getDateInEnglish = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   return (
     <TouchableHighlight
-      style={[
-        styles.mainWrapper,
-        {
-          marginBottom: marginBottom,
-        },
-      ]}
       onPress={handleClick}
       underlayColor="rgba(0, 0, 0, 0.05)"
+      style={[styles.mainWrapper]}
     >
       <View>
+        {/* Image Carousel */}
         <View style={styles.carouselContainer}>
           {media.length > 0 ? (
             <Animated.FlatList
               data={media}
               horizontal
-              keyExtractor={(item, index) => item.uri ? `${item.uri}-${index}` : `media-${index}`}
+              keyExtractor={(item, index) => `${item}-${index}`}
               showsHorizontalScrollIndicator={false}
               snapToInterval={ITEM_WIDTH + SPACING}
               decelerationRate="fast"
-              renderItem={({item, index}) => {
+              onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                { useNativeDriver: true }
+              )}
+              renderItem={({ item, index }) => {
                 const inputRange = [
                   (index - 1) * (ITEM_WIDTH + SPACING),
                   index * (ITEM_WIDTH + SPACING),
                   (index + 1) * (ITEM_WIDTH + SPACING),
                 ];
-
+  
                 const scale = scrollX.interpolate({
                   inputRange,
                   outputRange: [0.8, 1, 0.8],
                   extrapolate: 'clamp',
                 });
-
+  
                 const translateX = scrollX.interpolate({
                   inputRange,
                   outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
                   extrapolate: 'clamp',
                 });
-
-                return item?.uri ? (
+  
+                return item ? (
                   <Animated.View
                     style={[
                       styles.imageContainer,
-                      {
-                        transform: [{scale}, {translateX}],
-                      },
+                      { transform: [{ scale }, { translateX }] },
                     ]}
                   >
-                    {item.uri.includes('video') ? (
-                      <View style={styles.videoContainer}>
-                        <Text style={styles.videoText}>Video</Text>
-                      </View>
-                    ) : (
+                    {/* TouchableOpacity for the image click action */}
+                    <TouchableOpacity onPress={() => console.log('Image clicked')} activeOpacity={0.8}>
                       <ImageBackground
-                        source={{uri: item.uri}}
+                        source={{ uri: item }}
                         style={styles.imageBgContainer}
                         imageStyle={styles.imageBgStyle}
                       >
-                        <View style={styles.favoriteButton}>
-                          <HeartIcon width={30} height={30} />
-                        </View>
+                        {/* TouchableOpacity for the favorite button */}
+                        <TouchableOpacity
+                          onPress={handleFavoriteClick}
+                          style={styles.favoriteButton}
+                          activeOpacity={0.7}
+                        >
+                          {isFavorite ? (
+                            <HeartIcon width={30} height={30} />
+                          ) : (
+                            <HeartOutlineIcon width={30} height={30} />
+                          )}
+                        </TouchableOpacity>
                       </ImageBackground>
-                    )}
+                    </TouchableOpacity>
                   </Animated.View>
                 ) : null;
               }}
@@ -379,50 +398,36 @@ export const PropertyCard = ({
             <Text>No media available</Text>
           )}
         </View>
-
-        <TopSpace top={10} />
-
-        {/* Price and Location with Featured label */}
-        <View style={styles.priceLocationContainer}>
-          <View style={styles.priceFeaturedContainer}>
-            <Text style={styles.priceText}>
-              {item?.price ? item.price.toLocaleString() : 'Price not available'} ﷼
+  
+        {/* Property Details */}
+        <View style={styles.contentWrapper}>
+          <View style={styles.priceLocationContainer}>
+            <View style={styles.priceFeaturedContainer}>
+              <Text style={styles.priceText}>
+                {item?.price ? `${formatPrice(item.price)} ﷼` : 'Price not available'}
+              </Text>
+            </View>
+            <Text style={styles.placeText}>
+              {item?.address || 'Address not available'}
             </Text>
-            {item?.is_featured && (
-              <>
-                <View style={styles.separator} />
-                <Text style={styles.featuredText}>Featured</Text>
-              </>
-            )}
+            {renderPropertyDetails()}
+            {renderPropertyIcons()}
           </View>
-          <Text style={styles.placeText}>
-            {item?.location || 'Location not available'}
-          </Text>
-          {renderPropertyDetails()}
-        </View>
-
-        <TopSpace top={5} />
-
-        {/* Render property icons */}
-        {renderPropertyIcons()}
-
-        <TopSpace top={20} />
-        <View style={styles.footerWrap}>
-          <View style={styles.underlineContainer}>
+  
+          <View style={styles.footerWrap}>
             <Text style={styles.dateText}>
-              {item?.listing_date
-                ? `Added on ${new Date(item.listing_date).toLocaleDateString()}`
-                : 'Date not available'}
+              {item?.listing_date ? `Added on ${new Date(item.listing_date).toLocaleDateString('en-US')}` : 'Date not available'}
             </Text>
+            <TouchableOpacity onPress={() => Share.open({ message: 'Check out this property!' })} style={styles.shareButton}>
+              <ShareIcon width={28} height={28} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-            <ShareIcon width={28} height={28} />
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableHighlight>
-  );
+  );  
 };
+
 
 const styles = StyleSheet.create({
   mainWrapper: {
@@ -483,7 +488,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   featuredText: {
-    color: Colors.light.featuredGold,
+    color: Colors.light.serialNoGreen,
     fontSize: 16,
     fontFamily: fonts.primary.bold,
   },
@@ -509,16 +514,21 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     fontSize: 14,
   },
+  propertyContainer: {
+    flexDirection: 'column', // Stack details and icons vertically
+    alignSelf: 'flex-start',  // Align content to the left
+    marginTop: 4,  // Add some space between the header and the first element
+  },
   iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 5,
+    flexDirection: 'row',  // Icons in a row
+    alignItems: 'center',  // Align icons and text vertically
+    marginTop: 10,  // Space between the text and the icons
+    flexWrap: 'wrap',  // Allow icons to wrap if there are many
   },
   iconWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: 'row',  // Icon and text side by side
+    alignItems: 'center',  // Vertically align icons and text
+    marginRight: 20,  // Space between icons
   },
   footerWrap: {
     flexDirection: 'row',
@@ -550,6 +560,13 @@ const styles = StyleSheet.create({
     height: 20,
     marginTop: 10,
     borderRadius: 4,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap', // Allows wrapping icons to the next row
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
 });
 

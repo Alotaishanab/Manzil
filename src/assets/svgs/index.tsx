@@ -80,6 +80,7 @@ export * from './HornseyIcon';
 export * from './HouseIcon';
 export * from './HelpIcon';
 export * from './HeartIcon';
+export * from './HeartOutlineIcon';
 
 //I
 export * from './InquiryIcon';

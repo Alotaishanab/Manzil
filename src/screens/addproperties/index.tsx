@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Vibration,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {Colors} from '@colors';
@@ -90,8 +89,8 @@ export const AddProperties = () => {
   });
 
   const [independentFields, setIndependentFields] = useState({
-    instrumentNumber: '',
-    ownerIDNumber: '',
+    instrumentNumber: '718703000570',
+    ownerIDNumber: '1003128350',
   });
 
   const [multipleOwnersFields, setMultipleOwnersFields] = useState({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BedIcon, BathroomIcon, LivingRoomIcon } from '@svgs'; // Assuming you have icons for these
-import ScrollPicker from '../molecules/ScrollPicker';
+import { ScrollPicker } from '../molecules/ScrollPicker';
 
 export const TowerComponent = ({
   rooms,

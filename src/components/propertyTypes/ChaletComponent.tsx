@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BedIcon, BathroomIcon, LivingRoomIcon } from '@svgs';
-import ScrollPicker from '../molecules/ScrollPicker';
+import { ScrollPicker } from '../molecules/ScrollPicker';
 
 export const ChaletComponent = ({
   beds,
