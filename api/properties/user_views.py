@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from . import user_serializers
-from .models import Property, PropertyView, PropertyShare, PropertyClick, PropertyInquiry
+from .models import Property, PropertyView, PropertyShare, PropertyClick, PropertyInquiry, SavedProperties
 from .utils import upload_to_s3
 from django.contrib.gis.geos import Point
 from django.db import connection
@@ -15,6 +15,7 @@ from django.db.models import F, Q, Subquery
 from .helper import map_property
 from django.shortcuts import get_object_or_404
 from .ownership_validator import verify_property_ownership
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @api_view(["POST"])
@@ -220,6 +221,31 @@ def explore_properties_by_interests(request):
 
 @api_view(["GET"])
 def get_property_by_id(request, property_id):
-    property_instance = get_object_or_404(Property, pk=property_id)
-    property_data = map_property(property_instance)
-    return Response(property_data, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        property_instance = get_object_or_404(Property, pk=property_id)
+        property_data = map_property(property_instance)
+        return Response(property_data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def save_property(request, property_id):
+    if request.method == 'POST':
+
+        user = request.user
+        try:
+            property_obj = Property.objects.get(property_id=property_id)
+        except ObjectDoesNotExist:
+            return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        if property_obj.user_id == user.user_id:
+            return Response({"error": "You cannot save your own property"}, status=status.HTTP_400_BAD_REQUEST)
+        if SavedProperties.objects.filter(user=user, property=property_obj).exists():
+            return Response({"error": "This property is already saved"}, status=status.HTTP_409_CONFLICT)
+
+        saved_property = SavedProperties.objects.create(
+            user=user,
+            property=property_obj
+        )
+        return Response({
+            "message": "Property saved successfully",
+            "saved_id": saved_property.saved_id
+        }, status=status.HTTP_201_CREATED)
