@@ -151,3 +151,20 @@ def change_user_password(request):
                 return Response({"message": "Password changed"}, status=status.HTTP_200_OK)
             else:
                 return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+def get_user_info(request):
+    if request.method == 'GET':
+        user = request.user
+
+        if not user:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        user_data = {
+            "id": user.user_id,
+            "email": user.email,
+            "name": user.name,
+        }
+
+        return Response(user_data, status=status.HTTP_200_OK)

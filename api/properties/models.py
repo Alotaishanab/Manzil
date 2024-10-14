@@ -180,3 +180,18 @@ class PropertyInquiry(models.Model):
     inquiry_date = models.DateTimeField(auto_now_add=True)
     inquiry_type = models.CharField(max_length=50)  # Type of inquiry
     inquiry_details = models.TextField(blank=True)
+
+
+class SavedProperties(models.Model):
+    saved_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='saved_properties')
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name='saved_by_users')
+    saved_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'property')
+
+    def __str__(self):
+        return f"User {self.user_id} saved Property {self.property_id} on {self.saved_date}"
