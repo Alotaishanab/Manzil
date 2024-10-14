@@ -15,6 +15,7 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; // Make sur
 import {TopSpace} from '@components';
 import {Colors} from '@colors';
 import {fonts} from '@fonts';
+import HapticFeedback from 'react-native-haptic-feedback';
 import {
   AreaIcon,
   BathroomIcon,
@@ -49,6 +50,14 @@ export const PropertyCard = ({
   const {intl} = useIntl();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const scrollX = React.useRef(new Animated.Value(0)).current;
+
+  const handlePress = () => {
+    // Trigger haptic feedback when pressed
+    HapticFeedback.trigger('selection');
+
+    // Call the original favorite click handler
+    handleFavoriteClick();
+  };
 
 
 
@@ -378,16 +387,16 @@ export const PropertyCard = ({
                       >
                         {/* TouchableOpacity for the favorite button */}
                         <TouchableOpacity
-                          onPress={handleFavoriteClick}
-                          style={styles.favoriteButton}
-                          activeOpacity={0.7}
-                        >
-                          {isFavorite ? (
-                            <HeartIcon width={30} height={30} />
-                          ) : (
-                            <HeartOutlineIcon width={30} height={30} />
-                          )}
-                        </TouchableOpacity>
+      onPress={handlePress}
+      style={styles.favoriteButton}
+      activeOpacity={0.7}
+    >
+      {isFavorite ? (
+        <HeartIcon width={30} height={30} />
+      ) : (
+        <HeartOutlineIcon width={30} height={30} />
+      )}
+    </TouchableOpacity>
                       </ImageBackground>
                     </TouchableOpacity>
                   </Animated.View>

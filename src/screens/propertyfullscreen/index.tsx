@@ -216,7 +216,7 @@ export const PropertyFullScreen = () => {
         onPress={() => navigation.goBack()}
       >
         <Image
-          source={require('../propertyscreen/assets/icons/close.png')}
+          source={require('../../assets/images/close.png')}
           style={styles.closeIconImage}
         />
       </TouchableOpacity>

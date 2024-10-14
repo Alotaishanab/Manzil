@@ -11,7 +11,7 @@ import {
 import {launchImageLibrary} from 'react-native-image-picker';
 import {Colors} from '@colors';
 import {useNavigation} from '@react-navigation/native';
-import {AddPropertyBack, TopSpace} from '@components';
+import {AddPropertyBack, PropertyStepHeader, TopSpace} from '@components';
 import {fonts} from '@fonts';
 import {globalStyles} from '@globalStyles';
 import {useIntl} from '@context';
@@ -367,16 +367,7 @@ export const AddProperties = () => {
         }}>
         <AddPropertyBack text={'Add Properties'} onPress={handleBack} />
         <TopSpace top={10} />
-        <View style={globalStyles.rowSpaceBetween}>
-          <Text style={styles.heading}>
-            {intl.formatMessage({id: 'addpropertyScreen.header'})}
-          </Text>
-          <View style={globalStyles.simpleRow}>
-            <Text style={styles.stepText}>
-              {`Step ${step} / ${totalSteps}`}
-            </Text>
-          </View>
-        </View>
+        <PropertyStepHeader step={step} totalSteps={6} />
 
         <TopSpace top={10} />
 
@@ -385,6 +376,8 @@ export const AddProperties = () => {
           <PropertyStep1
             selectedPropertyType={selectedPropertyType}
             setSelectedPropertyType={setSelectedPropertyType}
+            markerPosition={markerPosition}
+            setMarkerPosition={setMarkerPosition}
             size={size}
             setSize={setSize}
             propertyAge={propertyAge}
@@ -453,13 +446,21 @@ export const AddProperties = () => {
             setWaterAccess={setWaterAccess}
             sewageSystem={sewageSystem}
             waterAccess={waterAccess}
+            selectedPropertyFeatures={selectedPropertyFeatures}
+            setSelectedPropertyFeatures={setSelectedPropertyFeatures}
+            propertyFeature={propertyFeature}
+            setPropertyFeature={onChangePropertyFeature}
           />
         )}
 
 {step === 4 && (
   <PropertyStep4
-    selectedPropertyType={selectedPropertyType} // Use this for property type, assuming it replaces `propertyType`
+    setPropertyType={setPropertyType}
     setPrice={setPrice}
+    title={title}
+    setTitle={setTitle}
+    description={description}
+    setDescription={setDescription}
     price={price}
     rentDuration={rentDuration} // Keep rentDuration if it's needed for rent properties
     setRentDuration={setRentDuration} // Keep setRentDuration for rent properties
@@ -475,16 +476,10 @@ export const AddProperties = () => {
             selectedPropertyType={selectedPropertyType}
             media={media}
             setMedia={setMedia}
-            selectedPropertyFeatures={selectedPropertyFeatures}
-            setSelectedPropertyFeatures={setSelectedPropertyFeatures}
-            markerPosition={markerPosition}
-            setMarkerPosition={setMarkerPosition}
             floorPlan={floorPlan}
             setFloorPlan={setFloorPlan}
             handleNext={handleNext}
             handleBack={handleBack}
-            propertyFeature={propertyFeature}
-            setPropertyFeature={onChangePropertyFeature}
             bedroomCount={bedroomCount}
             setBedroomCount={setBedroomCount}
             bathroomCount={bathroomCount}

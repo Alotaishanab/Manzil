@@ -21,3 +21,4 @@ export * from './FullScreenMap';
 export * from './PropertyCardSimpleWithAnalytics';
 export * from './SavedSearchModal';
 export * from './CardSkeleton';
+export * from './ImageCorouselPicker';

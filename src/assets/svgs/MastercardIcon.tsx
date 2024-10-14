@@ -157,7 +157,7 @@ export const MastercardIcon = (
     > & {readonly preserveAspectRatio?: string} & {},
 ) => {
   const {width, height} = props;
-  s;
+
   return (
     <Svg
       // xmlns="http://www.w3.org/2000/svg"

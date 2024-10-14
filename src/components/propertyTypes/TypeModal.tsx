@@ -4,7 +4,7 @@ import { PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, useAnimatedGestureHandler } from 'react-native-reanimated';
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
-import * as SVGs from '../../../assets/svgs';
+import * as SVGs from '../../assets/svgs';
 import { useIntl } from '@context';
 import { globalStyles } from '@globalStyles';
 

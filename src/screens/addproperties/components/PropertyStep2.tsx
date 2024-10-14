@@ -32,10 +32,6 @@ import {
 const PropertyStep2 = ({
   selectedPropertyType,
   handleNext,
-  title,
-  setTitle,
-  description,
-  setDescription,
   beds,
   setBeds,
   baths,
@@ -81,16 +77,6 @@ const PropertyStep2 = ({
 
     if (!selectedPropertyType) {
       newErrors.propertyType = 'Please select a property type.';
-      valid = false;
-    }
-
-    if (!title.trim()) {
-      newErrors.title = 'Please enter a title.';
-      valid = false;
-    }
-
-    if (!description.trim()) {
-      newErrors.description = 'Please describe the property.';
       valid = false;
     }
 
@@ -289,42 +275,6 @@ const PropertyStep2 = ({
     handleNext();
   };
 
-  const handleTitleChange = (text: string) => {
-    if (/[^a-zA-Z\s]/.test(text)) {
-      setErrors((prev) => ({
-        ...prev,
-        title: 'Title should not contain numbers or special characters.',
-      }));
-      return;
-    }
-    setTitle(text.slice(0, 50));
-    setErrors((prev) => ({ ...prev, title: '' }));
-  };
-
-  const handleDescriptionChange = (text: string) => {
-    const minLength = 10;
-    const maxLength = 200;
-
-    if (text.length < minLength) {
-      setErrors(prev => ({
-        ...prev,
-        description: `Description must be at least ${minLength} characters long.`,
-      }));
-      return;
-    }
-
-    if (text.length > maxLength) {
-      //@ts-ignore
-      setErrors(prev => ({
-        ...prev,
-        description: `Description cannot exceed ${maxLength} characters.`,
-      }));
-      return;
-    }
-
-    setDescription(text);
-    setErrors((prev) => ({ ...prev, description: '' }));
-  };
   
 
 
@@ -488,43 +438,11 @@ const PropertyStep2 = ({
 
   return (
     <ScrollView style={styles.container}>
-      {/* Ad Title */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Ad Title</Text>
-        <TopSpace top={10} />
-        <TextInput
-          placeholder="Enter your property title here..."
-          placeholderTextColor={Colors.light.black}
-          style={[
-            styles.textInputFullWidth,
-            !!errors.title && styles.errorBorder,
-          ]}
-          value={title}
-          onChangeText={handleTitleChange}
-        />
-        {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
-      </View>
+      
 
       {renderFieldsForPropertyType()}
 
-      {/* Description Field */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Property Description</Text>
-        <TextInput
-          style={[
-            styles.descriptionInput,
-            !!errors.description && styles.errorBorder,
-          ]}
-          placeholder="Enter a brief description of the property"
-          placeholderTextColor={Colors.light.black}
-          value={description}
-          onChangeText={handleDescriptionChange}
-          multiline
-        />
-        {errors.description && (
-          <Text style={styles.errorText}>{errors.description}</Text>
-        )}
-      </View>
+      
 
       <CustomButton
         btnWidth={'100%'}
@@ -579,19 +497,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
   },
-  descriptionInput: {
-    height: 200,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    fontSize: 16,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-    justifyContent: 'center',
-  },
+  
   pickerTrigger: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E5E7EB',
@@ -599,21 +505,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
-  },
-  nextButtonContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  nextButton: {
-    backgroundColor: '#3B82F6', // Blue button color
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 30,
-  },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
@@ -628,19 +519,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 30,
-  },
-  textInputFullWidth: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    fontSize: 16,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-    justifyContent: 'center',
   },
   squareContainer: {
     width: '48%',

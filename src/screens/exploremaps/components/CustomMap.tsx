@@ -1,6 +1,7 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import MapView, { Marker, Polygon } from 'react-native-maps';
+/* eslint-disable react-native/no-inline-styles */
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MapLayerIcon, PenIcon } from '@svgs'; // Assuming these are your custom icons
 import { throttle } from 'lodash';
@@ -26,20 +27,44 @@ const cities = [
 export const CustomMap = () => {
   const mapRef = useRef(null);
   const insets = useSafeAreaInsets();
-  const [cityLocked, setCityLocked] = useState(false);
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [mapType, setMapType] = useState('standard');
   const [drawing, setDrawing] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
   const [showDrawMessage, setShowDrawMessage] = useState(false);
+  const [mapType, setMapType] = useState('standard');
+  const [cityLocked, setCityLocked] = useState(false);
+  const [selectedCity, setSelectedCity] = useState(null);
 
-  const initialRegion = {
-    latitude: 23.8859,
-    longitude: 45.0792,
-    latitudeDelta: 20,
-    longitudeDelta: 20,
-  };
+  // Throttle handler to improve drawing performance
+  const throttledHandleMapPress = useCallback(
+    throttle((newCoordinate) => {
+      setCoordinates((prevCoords) => [...prevCoords, newCoordinate]);
+    }, 50),
+    []
+  );
 
+  const handleMapPress = useCallback(
+    (e) => {
+      if (drawing) {
+        const newCoordinate = e.nativeEvent.coordinate;
+        throttledHandleMapPress(newCoordinate);
+      }
+    },
+    [drawing, throttledHandleMapPress]
+  );
+
+  // Toggle drawing mode and show/hide message
+  const handleToggleDrawing = useCallback(() => {
+    setDrawing((prev) => !prev);
+    setShowDrawMessage(true);
+    setTimeout(() => setShowDrawMessage(false), 1000);
+  }, []);
+
+  // Clear the drawing
+  const handleDeleteDrawing = useCallback(() => {
+    setCoordinates([]);
+  }, []);
+
+  // Zoom into selected city
   const zoomInToCity = (city) => {
     setCityLocked(true);
     setSelectedCity(city.name);
@@ -52,68 +77,22 @@ export const CustomMap = () => {
     mapRef.current.animateToRegion(region, 1000);
   };
 
-  const handleToggleDrawing = useCallback(() => {
-    if (drawing && coordinates.length > 1 && coordinates[0] !== coordinates[coordinates.length - 1]) {
-      setCoordinates((prevCoords) => [...prevCoords, prevCoords[0]]); // Close the loop
-    }
-    setDrawing((prev) => !prev);
-    setShowDrawMessage(true); // Show draw area message when entering drawing mode
-  }, [drawing, coordinates]);
-
-  const handleDeleteDrawing = useCallback(() => {
-    setCoordinates([]);
-    setShowDrawMessage(false);
-  }, []);
-
-  const handleMapPress = useCallback(
-    (e) => {
-      if (drawing) {
-        const newCoordinate = e.nativeEvent.coordinate;
-        throttledHandleMapPress(newCoordinate);
-      }
-    },
-    [drawing]
-  );
-
-  const throttledHandleMapPress = useCallback(
-    throttle((newCoordinate) => {
-      setCoordinates((prevCoords) => [...prevCoords, newCoordinate]);
-    }, 50),
-    []
-  );
-
-  const handleRegionChange = (region) => {
-    if (cityLocked && (region.latitudeDelta > 0.5 || region.longitudeDelta > 0.5)) {
-      mapRef.current.animateToRegion({
-        latitude: region.latitude,
-        longitude: region.longitude,
-        latitudeDelta: 0.3,
-        longitudeDelta: 0.3,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (drawing) {
-      const timer = setTimeout(() => {
-        setShowDrawMessage(false); // Hide draw area message after a delay
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [drawing]);
-
   return (
     <View style={{ flex: 1 }}>
       <MapView
         ref={mapRef}
-        provider={MapView.PROVIDER_GOOGLE}
+        provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
-        initialRegion={initialRegion}
-        scrollEnabled={!drawing && cityLocked} // Disable scrolling when drawing
-        zoomEnabled={!drawing && cityLocked}   // Disable zooming when drawing
         mapType={mapType}
-        onRegionChangeComplete={handleRegionChange}
-        onPress={handleMapPress} // Capture map clicks during drawing
+        scrollEnabled={!drawing && cityLocked}
+        zoomEnabled={!drawing && cityLocked}
+        onPress={handleMapPress}
+        initialRegion={{
+          latitude: 23.8859,
+          longitude: 45.0792,
+          latitudeDelta: 20,
+          longitudeDelta: 20,
+        }}
       >
         {cities.map((city, index) => (
           selectedCity !== city.name && (
@@ -130,19 +109,32 @@ export const CustomMap = () => {
             </Marker>
           )
         ))}
-        {drawing && coordinates.length > 0 && (
-          <Polygon coordinates={coordinates} strokeColor="#FF0000" fillColor="rgba(255,0,0,0.5)" />
+
+        {/* Draw Polyline while drawing */}
+        {coordinates.length > 0 && (
+          <>
+            <Polyline
+              coordinates={coordinates}
+              strokeColor="#307e20" // Set to green
+              strokeWidth={6}       // Increase stroke width for visibility
+              zIndex={2}            // Ensure the polyline is above other map elements
+            />
+            <Marker
+              coordinate={coordinates[coordinates.length - 1]}
+              pinColor="#307e20"
+            />
+          </>
         )}
       </MapView>
 
-      {/* Optional draw area message */}
+      {/* Display draw area message */}
       {drawing && showDrawMessage && (
         <View style={[styles.drawYourSearchAreaViewStyle, { top: insets.top + 50 }]}>
           <Text style={styles.drawSearchText}>Draw your search area</Text>
         </View>
       )}
 
-      {/* Overlay Buttons */}
+      {/* Map control buttons */}
       {cityLocked && (
         <>
           <TouchableOpacity
@@ -159,14 +151,6 @@ export const CustomMap = () => {
             style={[styles.mapLayerBtn, { top: insets.top + 120 }]}
           >
             <PenIcon width={30} height={30} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleDeleteDrawing}
-            style={[styles.mapLayerBtn, { top: insets.top + 170 }]}
-          >
-            <Text style={styles.drawSketchText}>Draw from Scratch</Text>
           </TouchableOpacity>
         </>
       )}
@@ -215,11 +199,6 @@ const styles = StyleSheet.create({
   },
   drawSearchText: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  drawSketchText: {
-    fontSize: 16,
-    color: '#000',
     fontWeight: 'bold',
   },
 });

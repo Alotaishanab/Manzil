@@ -14,10 +14,7 @@ export const CustomCheckbox = ({title, selectedOption, onValueChange}: any) => {
       style={[
         globalStyles.simpleRow,
         styles.mainWrap,
-        {
-          backgroundColor:
-            title === selectedOption ? Colors.light.checkboxBtnBg : undefined,
-        },
+       
       ]}>
       <Text
         style={[
@@ -41,7 +38,7 @@ export const CustomCheckbox = ({title, selectedOption, onValueChange}: any) => {
 
 const styles = StyleSheet.create({
   mainWrap: {
-    backgroundColor: Colors.light.checkboxBtnBg,
+   
     paddingHorizontal: 35,
     paddingVertical: 7,
     borderRadius: 10,

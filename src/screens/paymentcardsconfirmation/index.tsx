@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {convertCardNumberToMaskDigit} from '@helpers';
-import HistoryCard from '../paymentmethods/component/HistoryCard';
+import { HistoryCard } from '../paymentmethods/components/HistoryCard';
 import {Colors} from '@colors';
 import {fonts} from '@fonts';
 import {PlusIcon} from '@svgs';

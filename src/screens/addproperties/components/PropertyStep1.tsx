@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useRef, useState} from 'react';
 import {useIntl} from '@context';
 import {
   CustomButton,
   TopSpace,
   PropertyTypeModal,
-  CompassDirectionModal,
+  CustomMap,
+  FullScreenMap,
+  CustomCheckbox,
 } from '@components';
-import {CustomCheckbox} from '../../../components/atoms/CustomCheckbox';
 import {
   StyleSheet,
   Text,
@@ -16,88 +16,46 @@ import {
   Animated,
   Vibration,
   TextInput,
-  Modal,
   Dimensions,
-  TouchableWithoutFeedback,
   PanResponder,
 } from 'react-native';
 import {globalStyles} from '@globalStyles';
 import {Colors} from '@colors';
 import {fonts} from '@fonts';
 import {ArrowDownIcon} from '@svgs';
+import HapticFeedback from 'react-native-haptic-feedback'; // Import the Haptic Feedback library
+
 
 const {height: screenHeight} = Dimensions.get('window');
-
-interface Props {
-  selectedPropertyType: string;
-  setSelectedPropertyType: (type: string) => void;
-  size: string;
-  setSize: (size: string) => void;
-  propertyAge: string;
-  setPropertyAge: (age: string) => void;
-  propertyType: string;
-  setPropertyType: (type: string) => void;
-  handleNext: () => void;
-}
 
 const PropertyStep1 = ({
   selectedPropertyType,
   setSelectedPropertyType,
   size,
+  markerPosition,
+  setMarkerPosition,
   setSize,
   propertyAge,
   setPropertyAge,
   propertyType,
   setPropertyType,
   handleNext,
-}: Props) => {
+}) => {
   const {intl} = useIntl();
-  const [isDirectionModalVisible, setIsDirectionModalVisible] = useState(false);
-  const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] =
-    useState(false);
+  const [isPropertyTypeModalVisible, setIsPropertyTypeModalVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
-  // Initialize panY starting from the bottom of the screen
-  const panY = useRef(new Animated.Value(screenHeight)).current;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (event, gestureState) => {
-        panY.setValue(gestureState.dy);
-      },
-      onPanResponderRelease: (event, gestureState) => {
-        if (gestureState.dy > 100) {
-          Animated.timing(panY, {
-            toValue: screenHeight, // Slide down
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => setIsDirectionModalVisible(false));
-        } else {
-          Animated.spring(panY, {
-            toValue: 0, // Stay in place
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    }),
-  ).current;
+  // New map state and handlers
+  const [mapType, setMapType] = useState<string>('standard');
+  const [mapVisible, setMapVisible] = useState(false);
+  
 
   const handleOpenPropertyTypeModal = () => {
     setIsPropertyTypeModalVisible(true);
-    Animated.timing(panY, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
   };
 
   const handleClosePropertyTypeModal = () => {
-    Animated.timing(panY, {
-      toValue: screenHeight,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setIsPropertyTypeModalVisible(false));
+    setIsPropertyTypeModalVisible(false);
   };
 
   const handlePropertyTypeSelect = (type: string) => {
@@ -113,11 +71,14 @@ const PropertyStep1 = ({
   };
 
   const handlePropertyAgeChange = (text: string) => {
-    console.log('Property age raw text', text);
     const sanitizedText = text.replace(/[^0-9]/g, '');
-    console.log('Property age sanitizedText', sanitizedText);
     setPropertyAge(sanitizedText);
     setErrors(prev => ({...prev, propertyAge: null}));
+  };
+
+  const handleLocationSelect = location => {
+    setMarkerPosition(location); // Update the marker position for both maps
+    setMapVisible(false); // Close full-screen map after selection
   };
 
   const handleSubmit = () => {
@@ -139,6 +100,11 @@ const PropertyStep1 = ({
       valid = false;
     }
 
+    if (!markerPosition) {
+      newErrors.markerPosition = 'Please select a location on the map.';
+      valid = false;
+    }
+
     if (!valid) {
       Vibration.vibrate(50);
       setErrors(newErrors);
@@ -150,23 +116,31 @@ const PropertyStep1 = ({
 
   return (
     <View style={{flexGrow: 1}}>
-      <TopSpace top={20} />
+      <TopSpace top={10} />
       <Text style={styles.label}>Select</Text>
-      {/* Sell Rent */}
-      <View style={globalStyles.simpleRow}>
-        <CustomCheckbox
-          title={intl.formatMessage({id: 'addpropertyScreen.sell'})}
-          selectedOption={propertyType}
-          onValueChange={setPropertyType}
-        />
-        <CustomCheckbox
-          title={intl.formatMessage({id: 'addpropertyScreen.rent'})}
-          selectedOption={propertyType}
-          onValueChange={setPropertyType}
-        />
-      </View>
 
-      <TopSpace top={30} />
+      {/* Sell Rent */}
+<View style={[styles.propertyTypeContainer, { justifyContent: 'flex-start', paddingHorizontal: 10 }]}>
+  <CustomCheckbox
+    title={intl.formatMessage({ id: 'addpropertyScreen.sell' })}
+    selectedOption={propertyType}
+    onValueChange={(value) => {
+      HapticFeedback.trigger('selection'); // Trigger haptic feedback
+      setPropertyType(value);
+    }}
+  />
+  <CustomCheckbox
+    title={intl.formatMessage({ id: 'addpropertyScreen.rent' })}
+    selectedOption={propertyType}
+    onValueChange={(value) => {
+      HapticFeedback.trigger('selection'); // Trigger haptic feedback
+      setPropertyType(value);
+    }}
+  />
+</View>
+
+
+      <TopSpace top={20} />
 
       {/* Property Type Field */}
       <View style={styles.inputContainer}>
@@ -184,13 +158,14 @@ const PropertyStep1 = ({
               ? selectedPropertyType
               : 'Select Property Type'}
           </Text>
-          <ArrowDownIcon width={20} height={20} fill="black" />
+          <ArrowDownIcon width={16} height={16} fill="black" />
         </TouchableOpacity>
         {errors.propertyType && (
           <Text style={styles.errorText}>{errors.propertyType}</Text>
         )}
       </View>
 
+      {/* Size and Property Age Fields */}
       <View style={styles.rowContainer}>
         <View style={styles.halfWidthContainer}>
           <Text style={styles.label}>
@@ -231,6 +206,42 @@ const PropertyStep1 = ({
         </View>
       </View>
 
+      <TopSpace top={10} />
+
+      {/* Address and Map */}
+      <Text style={styles.label}>Address</Text>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => setMapVisible(true)} // Open full-screen map on press
+        style={[
+          styles.mapContainer,
+          errors.markerPosition && styles.errorBorder, // Apply red border if there's an error
+        ]}>
+        <CustomMap
+          height={250} // Reduced height for compactness
+          showHome={true}
+          showMaximizeScreen={true}
+          isAbsoluteFill={false}
+          mapType={mapType}
+          markerPosition={markerPosition} // Pass the selected marker position
+          setMapVisible={setMapVisible} // Pass setMapVisible to handle full-screen button
+          initialRegion={
+            markerPosition
+              ? {
+                  latitude: markerPosition.latitude,
+                  longitude: markerPosition.longitude,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }
+              : undefined
+          }
+        />
+        
+      </TouchableOpacity>
+      {errors.markerPosition && (
+        <Text style={styles.errorText}>{errors.markerPosition}</Text>
+      )}
+
       <TopSpace top={20} />
 
       <CustomButton
@@ -246,7 +257,13 @@ const PropertyStep1 = ({
         isVisible={isPropertyTypeModalVisible}
         onRequestClose={handleClosePropertyTypeModal}
         handleClick={handlePropertyTypeSelect}
-        panY={panY}
+      />
+
+      {/* Full-Screen Map for selecting location */}
+      <FullScreenMap
+        visible={mapVisible}
+        onClose={() => setMapVisible(false)}
+        onLocationSelect={handleLocationSelect} // Update marker in CustomMap when location is selected
       />
     </View>
   );
@@ -257,17 +274,17 @@ export default PropertyStep1;
 const styles = StyleSheet.create({
   wantText: {
     color: Colors.light.headingTitle,
-    fontSize: 17,
+    fontSize: 16, // Reduced font size
     fontFamily: fonts.primary.medium,
   },
   propertyTypeLabel: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
     marginBottom: 5,
-    fontSize: 16,
+    fontSize: 14, // Reduced font size
   },
   propertyTypeText: {
-    fontSize: 16,
+    fontSize: 14, // Reduced font size
     color: Colors.light.black,
     fontFamily: fonts.primary.regular,
     flex: 1,
@@ -277,20 +294,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderColor: Colors.light.inputBg,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8, // Reduced border radius
     backgroundColor: Colors.light.inputBg,
-    height: 50,
-    paddingHorizontal: 20,
+    height: 45, // Reduced height
+    paddingHorizontal: 15, // Reduced padding
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 10, // Reduced margin top
   },
   inputContainer: {
-    marginBottom: 30,
+    marginBottom: 20, // Reduced margin bottom
   },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: 20, // Reduced margin bottom
   },
   halfWidthContainer: {
     width: '48%',
@@ -298,7 +315,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 12,
-    marginTop: 5,
+    marginTop: 3, // Reduced margin top
   },
   errorBorder: {
     borderColor: 'red',
@@ -307,51 +324,18 @@ const styles = StyleSheet.create({
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
     marginBottom: 5,
-    fontSize: 16,
-  },
-  textInputFullWidth: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    fontSize: 16,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-    justifyContent: 'center',
+    fontSize: 14, // Reduced font size
   },
   textInputHalfWidth: {
-    height: 50,
+    height: 45, // Reduced height
     borderColor: Colors.light.inputBg,
     width: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 15, // Reduced padding
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
     borderWidth: 1,
     backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
-    fontSize: 16,
-  },
-  directionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    width: '100%',
-    height: screenHeight * 0.4,
-    backgroundColor: Colors.light.offWhite,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    alignItems: 'center',
+    borderRadius: 8, // Reduced border radius
+    fontSize: 14, // Reduced font size
   },
 });

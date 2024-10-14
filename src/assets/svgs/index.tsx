@@ -111,7 +111,8 @@ export * from './MyPropertiesIcon';
 export * from './MultiWindowAddIcon';
 export * from './MaidIcon';
 export * from './MapTabIcon';
-
+export * from './MastercardIcon';
+export * from './MadaIcon';
 // N
 
 // O

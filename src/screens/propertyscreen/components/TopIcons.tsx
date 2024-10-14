@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import heartIcon from '../assets/icons/heart.png';
-import forbiddenIcon from '../assets/icons/forbidden.png';
-import sendIcon from '../assets/icons/send.png';
+import heartIcon from '../../../assets/images/heart.png';
+import forbiddenIcon from '../../../assets/images/forbidden.png';
+import sendIcon from '../../../assets/images/send.png';
 
 interface TopIconsProps {
   topInset: number;

@@ -82,7 +82,7 @@ export const PropertyScreen: React.FC = () => {
         style={[styles.closeButton, { top: insets.top + 15 }]}
         onPress={() => navigation.goBack()} 
       >
-        <Image source={require('./assets/icons/close.png')} style={styles.closeIconImage} />
+        <Image source={require('../../assets/images/close.png')} style={styles.closeIconImage} />
       </TouchableOpacity>
 
       <TopIcons 

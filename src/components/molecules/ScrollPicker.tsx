@@ -19,17 +19,21 @@ export const ScrollPicker = ({
 }) => {
   const flatListRef = useRef(null);
   const screenWidth = Dimensions.get('window').width;
-  const ITEM_WIDTH = screenWidth * 0.35;  // Slightly larger items for better visibility
+  const ITEM_WIDTH = screenWidth * 0.25; // Adjusted for a smaller, compact design
 
-  // Smooth scrolling effect
+  // Circular scroll logic
+  const totalOptions = options.length;
+  const extendedOptions = [...options, ...options, ...options]; // Extend the array to loop
+
   const scrollAnimatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const index = options.indexOf(currentValue);
     if (index >= 0 && flatListRef.current) {
+      // Start from the middle to allow infinite loop-like scroll behavior
       flatListRef.current.scrollToOffset({
-        offset: index * ITEM_WIDTH,
-        animated: true,
+        offset: (index + totalOptions) * ITEM_WIDTH, 
+        animated: false,
       });
     }
   }, [currentValue, options]);
@@ -40,8 +44,9 @@ export const ScrollPicker = ({
   );
 
   const handleMomentumScrollEnd = (event) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
-    setValue(options[index]);
+    const index = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH) % totalOptions;
+    const validIndex = index >= 0 ? index : totalOptions + index;
+    setValue(options[validIndex]);
     HapticFeedback.trigger('selection');
   };
 
@@ -56,7 +61,7 @@ export const ScrollPicker = ({
 
     const scale = scrollAnimatedValue.interpolate({
       inputRange,
-      outputRange: [0.9, 1.2, 1.5, 1.2, 0.9],
+      outputRange: [0.8, 1, 1.2, 1, 0.8],
       extrapolate: 'clamp',
     });
 
@@ -65,8 +70,6 @@ export const ScrollPicker = ({
       outputRange: [0.5, 0.8, 1, 0.8, 0.5],
       extrapolate: 'clamp',
     });
-
-    const isSelected = currentValue === item;
 
     return (
       <TouchableOpacity
@@ -80,21 +83,12 @@ export const ScrollPicker = ({
         }}
         style={[
           styles.itemContainer,
-          isSelected && styles.selectedItem,
-          { width: ITEM_WIDTH },  // Ensure the itemContainer uses the dynamic width
+          { width: ITEM_WIDTH },
         ]}
       >
-        <Animated.Text
-          style={[
-            styles.itemText,
-            {
-              transform: [{ scale }],
-              opacity,
-            },
-          ]}
-        >
-          {item}
-        </Animated.Text>
+        <Animated.View style={{ transform: [{ scale }], opacity }}>
+          <Text style={styles.itemText}>{item}</Text>
+        </Animated.View>
       </TouchableOpacity>
     );
   };
@@ -103,11 +97,11 @@ export const ScrollPicker = ({
     <View style={styles.pickerContainer}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.picker}>
-        <IconComponent width={40} height={40} style={styles.icon} />
+        <IconComponent width={30} height={60} style={styles.icon} />
         <Animated.FlatList
           ref={flatListRef}
-          data={options}
-          keyExtractor={(item) => item.toString()}
+          data={extendedOptions} // Use the extended list for circular effect
+          keyExtractor={(item, index) => `${item}-${index}`} // Unique key
           renderItem={renderItem}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -128,44 +122,51 @@ export const ScrollPicker = ({
 
 const styles = StyleSheet.create({
   pickerContainer: {
-    width: '45%',  // Adjust width for each picker container
+    width: '20%',  // Wider container for better visibility
     alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#FFFFFF',
+    marginBottom: 30,
+    backgroundColor: '#f5f5f5',
     borderRadius: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
     elevation: 6,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     marginBottom: 10,
     textAlign: 'center',
-    color: '#333',
+    color: '#444',
   },
   picker: {
     width: '100%',
     height: 160,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   itemContainer: {
     alignItems: 'center',
-  },
-  selectedItem: {
-    backgroundColor: '#A0F0E0',
-    borderRadius: 12,
-    padding: 10,
-    borderColor: '#00BFA6',
-    borderWidth: 2,
+    justifyContent: 'center',
   },
   itemText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#000000',
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    paddingHorizontal: 10,
   },
   icon: {
     marginBottom: 15,
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
+    tintColor: '#007AFF',
   },
-
+  highlight: {
+    position: 'absolute',
+    top: 0,
+    left: Dimensions.get('window').width * 0.35,
+    width: Dimensions.get('window').width * 0.3,
+    height: '100%',
+    borderColor: '#007AFF',
+    borderWidth: 2,
+    borderRadius: 12,
+  },
 });

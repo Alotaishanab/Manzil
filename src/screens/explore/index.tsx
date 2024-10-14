@@ -23,6 +23,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 import {globalStyles} from '@globalStyles';
 import {Colors} from '@colors';
@@ -30,6 +31,8 @@ import {styles} from './styles';
 import {ArrowForIcon, ArrowForwardIcon} from '@svgs';
 import {ag1, ag2, ag5, ag6, ag7} from '@assets';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { refreshAnimation } from '@assets'; // Import the animation
+import LottieView from 'lottie-react-native';
 import {
   useGetNearbyProperties,
   UserLocation,
@@ -41,6 +44,17 @@ export const Explore = () => {
     latitude: 37.76816965856596, // Example latitude
     longitude: -122.4264693260193, // Example longitude
   });
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Handle pull to refresh
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate a network request
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const [favorites, setFavorites] = useState({});
 
@@ -374,6 +388,8 @@ export const Explore = () => {
   useEffect(() => {
     setAminities(null);
   }, [selectedPropertyType]);
+
+  
   return (
     <Screen padding={0} paddingHorizontal={10} showKeyboardAware={false}>
       <ScrollView
@@ -382,7 +398,29 @@ export const Explore = () => {
           backgroundColor: Colors.light.background,
           paddingTop: 20,
           width: '100%',
-        }}>
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="transparent"   // Hide default iOS spinner
+            colors={['transparent']}  // Hide default Android spinner
+          />
+        }
+      >
+        {/* Lottie Animation for pull to refresh */}
+        {refreshing && (
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <LottieView
+              source={refreshAnimation}
+              autoPlay
+              loop
+              style={{ width: 50, height: 50 }} // Smaller size for the animation
+            />
+          </View>
+        )}
+
+          
         <FilterHeader
           onFocusInput={onFocusInput}
           handleFilter={togglePropertyModal}
