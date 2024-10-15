@@ -249,3 +249,16 @@ def save_property(request, property_id):
             "message": "Property saved successfully",
             "saved_id": saved_property.saved_id
         }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def get_user_saved_properties(request):
+    if request.method == 'GET':
+        user = request.user
+        saved_properties = SavedProperties.objects.filter(
+            user=user).select_related('property')
+
+        result = [map_property(saved_property.property)
+                  for saved_property in saved_properties]
+
+        return JsonResponse({"properties": result})

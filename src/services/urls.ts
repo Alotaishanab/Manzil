@@ -20,4 +20,5 @@ export const apiUrls = {
   exploreInterestedProperties: '/properties/explore/interested',
   getPropertyById: '/properties/property',
   saveProperty: '/properties',
+  getSavedProperties: '/properties/user/saved-properties',
 };
