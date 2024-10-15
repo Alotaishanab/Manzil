@@ -393,38 +393,38 @@ export const Explore = () => {
   return (
     <Screen padding={0} paddingHorizontal={10} showKeyboardAware={false}>
       <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          backgroundColor: Colors.light.background,
-          paddingTop: 20,
-          width: '100%',
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="transparent"   // Hide default iOS spinner
-            colors={['transparent']}  // Hide default Android spinner
-          />
-        }
-      >
-        {/* Lottie Animation for pull to refresh */}
-        {refreshing && (
-          <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            <LottieView
-              source={refreshAnimation}
-              autoPlay
-              loop
-              style={{ width: 50, height: 50 }} // Smaller size for the animation
-            />
-          </View>
-        )}
+  contentContainerStyle={{
+    flexGrow: 1,
+    backgroundColor: Colors.light.background,
+    paddingTop: 20,
+    width: '100%',
+  }}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor="transparent"   // Hide default iOS spinner
+      colors={['transparent']}  // Hide default Android spinner
+    />
+  }
+>
+  {/* Filter Header (Search Bar) */}
+  <FilterHeader
+    onFocusInput={onFocusInput}
+    handleFilter={togglePropertyModal}
+  />
 
-          
-        <FilterHeader
-          onFocusInput={onFocusInput}
-          handleFilter={togglePropertyModal}
-        />
+  {/* Lottie Animation for pull to refresh */}
+  {refreshing && (
+    <View style={{ alignItems: 'center', marginBottom: 20 }}>
+      <LottieView
+        source={refreshAnimation}
+        autoPlay
+        loop
+        style={{ width: 50, height: 50 }} // Adjust size as needed
+      />
+    </View>
+  )}
 
         {/* Updated Smart Search with AI Option */}
 <TouchableOpacity
