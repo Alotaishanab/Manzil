@@ -9,5 +9,5 @@ urlpatterns = [
     path('user/verify/phone', views.verify_code, name="verify_code"),
     path('user/change-password', views.change_user_password),
     path('user/resend/code', views.resend_phone_code),
-    path('user/info/', views.get_user_info),
+    path('user/info', views.get_user_info),
 ]

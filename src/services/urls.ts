@@ -13,10 +13,11 @@ export const apiUrls = {
   changeUserPassword: '/account/user/change-password',
   resetUserPassword: '/account/user/reset-password',
   resendPhoneCode: '/account/user/resend/code',
+  userProfile: 'account/user/info',
 
   addProperty: '/properties/add',
   exploreNearbyProperties: '/properties/explore/near-by',
   exploreInterestedProperties: '/properties/explore/interested',
-
-  userProfile: '/api/user/',
+  getPropertyById: '/properties/property',
+  saveProperty: '/properties',
 };

@@ -15,21 +15,22 @@ export interface RegisterUserPhoneResponse {
 }
 
 export type RegisterUserPhoneForm = {
-  
- phone: string | any;
+  phone: string | any;
 };
 
 const registerUserPhone = async (formData: RegisterUserPhoneForm) => {
-  try{
-  const data = await api.post<RegisterUserPhoneResponse>(apiUrls.registerPhone, formData);
-  
-  //AsyncHelper.setToken(data.token.access)
-  //AsyncHelper.setRefreshToken(data.token.refresh)
-  
-  return data;
-  }
-  catch(error){
-    console.log("Error registering phone",error);
+  try {
+    const data = await api.post<RegisterUserPhoneResponse>(
+      apiUrls.registerPhone,
+      formData,
+    );
+
+    //AsyncHelper.setToken(data.token.access)
+    //AsyncHelper.setRefreshToken(data.token.refresh)
+
+    return data;
+  } catch (error) {
+    console.log('Error registering phone', error);
     throw error;
   }
 };
