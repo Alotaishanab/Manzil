@@ -53,3 +53,4 @@ export * from './paymentcardsconfirmation';
 export * from './centerscreen';
 export * from './propertyfullscreen';
 export * from './addedproperties';
+export * from './mapscreen';

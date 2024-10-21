@@ -102,19 +102,34 @@ export const styles = StyleSheet.create({
     paddingVertical: 5, // Padding for text
   },
   aiSearchContainer: {
-    marginTop: 10,
-    marginLeft: 15, // Align to the left
+    backgroundColor: Colors.light.secondaryBtn, // Use a complementary background color
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 25, // Rounded corners for a more modern look
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    shadowColor: '#000', // Subtle shadow for a floating effect
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3, // For Android shadow
+    marginVertical: 10, // Some spacing from other elements
   },
   aiSearchContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   aiSearchText: {
-    color: Colors.light.primaryBtn,  // Match your primary color
-    fontSize: 16,  // Adjust font size as desired
-    fontFamily: fonts.primary.medium,  // Medium weight for the font
-    marginLeft: 5,  // Space between icon and text
-    textDecorationLine: 'underline', // Underline the text
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.light.primaryBtn,
+    marginRight: 8, // Space between text and icon
+    fontFamily: 'Jost', // Ensure the font is consistent
+  },
+  icon: {
+    marginLeft: 4, // Fine-tune spacing
   },
   underline: {
     height: 1,

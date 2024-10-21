@@ -1,40 +1,12 @@
-import React from 'react';
-import { GenericModal } from './GenericModal';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { useIntl } from '@context';
-import { TopSpace } from '../atoms';
-import { fonts } from '@fonts';
-import { Colors } from '@colors';
+import React, { useRef } from 'react';
+import { StyleSheet, Text, View, Modal, TouchableWithoutFeedback, TouchableOpacity, PanResponder, Animated } from 'react-native';
 
 export const SavedSearchModal = ({ isVisible, toggleVisible, onSelectOption }: any) => {
-  const { intl } = useIntl();
-
-  // Sorting options
   const searchOptions: any = [
-    {
-      label: intl.formatMessage({
-        id: 'savedSearch.newestDateSaved',
-      }),
-      value: 'Most Recent',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'savedSearch.oldestDateSaved',
-      }),
-      value: 'Least Recent',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'savedSearch.mostExpensive',
-      }),
-      value: 'Most Expensive',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'savedSearch.mostCheap',
-      }),
-      value: 'Least Expensive',
-    },
+    { label: 'Most Recent', value: 'Most Recent' },
+    { label: 'Least Recent', value: 'Least Recent' },
+    { label: 'Most Expensive', value: 'Most Expensive' },
+    { label: 'Least Expensive', value: 'Least Expensive' },
   ];
 
   const handleSelection = (value: string) => {
@@ -42,50 +14,105 @@ export const SavedSearchModal = ({ isVisible, toggleVisible, onSelectOption }: a
     toggleVisible(); // Close modal after selection
   };
 
+  // Draggable modal implementation
+  const panY = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 0,
+      onPanResponderMove: Animated.event([null, { dy: panY }], { useNativeDriver: false }),
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 150) {
+          toggleVisible(); // Close the modal if dragged down sufficiently
+        } else {
+          Animated.spring(panY, { toValue: 0, useNativeDriver: false }).start(); // Spring back if not dragged enough
+        }
+      },
+    })
+  ).current;
+
+  const modalTranslateY = panY.interpolate({
+    inputRange: [0, 300],
+    outputRange: [0, 300],
+    extrapolate: 'clamp',
+  });
+
   return (
-    <GenericModal
-      centeredModal={false}
-      isVisible={isVisible}
-      showCloseButton={false}
-      centerText={true}
-      modalTitle={intl.formatMessage({ id: 'savedSearchModal.title' })}
-      toggleModal={toggleVisible}
+    <Modal
+      transparent={true}
+      visible={isVisible}
+      animationType="slide"
+      onRequestClose={toggleVisible}
     >
+      <TouchableWithoutFeedback onPress={toggleVisible}>
+        <View style={styles.modalOverlay} />
+      </TouchableWithoutFeedback>
 
-      {/* Render sorting options as buttons */}
-      <View style={styles.optionsContainer}>
-        {searchOptions.map((option: any) => (
-          <TouchableOpacity
-            key={option.value}
-            onPress={() => handleSelection(option.value)}
-            style={styles.optionButton}
-          >
-            <Text style={styles.optionText}>{option.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <Animated.View
+        style={[
+          styles.modalContent,
+          { transform: [{ translateY: modalTranslateY }] },
+        ]}
+        {...panResponder.panHandlers} // Attach pan responder to the entire modal content
+      >
+        <Text style={styles.modalTitle}>Sort Options</Text>
 
-      <TopSpace top={10} />
-    </GenericModal>
+        {/* Render sorting options as minimalistic text-based buttons */}
+        <View style={styles.optionsContainer}>
+          {searchOptions.map((option: any) => (
+            <TouchableOpacity
+              key={option.value}
+              underlayColor="#f0f0f0" // Highlight effect when pressed
+              onPress={() => handleSelection(option.value)}
+              style={styles.optionButton}
+            >
+              <View>
+                <Text style={styles.optionText}>{option.label}</Text>
+                <View style={styles.divider} />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </Animated.View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#fff', // Standard white background
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333', // Standard dark text
+    marginBottom: 15,
+    textAlign: 'left',
+  },
   optionsContainer: {
-    marginTop: 20,
+    marginTop: 10,
   },
   optionButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: Colors.light.primaryBtn,
-    borderRadius: 10,
-    marginBottom: 15,
-    alignItems: 'center',
+    paddingVertical: 10,
   },
   optionText: {
     fontSize: 16,
-    fontFamily: fonts.primary.bold,
-    color: '#fff',
+    color: '#333', // Standard dark text color
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#ccc', // Light gray divider
+    marginTop: 8,
   },
 });
 

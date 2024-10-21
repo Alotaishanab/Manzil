@@ -1,180 +1,24 @@
 import * as React from 'react';
 import Svg, { Path, SvgProps } from 'react-native-svg';
 
-export const MapTabIcon = (
-  props: React.JSX.IntrinsicAttributes &
-    React.JSX.IntrinsicClassAttributes<Svg> &
-    Pick<
-      Readonly<SvgProps>,
-      | 'width'
-      | 'height'
-      | 'viewBox'
-      | 'color'
-      | 'title'
-      | 'children'
-      | 'opacity'
-      | 'fill'
-      | 'fillOpacity'
-      | 'fillRule'
-      | 'stroke'
-      | 'strokeWidth'
-      | 'strokeOpacity'
-      | 'strokeDasharray'
-      | 'strokeDashoffset'
-      | 'strokeLinecap'
-      | 'strokeLinejoin'
-      | 'strokeMiterlimit'
-      | 'vectorEffect'
-      | 'clipRule'
-      | 'clipPath'
-      | 'translate'
-      | 'translateX'
-      | 'translateY'
-      | 'origin'
-      | 'originX'
-      | 'originY'
-      | 'scale'
-      | 'scaleX'
-      | 'scaleY'
-      | 'skew'
-      | 'skewX'
-      | 'skewY'
-      | 'rotation'
-      | 'x'
-      | 'y'
-      | 'transform'
-      | 'pointerEvents'
-      | 'onStartShouldSetResponder'
-      | 'onMoveShouldSetResponder'
-      | 'onResponderEnd'
-      | 'onResponderGrant'
-      | 'onResponderReject'
-      | 'onResponderMove'
-      | 'onResponderRelease'
-      | 'onResponderStart'
-      | 'onResponderTerminationRequest'
-      | 'onResponderTerminate'
-      | 'onStartShouldSetResponderCapture'
-      | 'onMoveShouldSetResponderCapture'
-      | 'disabled'
-      | 'onPress'
-      | 'onPressIn'
-      | 'onPressOut'
-      | 'onLongPress'
-      | 'delayPressIn'
-      | 'delayPressOut'
-      | 'delayLongPress'
-      | 'id'
-      | 'marker'
-      | 'markerStart'
-      | 'markerMid'
-      | 'markerEnd'
-      | 'mask'
-      | 'onLayout'
-      | 'accessibilityLabel'
-      | 'accessible'
-      | 'testID'
-      | 'font'
-      | 'fontStyle'
-      | 'fontVariant'
-      | 'fontWeight'
-      | 'fontStretch'
-      | 'fontSize'
-      | 'fontFamily'
-      | 'textAnchor'
-      | 'textDecoration'
-      | 'letterSpacing'
-      | 'wordSpacing'
-      | 'kerning'
-      | 'fontFeatureSettings'
-      | 'fontVariantLigatures'
-      | 'fontVariationSettings'
-      | 'hitSlop'
-      | 'needsOffscreenAlphaCompositing'
-      | 'removeClippedSubviews'
-      | 'style'
-      | 'nativeID'
-      | 'collapsable'
-      | 'renderToHardwareTextureAndroid'
-      | 'focusable'
-      | 'tabIndex'
-      | 'shouldRasterizeIOS'
-      | 'isTVSelectable'
-      | 'hasTVPreferredFocus'
-      | 'tvParallaxProperties'
-      | 'tvParallaxShiftDistanceX'
-      | 'tvParallaxShiftDistanceY'
-      | 'tvParallaxTiltAngle'
-      | 'tvParallaxMagnification'
-      | 'onTouchStart'
-      | 'onTouchMove'
-      | 'onTouchEnd'
-      | 'onTouchCancel'
-      | 'onTouchEndCapture'
-      | 'onPointerEnter'
-      | 'onPointerEnterCapture'
-      | 'onPointerLeave'
-      | 'onPointerLeaveCapture'
-      | 'onPointerMove'
-      | 'onPointerMoveCapture'
-      | 'onPointerCancel'
-      | 'onPointerCancelCapture'
-      | 'onPointerDown'
-      | 'onPointerDownCapture'
-      | 'onPointerUp'
-      | 'onPointerUpCapture'
-      | 'accessibilityActions'
-      | 'aria-label'
-      | 'accessibilityRole'
-      | 'accessibilityState'
-      | 'aria-busy'
-      | 'aria-checked'
-      | 'aria-disabled'
-      | 'aria-expanded'
-      | 'aria-selected'
-      | 'accessibilityHint'
-      | 'accessibilityValue'
-      | 'aria-valuemax'
-      | 'aria-valuemin'
-      | 'aria-valuenow'
-      | 'aria-valuetext'
-      | 'onAccessibilityAction'
-      | 'importantForAccessibility'
-      | 'aria-hidden'
-      | 'aria-modal'
-      | 'role'
-      | 'accessibilityLabelledBy'
-      | 'aria-labelledby'
-      | 'accessibilityLiveRegion'
-      | 'aria-live'
-      | 'accessibilityElementsHidden'
-      | 'accessibilityViewIsModal'
-      | 'onAccessibilityEscape'
-      | 'onAccessibilityTap'
-      | 'onMagicTap'
-      | 'accessibilityIgnoresInvertColors'
-      | 'accessibilityLanguage'
-    > & { readonly preserveAspectRatio?: string | undefined } & {},
-) => {
-  const { width, height } = props;
+type MapTabIconProps = SvgProps & {
+  size?: number;
+  color?: string;
+};
+
+export const MapTabIcon = ({ size = 24, color = '#222', ...props }: MapTabIconProps) => {
   return (
     <Svg
-      width={width || 74}
-      height={height || 76}
+      width={size}
+      height={size}
       fill="none"
+      viewBox="0 0 576 512"
       {...props}
     >
-      <Svg
-        width={width || 74}
-        height={height || 74}
-        y={1}
-        fill="#222"
-        opacity="100%"
-        viewBox="0 0 576 512"
-        {...props}
-      >
-        <Path d="M408 120c0 54.6-73.1 151.9-105.2 191.1-7.7 10.5-21.9 10.5-29.6 0C241.1 271.9 168 174.6 168 120 168 53.73 221.7 0 288 0s120 53.73 120 120zm-120 32c22.1 0 40-17.9 40-40 0-22.09-17.9-40-40-40s-40 17.91-40 40c0 22.1 17.9 40 40 40zm137.6 27.8c.5-1.2 1-2.4 1.5-3.7l116-46.4c15.8-6.3 32.9 5.3 32.9 22.3v270.8c0 9.8-6 18.6-15.1 22.3L416 503V200.4c3.5-6.9 6.7-13.7 9.6-20.6zm-275.2 0c2.9 6.9 6.1 13.7 9.6 20.6v251.4L32.91 502.7C17.15 508.1 0 497.4 0 480.4V209.6c0-9.8 5.975-19.5 15.09-22.3l122.51-49c2.4 14.2 7.3 28.3 12.8 41.5zm177.4 151.3c13.9-16.5 35.7-44.8 56.2-76.1v249.3l-192-54.9V255c20.5 31.3 42.3 59.6 56.2 76.1 20.5 26.5 59.1 26.5 79.6 0z" />
-      </Svg>
+      <Path
+        d="M408 120c0 54.6-73.1 151.9-105.2 191.1-7.7 10.5-21.9 10.5-29.6 0C241.1 271.9 168 174.6 168 120 168 53.73 221.7 0 288 0s120 53.73 120 120zm-120 32c22.1 0 40-17.9 40-40 0-22.09-17.9-40-40-40s-40 17.91-40 40c0 22.1 17.9 40 40 40zm137.6 27.8c.5-1.2 1-2.4 1.5-3.7l116-46.4c15.8-6.3 32.9 5.3 32.9 22.3v270.8c0 9.8-6 18.6-15.1 22.3L416 503V200.4c3.5-6.9 6.7-13.7 9.6-20.6zm-275.2 0c2.9 6.9 6.1 13.7 9.6 20.6v251.4L32.91 502.7C17.15 508.1 0 497.4 0 480.4V209.6c0-9.8 5.975-19.5 15.09-22.3l122.51-49c2.4 14.2 7.3 28.3 12.8 41.5zm177.4 151.3c13.9-16.5 35.7-44.8 56.2-76.1v249.3l-192-54.9V255c20.5 31.3 42.3 59.6 56.2 76.1 20.5 26.5 59.1 26.5 79.6 0z"
+        fill={color}
+      />
     </Svg>
   );
 };

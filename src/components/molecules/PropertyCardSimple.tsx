@@ -6,8 +6,6 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { ImageCarousel } from '@components'; // Ensure correct import path
-import { globalStyles } from '../../styles/globalStyles';
 import { fonts } from '../../../src/assets/fonts';
 import { Colors } from '@colors';
 import { TopSpace } from '@components';
@@ -24,12 +22,6 @@ const ITEM_WIDTH = screenWidth * 0.8;
 export const PropertyCardSimple = ({ item }) => {
   const navigation = useNavigation();
 
-  // Example images array (if your `item` contains more than one image, adjust accordingly)
-  const images = [
-    { uri: item.imageUrl },
-    { uri: 'https://via.placeholder.com/150' },
-    { uri: 'https://via.placeholder.com/150' },
-  ];
 
   // Function to handle click and navigate to PropertyScreen
   const handleClick = () => {
@@ -41,7 +33,7 @@ export const PropertyCardSimple = ({ item }) => {
     <View style={styles.mainWrapper}>
       <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
         {/* Use the ImageCarousel component */}
-        <ImageCarousel images={images} />
+        
 
         <TopSpace top={10} />
 
@@ -100,7 +92,7 @@ export const PropertyCardSimple = ({ item }) => {
 const styles = StyleSheet.create({
   mainWrapper: {
     paddingVertical: 0,
-    borderRadius: 20,
+    borderRadius: 30,
     shadowColor: 'rgba(0, 0, 0, 0.1)',
     backgroundColor: Colors.light.background,
     shadowOffset: { width: 0, height: 4 },

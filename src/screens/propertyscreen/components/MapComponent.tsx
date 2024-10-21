@@ -1,85 +1,114 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import MapView from 'react-native-maps';
-
-// Example data for area and location
-const area = '5000 sqft';
-const location = '123 Main St, Springfield';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // React Navigation
+import { CustomMap } from '@components'; // Custom components for map
+import { fonts } from '../../../assets/fonts/index'; // Import fonts
 
 const MapComponent: React.FC = () => {
+  const [scaleAnim] = useState(new Animated.Value(1)); // Scale animation for press effect
+  const navigation = useNavigation(); // React Navigation hook
+
+  // Function to handle press-in effect
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.97, // Slightly scale down
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Function to handle press-out effect and navigate to the map screen
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1, // Return to normal scale
+      useNativeDriver: true,
+    }).start(() => {
+      navigation.navigate('MapScreen'); // Navigate to the map screen
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Map</Text>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      />
-      <View style={styles.infoContainer}>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Area:</Text>
-          <Text style={styles.infoValue}>{area}</Text>
+    <View style={styles.outerContainer}>
+      <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
+        {/* Map Title */}
+        <Text style={styles.title}>Map</Text>
+
+        {/* Clickable Custom Map */}
+        <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} activeOpacity={0.7}>
+          <View style={styles.mapWrapper}>
+            <CustomMap
+              markerPosition={undefined}
+              scrollEnabled={false} // Disable map scrolling
+              zoomEnabled={false} // Disable map zooming
+              rotateEnabled={false} // Disable map rotation
+            />
+          </View>
+        </TouchableOpacity>
+
+        {/* Area and District Information */}
+        <View style={styles.locationInfo}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Area:</Text>
+            <Text style={styles.infoValue}>Riyadh</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>District:</Text>
+            <Text style={styles.infoValue}>AlMalga</Text>
+          </View>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Location:</Text>
-          <Text style={styles.infoValue}>{location}</Text>
-        </View>
-      </View>
+      </Animated.View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+  },
   container: {
-    backgroundColor: '#F9F9F9', // Light background for a modern look
-    borderRadius: 20,
-    padding: 15,
+    width: '97%',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     marginVertical: 10,
-    shadowColor: '#000', // Enhanced shadow for a modern 3D effect
-    shadowOffset: { width: 0, height: 8 }, // Larger shadow offset
-    shadowOpacity: 0.15, // Subtle shadow opacity
-    shadowRadius: 12, // Larger shadow blur radius
-    elevation: 6, // For Android shadow
+    overflow: 'hidden',
   },
   title: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#333', // Darker color for better readability
+    fontSize: 16,
+    color: '#000',
     textAlign: 'center',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.bold,
+    paddingVertical: 10, // Adjusted for consistent spacing
   },
-  map: {
+  mapWrapper: {
     width: '100%',
-    height: 320, // Increased height for better map visibility
-    borderRadius: 20,
+    height: 200, // Slightly reduced height for a more compact design
     overflow: 'hidden',
-    marginBottom: 15, // Space between map and info container
   },
-  infoContainer: {
-    paddingHorizontal: 10,
+  locationInfo: {
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    paddingHorizontal: 10, // Slight padding for cleaner layout
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12, // More vertical padding for a spacious look
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0', // Subtle border color
+    paddingVertical: 6, // Reduced padding for tighter design
   },
   infoLabel: {
-    fontSize: 18,
-    fontWeight: '500', // Semi-bold font weight for labels
+    fontSize: 14,
     color: '#555',
-    fontFamily: 'Jost',
+    fontFamily: fonts.primary.regular,
   },
   infoValue: {
-    fontSize: 18,
-    fontWeight: '700', // Bold font weight for values
-    color: '#222', // Darker color for better contrast
-    fontFamily: 'Jost',
+    fontSize: 14,
+    color: '#000',
+    fontFamily: fonts.primary.bold,
   },
 });
 

@@ -6,45 +6,46 @@ import GreenBar from './GreenBar';
 import DescriptionBox from './DescriptionBox';
 import PropertyFeatures from './PropertyFeatures';
 import AdInfo from './AdInfo';
-import AgencyDetails from './AgencyDetails';
-import { SimilarProperties } from '@screens'; // Ensure SimilarProperties component is imported correctly
+import AgentDetails from './AgentDetails';
+import ModalHeader from './ContactButton';
+import Utilities from './Utilities';
+import { SimilarProperties } from '@screens';
 import { fonts } from '../../../assets/fonts/index';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
-
+import { useNavigation } from '@react-navigation/native';
+import { renderPropertyIcons } from '../../../../src/helpers/renderPropertyIcons'; 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface ModalContentProps {
+  property: any; // Add this prop to receive the property data
   expandedHeight: number;
   scrollOffsetY: any;
   scrollViewRef: React.RefObject<ScrollView>;
-  isExpanded: boolean; // New prop to determine if the modal is expanded
-  handleTermsClick: () => void; // Add this prop to the interface
+  isExpanded: boolean;
+  handleTermsClick: () => void;
 }
 
 const ModalContent: React.FC<ModalContentProps> = ({
+  property,
   expandedHeight,
   scrollOffsetY,
   scrollViewRef,
   isExpanded,
-  handleTermsClick, // Destructure the prop
+  handleTermsClick,
 }) => {
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
 
-  // Navigation handler for SimilarProperties clicks
   const handleCardClick = (propertyId: string) => {
-    console.log('Card clicked!', propertyId); // Log to see if this function is triggered
-    navigation.navigate('PropertyScreen', { propertyId }); // Navigate and pass property ID
+    console.log('Card clicked!', propertyId);
+    navigation.navigate('PropertyScreen', { propertyId });
   };
-
-  console.log('Rendering ModalContent'); // Log to verify rendering
 
   return (
     <ScrollView
-      ref={scrollViewRef} // Assign the ref to the ScrollView
-      style={[styles.modalScrollView, { maxHeight: expandedHeight - 110 }]}
+      ref={scrollViewRef}
+      style={[styles.modalScrollView, { maxHeight: expandedHeight - 50 }]}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={true}
-      scrollEnabled={isExpanded} // Disable scroll when the modal is collapsed
+      scrollEnabled={isExpanded}
       onScroll={(event) => {
         scrollOffsetY.current = event.nativeEvent.contentOffset.y;
       }}
@@ -52,35 +53,37 @@ const ModalContent: React.FC<ModalContentProps> = ({
     >
       {/* Header Section */}
       <View style={styles.headerSection}>
-        <View style={styles.dragIcon}></View>
-        <View style={styles.slipSection}>
-          <Text style={styles.leftText}>House</Text>
-          <Text style={styles.rightText}>For Sale</Text>
-        </View>
+        {/* Drag Icon */}
+        <View style={styles.dragIcon} />
+        
         <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>﷼2,949,000</Text>
-          <Text style={styles.detailsText}>4 beds | 2 baths | 1,863 sqft</Text>
-          <Text style={styles.detailsText}>AlMalga, Riyadh</Text>
+          <Text style={styles.priceText}>{`${property.price.toLocaleString()}﷼`}</Text>
+
+          {/* Render the property icons */}
+          <View style={styles.iconContainer}>
+            {renderPropertyIcons(property)}
+          </View>
+          
+          <Text style={styles.detailsText}>{property.address}</Text>
         </View>
 
-        <GreenBar />
+        {/* Add margin to lower the GreenBar */}
+        <GreenBar style={styles.greenBar} />
       </View>
 
       <View style={styles.contentContainer}>
-        <PropertyDetails />
-        <PropertyFeatures style={styles.propertyFeatures} />
-        <DescriptionBox />
-        <MapComponent />
-        <AdInfo />
-        <AgencyDetails />
+        <PropertyDetails property={property} />
+        <Utilities/>
+       
+        <DescriptionBox description={property.description} />
+        <MapComponent location={property.location} />
+        <AdInfo property={property} />
+        <AgentDetails contactInformation={property.contact_information} />
 
-        {/* Use SimilarProperties component directly */}
         <View style={styles.similarHomesSection}>
           <Text style={styles.sectionTitle}>Similar Properties</Text>
-          {/* Directly render SimilarProperties with the handleClick prop */}
           <SimilarProperties handleClick={handleCardClick} />
 
-          {/* Disclaimer Text */}
           <Text style={styles.disclaimerText}>
             Manzil makes every effort to provide accurate and up-to-date information on property listings. However, we are not responsible for any inaccuracies or discrepancies in the details provided. It is highly recommended to verify all property information directly with the listing agent or property owner. For more information, please review our{' '}
             <TouchableOpacity onPress={handleTermsClick}>
@@ -102,30 +105,31 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   headerSection: {
-    paddingTop: 0,
-    paddingBottom: 0,
     position: 'relative',
     backgroundColor: 'white',
-    marginTop: -55,
+    paddingBottom: 20,
   },
-  leftText: {
-    fontSize: 16,
-    color: '#fff',
-    fontFamily: fonts.primary.regular,
-  },
-  rightText: {
-    fontSize: 16,
-    color: '#fff',
-    fontFamily: fonts.primary.regular,
+  dragIcon: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#aaa',
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginVertical: 10, // Adds spacing above and below the icon
   },
   priceContainer: {
-    paddingVertical: 10,
     alignItems: 'center',
   },
   priceText: {
     fontSize: 32,
-    fontFamily: fonts.primary.regular,
+    fontFamily: fonts.primary.bold,
     color: '#000',
+  },
+  iconContainer: {
+    marginTop: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   detailsText: {
     fontSize: 16,
@@ -133,7 +137,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     marginBottom: 20,
   },
+  greenBar: {
+    marginTop: 10, // Adjust this value to lower the GreenBar
+  },
   contentContainer: {
+    flex: 1,
     paddingBottom: 30,
   },
   propertyFeatures: {
@@ -141,18 +149,6 @@ const styles = StyleSheet.create({
   },
   descriptionBox: {
     marginBottom: 20,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontFamily: fonts.primary.regular,
-    color: '#000',
-  },
-  square: {
-    width: '100%',
-    height: 100,
-    backgroundColor: '#ccc',
-    marginBottom: 10,
   },
   similarHomesSection: {
     marginTop: 20,
@@ -164,9 +160,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     color: '#000',
     marginBottom: 10,
-  },
-  flatListContent: {
-    paddingLeft: 10,
   },
   disclaimerText: {
     marginTop: 15,

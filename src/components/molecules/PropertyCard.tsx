@@ -34,6 +34,8 @@ import {
   SewageIcon,
 } from '@svgs'; // Ensure all icons are correctly imported
 import {useIntl} from '@context';
+import { useSaveProperty, useGetPropertyById } from '@services';
+import { useNavigation } from '@react-navigation/native';
 
 const {width: screenWidth} = Dimensions.get('window');
 const ITEM_WIDTH = screenWidth * 0.8;
@@ -47,17 +49,58 @@ export const PropertyCard = ({
   isFavorite = false, // Whether the property is favorited
   handleFavoriteClick = () => {}, // To toggle favorite status
 }) => {
-  const {intl} = useIntl();
+  const { intl } = useIntl();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const scrollX = React.useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation(); // Initialize navigation hook
+
+
+  // Use the save property mutation hook
+  const { mutate: saveProperty, isLoading: isSaving } = useSaveProperty();
+
+
+  const handlePropertyClick = () => {
+    // Navigate to PropertyScreen and pass property_id as a parameter
+    navigation.navigate('PropertyScreen', {
+      propertyId: item.property_id,
+    });
+  };
+
+  
 
   const handlePress = () => {
     // Trigger haptic feedback when pressed
     HapticFeedback.trigger('selection');
 
-    // Call the original favorite click handler
+    // Log the item to debug
+    console.log("Property item:", item);
+    console.log("Property ID:", item.property_id);
+
+    // Ensure property_id is valid
+    if (!item.property_id) {
+      console.error("property_id is undefined");
+      return;
+    }
+
+    // Optimistically toggle favorite state
     handleFavoriteClick();
+
+    // Trigger save property mutation
+    saveProperty(
+      { property_id: item.property_id },
+      {
+        onSuccess: (data) => {
+          console.log('Property saved successfully:', data);
+        },
+        onError: (error) => {
+          console.error('Error saving property:', error);
+          // Revert the favorite toggle on error
+          handleFavoriteClick();
+        },
+      }
+    );
   };
+
 
 
 
@@ -333,7 +376,7 @@ export const PropertyCard = ({
 
   return (
     <TouchableHighlight
-      onPress={handleClick}
+      onPress={handlePropertyClick} // Use this handler to navigate
       underlayColor="rgba(0, 0, 0, 0.05)"
       style={[styles.mainWrapper]}
     >
@@ -385,18 +428,19 @@ export const PropertyCard = ({
                         style={styles.imageBgContainer}
                         imageStyle={styles.imageBgStyle}
                       >
-                        {/* TouchableOpacity for the favorite button */}
-                        <TouchableOpacity
-      onPress={handlePress}
-      style={styles.favoriteButton}
-      activeOpacity={0.7}
-    >
-      {isFavorite ? (
-        <HeartIcon width={30} height={30} />
-      ) : (
-        <HeartOutlineIcon width={30} height={30} />
-      )}
-    </TouchableOpacity>
+                         {/* TouchableOpacity for the favorite button */}
+      <TouchableOpacity
+        onPress={handlePress}
+        style={styles.favoriteButton}
+        activeOpacity={0.7}
+        disabled={isSaving} // Disable button while saving
+      >
+        {isFavorite ? (
+          <HeartIcon width={30} height={30} />
+        ) : (
+          <HeartOutlineIcon width={30} height={30} />
+        )}
+      </TouchableOpacity>
                       </ImageBackground>
                     </TouchableOpacity>
                   </Animated.View>

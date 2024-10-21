@@ -5,7 +5,8 @@ import {fonts} from '../../../src/assets/fonts';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50, // This brings the content down a bit
+    paddingTop:40,
+    color: Colors.light.background,
   },
   headerView: {
     backgroundColor: Colors.light.primaryBtn,

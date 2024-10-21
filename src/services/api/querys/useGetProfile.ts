@@ -4,7 +4,7 @@ import {apiUrls} from '../../urls';
 
 export interface ProfileData {
   email: string;
-  first_name: string;
+  name: string;
   kids: Kid[];
   // subscriptions: SubscriptionResponse[]
 }
@@ -16,9 +16,17 @@ export interface Kid {
 }
 
 const getProfile = async (): Promise<ProfileData> => {
-  const {data} = await api.get<ProfileData>(apiUrls.userProfile);
-  return data;
+  try {
+    const data = await api.get<ProfileData>(apiUrls.userProfile); // No need for .data
+    console.log("Profile API response:", data); // Log the entire response
+    return data;
+  } catch (error) {
+    console.error("Error fetching profile data:", error);
+    throw error;
+  }
 };
+
+
 
 export const useGetProfile = () => {
   return useQuery<ProfileData, Error>({

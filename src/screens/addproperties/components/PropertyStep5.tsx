@@ -1,35 +1,17 @@
+import DocumentPicker from 'react-native-document-picker';
 import React, { Fragment, useState } from 'react';
-import { ScrollView, Image, StyleSheet, Text, TouchableOpacity, View, Vibration, Platform } from 'react-native';
-import { CustomButton, TopSpace, ImageCarouselPicker } from '@components';
+import { ScrollView, Image, StyleSheet, Text, TouchableOpacity, View, Vibration, Modal, TouchableWithoutFeedback } from 'react-native';
+import { CustomButton, TopSpace, MediaCarousel } from '@components';
 import { fonts } from '@fonts';
 import { Colors } from '@colors';
-import { globalStyles } from '@globalStyles';
 import { useIntl } from '@context';
 import * as SVGs from '../../../assets/svgs';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-const PropertyStep5 = ({ media, setMedia, floor, setFloor, handleNext, handleBack }) => {
+const PropertyStep5 = ({ media, setMedia, floor, setFloorPlan, handleNext }) => {
   const { intl } = useIntl();
-  const [errors, setErrors] = useState({}); // State to manage validation errors
-
-  const handlePicker = (selectedMedia: Array<any>) => {
-    setMedia(selectedMedia); // Handle both images and videos
-  };
-
-  const handleAddFloorPicker = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        selectionLimit: 1,
-      },
-      response => {
-        if (!response.didCancel && response.assets && response.assets.length > 0) {
-          const asset = response.assets[0];
-          setFloor(asset.uri);
-        }
-      },
-    );
-  };
+  const [errors, setErrors] = useState({});
+  const [showPickerModal, setShowPickerModal] = useState(false); // State for modal
 
   const openMediaPicker = () => {
     launchImageLibrary(
@@ -40,73 +22,131 @@ const PropertyStep5 = ({ media, setMedia, floor, setFloor, handleNext, handleBac
       response => {
         if (!response.didCancel && response.assets) {
           const currentMedia = media || [];
-          const selectedMedia = response.assets.filter(asset => {
-            const isImage = asset.type.startsWith('image');
-            const isVideo = asset.type.startsWith('video');
-            return (isImage || isVideo);
-          });
-
+          const selectedMedia = response.assets.filter(asset => asset.uri);
           setMedia([...currentMedia, ...selectedMedia]);
         }
-      },
+      }
     );
+  };
+
+  const handleAddFloorPicker = async (type) => {
+    try {
+      setShowPickerModal(false); // Close modal only when action starts
+      if (type === 'image') {
+        const response = await new Promise((resolve) => {
+          launchImageLibrary(
+            { mediaType: 'photo', selectionLimit: 1 },
+            resolve
+          );
+        });
+        if (!response.didCancel && response.assets && response.assets.length > 0) {
+          const asset = response.assets[0];
+          setFloorPlan(asset.uri);
+        }
+      } else if (type === 'document') {
+        const file = await DocumentPicker.pick({
+          type: [DocumentPicker.types.pdf, DocumentPicker.types.doc],
+        });
+        setFloorPlan(file.uri);
+      }
+    } catch (error) {
+      if (!DocumentPicker.isCancel(error)) {
+        console.error(error);
+      }
+    }
   };
 
   const validateFields = () => {
     const currentErrors = {};
-    if (media.length === 0) {
-      currentErrors.media = intl.formatMessage({ id: 'errors.addMedia' }) || 'Please add at least one media item.';
+    if (!media || media.length === 0) {
+      currentErrors.media = 'Please add at least one media item.';
     }
     if (Object.keys(currentErrors).length > 0) {
       setErrors(currentErrors);
-      Vibration.vibrate(50); // Vibrate for 50ms on error
+      Vibration.vibrate(50);
     } else {
       setErrors({});
-      handleNext(); // Proceed to the next step if no errors
+      handleNext();
     }
   };
 
   return (
     <Fragment>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TopSpace top={10} />
+        <TopSpace top={20} />
 
-        {/* Image and Video Carousel Picker */}
+        {/* Media Carousel */}
         <View style={[styles.mediaContainer, errors.media && styles.errorBorder]}>
-          <ImageCarouselPicker media={media} handlePicker={handlePicker} />
+          <MediaCarousel media={media} setMedia={setMedia} />
         </View>
         {errors.media && <Text style={styles.errorText}>{errors.media}</Text>}
 
-        {/* Add Media Button */}
-        <TouchableOpacity onPress={openMediaPicker} style={styles.addMediaBtn}>
-          <Text style={styles.addImageText}>Add More Media</Text>
-        </TouchableOpacity>
-
-        {/* Floor Plan Input */}
-        <TopSpace top={10} />
-        <TouchableOpacity onPress={handleAddFloorPicker} activeOpacity={0.8} style={styles.addFloorplanBtn}>
+        {/* Slim and Refined Floor Plan Section */}
+        <TopSpace top={20} />
+        <TouchableOpacity onPress={() => setShowPickerModal(true)} activeOpacity={0.8} style={styles.glassAddFloorplanBtn}>
           {floor ? (
-            <Image source={{ uri: floor }} style={{ width: '100%', height: '100%' }} />
+            floor.startsWith('http') || floor.startsWith('file:') ? (
+              <Image source={{ uri: floor }} style={styles.glassFloorImage} />
+            ) : (
+              <View style={styles.filePlaceholder}>
+                <Text style={styles.fileText}>File Uploaded</Text>
+              </View>
+            )
           ) : (
-            <View style={globalStyles.simpleRow}>
-              <SVGs.MultiWindowAddIcon width={45} height={45} />
-              <Text style={styles.addImageText}>
-                {intl.formatMessage({ id: 'addpropertyScreen.feature-property.add-floor-plan' })}
-              </Text>
+            <View style={styles.glassFloorPlaceholder}>
+              <SVGs.MultiWindowAddIcon width={30} height={30} />
+              <Text style={styles.glassAddFloorText}>Add Floor Plan</Text>
             </View>
           )}
         </TouchableOpacity>
 
+        {/* Modal for Choosing Floor Plan Type */}
+        <Modal
+          visible={showPickerModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowPickerModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setShowPickerModal(false)}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.bottomModalContent}>
+                  <TouchableOpacity
+                    style={styles.closeButtonModal}
+                    onPress={() => setShowPickerModal(false)}
+                  >
+                    <Image
+                      source={require('../../../assets/images/close.png')}
+                      style={styles.closeIconImage}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.modalTitle}>Choose Floor Plan Type</Text>
+                  <Text style={styles.modalSubtitle}>Accepted Types: Images (JPG, PNG) or Documents (PDF, DOC)</Text>
+                  <View style={styles.horizontalButtonContainer}>
+                    <TouchableOpacity onPress={() => handleAddFloorPicker('image')} style={styles.modalButton}>
+                      <Text style={styles.modalButtonText}>Select Image</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleAddFloorPicker('document')} style={styles.modalButton}>
+                      <Text style={styles.modalButtonText}>Select File</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         {/* Next Button */}
-        <TopSpace top={20} />
+        <TopSpace top={30} />
         <CustomButton
           btnWidth={'100%'}
           borderRadius={30}
           disabled={false}
           handleClick={validateFields}
-          title={intl.formatMessage({ id: 'buttons.next' })}
+          title="Next"
           showRightIconButton={true}
         />
+        <TopSpace top={20} />
       </ScrollView>
     </Fragment>
   );
@@ -118,38 +158,63 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
   },
-  selectPrice: {
-    fontSize: 16,
-    fontFamily: fonts.primary.medium,
-    color: Colors.light.headingTitle,
-    marginBottom: 5,
-  },
-  mapContainer: {
+  mediaContainer: {
     borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: 10,
+    marginBottom: 20,
+    backgroundColor: Colors.light.inputBg,
+    padding: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  addMediaBtn: {
-    backgroundColor: Colors.light.primaryBtn,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  addImageText: {
-    fontSize: 16,
-    fontFamily: fonts.primary.medium,
-    color: Colors.light.background,
-  },
-  addFloorplanBtn: {
+  glassAddFloorplanBtn: {
     borderWidth: 1,
-    borderColor: Colors.light.inputBg,
-    borderRadius: 10,
-    height: 100,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    backgroundColor: Colors.light.inputBg,
+    marginBottom: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  glassFloorImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  glassFloorPlaceholder: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glassAddFloorText: {
+    marginLeft: 10,
+    fontSize: 14,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+  },
+  filePlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: Colors.light.primaryBtn,
+  },
+  fileText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: fonts.primary.bold,
   },
   errorText: {
     color: 'red',
@@ -161,7 +226,58 @@ const styles = StyleSheet.create({
     borderColor: 'red',
     borderWidth: 1,
   },
-  mediaContainer: {
-    borderRadius: 10,
+  // Bottom Slide-in Modal Styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  bottomModalContent: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  closeButtonModal: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  closeIconImage: {
+    width: 20,
+    height: 20,
+    tintColor: '#000',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.primary.bold,
+    marginBottom: 10,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: fonts.primary.medium,
+    color: Colors.light.headingTitle,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  horizontalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 15,
+    backgroundColor: Colors.light.primaryBtn,
+    borderRadius: 30,
+    marginHorizontal: 5,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

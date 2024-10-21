@@ -7,6 +7,10 @@ import {
   StyleSheet,
   Text,
   View,
+  Modal,
+  TouchableOpacity,
+  Image,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {Colors} from '@colors';
@@ -15,6 +19,8 @@ import {AddPropertyBack, PropertyStepHeader, TopSpace} from '@components';
 import {fonts} from '@fonts';
 import {globalStyles} from '@globalStyles';
 import {useIntl} from '@context';
+import { loadingAnimation } from '@assets';
+import LottieView from 'lottie-react-native';
 import PropertyStep1 from './components/PropertyStep1';
 import PropertyStep2 from './components/PropertyStep2';
 import PropertyStep3 from './components/PropertyStep3';
@@ -41,10 +47,13 @@ export const AddProperties = () => {
   const [description, setDescription] = useState('dwadawdawdawd');
   const [size, setSize] = useState('333');
   const [propertyAge, setPropertyAge] = useState('3');
-  const [propertyType, setPropertyType] = useState('Sell');
+  const [propertyType, setPropertyType] = useState('Rent');
   const [direction, setDirection] = useState('North');
 
   const [errors, setErrors] = useState({}); // Error state for validation
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
   // Step 2 fields
   const [beds, setBeds] = useState<number>(1);
@@ -148,6 +157,11 @@ export const AddProperties = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setShowErrorModal(false);
+    setErrorMessage("");
+  };
+
   const handlePicker = async () => {
     try {
       const res: any = await launchImageLibrary({
@@ -172,182 +186,179 @@ export const AddProperties = () => {
   };
 
   const submitProperty = async () => {
+    setIsLoading(true); // Show loading animation
     try {
-      // Initialize the common data that applies to all property types
-      let propertyData: AddPropertyPayload = {
-        propertyCategory: selectedPropertyType,
-        title,
-        price,
-        description,
-        area: size,
-        propertyAge,
-        propertyType, // Sell or Rent
-        direction: direction as unknown as DirectionType,
-        waterAccess: waterAccess === 'Yes',
-        electricityAccess: electricityAccess === 'Yes',
-        sewageSystem: sewageSystem === 'Yes',
-        media,
-        floorPlan,
-        propertyFeature: selectedPropertyFeatures,
-        markerPosition,
-        ownershipType,
-      };
-
-  
-      // If the property is for rent, include rentDuration in the property data
-      if (propertyType === 'rent') {
-        propertyData = {
-          ...propertyData,
-          rentDuration, // Assuming rentDuration is available in the state
+        // Initialize the common data that applies to all property types
+        let propertyData: AddPropertyPayload = {
+            propertyCategory: selectedPropertyType,
+            title,
+            price,
+            description,
+            area: size,
+            propertyAge,
+            propertyType, // Sell or Rent
+            direction: direction as unknown as DirectionType,
+            waterAccess: waterAccess === 'Yes',
+            electricityAccess: electricityAccess === 'Yes',
+            sewageSystem: sewageSystem === 'Yes',
+            media,
+            floorPlan,
+            propertyFeature: selectedPropertyFeatures,
+            markerPosition,
+            ownershipType,
         };
-      }
 
-      switch (selectedPropertyType) {
-        case 'House':
-          propertyData = {
-            ...propertyData,
-            bedrooms: beds,
-            bathrooms: baths,
-            floors,
-            livingRooms,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
+        // If the property is for rent, include rentDuration in the property data
+        if (propertyType === 'rent') {
+            propertyData = {
+                ...propertyData,
+                rentDuration, // Assuming rentDuration is available in the state
+            };
+        }
 
-        case 'Appartment':
-          propertyData = {
-            ...propertyData,
-            rooms,
-            bathrooms: baths,
-            floorNumber,
-            livingRooms,
-            floors,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
+        switch (selectedPropertyType) {
+            case 'House':
+                propertyData = {
+                    ...propertyData,
+                    bedrooms: beds,
+                    bathrooms: baths,
+                    floors,
+                    livingRooms,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Appartment':
+                propertyData = {
+                    ...propertyData,
+                    rooms,
+                    bathrooms: baths,
+                    floorNumber,
+                    livingRooms,
+                    floors,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Workers Residence':
+                propertyData = {
+                    ...propertyData,
+                    bedrooms: beds,
+                    bathrooms: baths,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Land':
+                propertyData = {
+                    ...propertyData,
+                    direction: direction as unknown as DirectionType,
+                    numberOfStreets,
+                };
+                break;
+            case 'Farmhouse':
+                propertyData = {
+                    ...propertyData,
+                    bedrooms: beds,
+                    bathrooms: baths,
+                    livingRooms,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Shop':
+                propertyData = {
+                    ...propertyData,
+                    footTraffic: footTraffic as unknown as FootTrafficType,
+                    proximity, // Assuming proximity is available in the state
+                };
+                break;
+            case 'Chalet':
+                propertyData = {
+                    ...propertyData,
+                    bedrooms: beds,
+                    bathrooms: baths,
+                    livingRooms,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Office':
+                propertyData = {
+                    ...propertyData,
+                    floors,
+                    parkingSpaces,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            case 'Warehouse':
+                propertyData = {
+                    ...propertyData,
+                    numberOfGates,
+                    loadingDocks,
+                    storageCapacity,
+                };
+                break;
+            case 'Tower':
+                propertyData = {
+                    ...propertyData,
+                    rooms,
+                    bathrooms: baths,
+                    numberOfUnits,
+                    floors,
+                    direction: direction as unknown as DirectionType,
+                };
+                break;
+            default:
+                throw new Error('Invalid property type selected');
+        }
 
-        case 'Workers Residence':
-          propertyData = {
-            ...propertyData,
-            bedrooms: beds,
-            bathrooms: baths,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
+        // Handle ownership-specific fields based on the ownership type
+        if (ownershipType === 'independent') {
+            propertyData.ownership = {
+                instrumentNumber: independentFields.instrumentNumber,
+                ownerIDNumber: independentFields.ownerIDNumber,
+                ownerDOB: selectedDOBs.independent,
+            };
+        } else if (ownershipType === 'multipleOwners') {
+            propertyData.ownership = {
+                instrumentNumber: multipleOwnersFields.instrumentNumber,
+                ownerIDNumber: multipleOwnersFields.ownerIDNumber,
+                agencyNumber: multipleOwnersFields.agencyNumber,
+                ownerDOB: selectedDOBs.multipleOwners,
+            };
+        } else if (ownershipType === 'agency') {
+            propertyData.ownership = {
+                instrumentNumber: agencyFields.instrumentNumber,
+                commercialRegNumber: agencyFields.commercialRegNumber,
+                agentIDNumber: agencyFields.agentIDNumber,
+                agencyNumber: agencyFields.agencyNumber,
+                agentDOB: selectedDOBs.agency,
+            };
+        }
 
-        case 'Land':
-          propertyData = {
-            ...propertyData,
-            direction: direction as unknown as DirectionType,
-            numberOfStreets,
-          };
-          break;
+        // Log the final property data for debugging
+        console.log(
+            'Submitting property data:',
+            JSON.stringify(propertyData, null, 2)
+        );
 
-        case 'Farmhouse':
-          propertyData = {
-            ...propertyData,
-            bedrooms: beds,
-            bathrooms: baths,
-            livingRooms,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
-
-        case 'Shop':
-          propertyData = {
-            ...propertyData,
-            footTraffic: footTraffic as unknown as FootTrafficType,
-            proximity, // Assuming proximity is available in the state
-          };
-          break;
-
-        case 'Chalet':
-          propertyData = {
-            ...propertyData,
-            bedrooms: beds,
-            bathrooms: baths,
-            livingRooms,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
-
-        case 'Office':
-          propertyData = {
-            ...propertyData,
-            floors,
-            parkingSpaces,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
-
-        case 'Warehouse':
-          propertyData = {
-            ...propertyData,
-            numberOfGates,
-            loadingDocks,
-            storageCapacity,
-          };
-          break;
-
-        case 'Tower':
-          propertyData = {
-            ...propertyData,
-            rooms,
-            bathrooms: baths,
-            numberOfUnits,
-            floors,
-            direction: direction as unknown as DirectionType,
-          };
-          break;
-
-        default:
-          throw new Error('Invalid property type selected');
-      }
-
-      // Handle ownership-specific fields based on the ownership type
-      if (ownershipType === 'independent') {
-        propertyData.ownership = {
-          instrumentNumber: independentFields.instrumentNumber,
-          ownerIDNumber: independentFields.ownerIDNumber,
-          ownerDOB: selectedDOBs.independent,
-        };
-      } else if (ownershipType === 'multipleOwners') {
-        propertyData.ownership = {
-          instrumentNumber: multipleOwnersFields.instrumentNumber,
-          ownerIDNumber: multipleOwnersFields.ownerIDNumber,
-          agencyNumber: multipleOwnersFields.agencyNumber,
-          ownerDOB: selectedDOBs.multipleOwners,
-        };
-      } else if (ownershipType === 'agency') {
-        propertyData.ownership = {
-          instrumentNumber: agencyFields.instrumentNumber,
-          commercialRegNumber: agencyFields.commercialRegNumber,
-          agentIDNumber: agencyFields.agentIDNumber,
-          agencyNumber: agencyFields.agencyNumber,
-          agentDOB: selectedDOBs.agency,
-        };
-      }
-
-      // Log the final property data for debugging
-      console.log(
-        'Submitting property data:',
-        JSON.stringify(propertyData, null, 2),
-      );
-
-      addProperty(propertyData, {
-        onSuccess: () => {
-          // Navigate on success
-          navigation.navigate('PropertyScreen');
-        },
-        onError: () => {
-          // Handle login failure
-          console.log('Error adding property');
-        },
-      });
+        addProperty(propertyData, {
+            onSuccess: () => {
+                // Stop loading animation and navigate on success
+                setIsLoading(false);
+                navigation.navigate('PropertyScreen');
+            },
+            onError: (error) => {
+                // Stop loading animation and show error modal
+                setIsLoading(false);
+                setErrorMessage(error.message || "An unexpected error occurred");
+                setShowErrorModal(true);
+            },
+        });
     } catch (error) {
-      console.error('Error while submitting property:', error);
+        // Stop loading animation and show error modal
+        setIsLoading(false);
+        setErrorMessage(error.message || "An unexpected error occurred");
+        setShowErrorModal(true);
     }
-  };
+};
+
 
   const handleSubmit = () => {
     let valid = true;
@@ -368,6 +379,7 @@ export const AddProperties = () => {
         <AddPropertyBack text={'Add Properties'} onPress={handleBack} />
         <TopSpace top={10} />
         <PropertyStepHeader step={step} totalSteps={6} />
+
 
         <TopSpace top={10} />
 
@@ -455,6 +467,7 @@ export const AddProperties = () => {
 
 {step === 4 && (
   <PropertyStep4
+    propertyType={propertyType}
     setPropertyType={setPropertyType}
     setPrice={setPrice}
     title={title}
@@ -508,6 +521,49 @@ export const AddProperties = () => {
           />
         )}
 
+<Modal
+  transparent={true}
+  visible={showErrorModal}
+  animationType="slide"
+  onRequestClose={() => setShowErrorModal(false)}
+>
+  <TouchableWithoutFeedback onPress={() => setShowErrorModal(false)}>
+    <View style={styles.modalOverlay}>
+      <TouchableWithoutFeedback>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalText}>Error</Text>
+            <TouchableOpacity onPress={() => setShowErrorModal(false)}>
+              <Image
+                source={require('../../assets/images/close.png')}
+                style={styles.closeIconImage}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalBody}>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
+
+
+{isLoading && (
+  <View style={styles.loadingOverlay}>
+    <View style={styles.loadingContainer}>
+      <LottieView
+        source={loadingAnimation}
+        autoPlay
+        loop
+        style={styles.loadingAnimation}
+      />
+    </View>
+  </View>
+)}
+
+
         <TopSpace top={10} />
       </ScrollView>
     </SafeAreaView>
@@ -526,6 +582,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.primary.medium,
   },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker overlay to match the modal
+    zIndex: 1000,
+  },  
+  loadingContainer: {
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Slightly transparent white background
+    borderRadius: 10,
+  },
+  loadingAnimation: {
+    width: 50,
+    height: 50,
+  },
+  errorModalContainer: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker overlay for modal background
+},
+modalContent: {
+    width: '95%',
+    backgroundColor: '#fff',
+    borderRadius: 30, // Updated to 30 for rounder borders
+    alignSelf: 'center',
+    marginBottom: 30,
+    padding: 0,
+},
+modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+},
+modalText: {
+    fontSize: 18,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+    textAlign: 'center',
+},
+modalBody: {
+    padding: 20,
+    alignItems: 'center',
+},
+errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+},
+closeIconImage: {
+    width: 20,
+    height: 20,
+    tintColor: '#000',
+},
 });
 
 export default AddProperties;

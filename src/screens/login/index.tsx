@@ -9,15 +9,14 @@ import {
 } from '@components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useIntl } from '@context';
-import { styles } from './styles';
 import { useValidations } from '../../../src/validations/useValidations';
 import { useForm } from 'react-hook-form';
 import { globalStyles } from '../../../src/styles/globalStyles';
 import { useNavigation } from '@react-navigation/native';
 import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
-import { useLoginUser } from '@services';
-// Importing AsyncHelper for token handling
-import AsyncHelper from '../../../src/helpers/asyncHelper'; 
+import { useLoginUser, useGetProfile } from '@services';
+import AsyncHelper from '../../../src/helpers/asyncHelper'; // Importing AsyncHelper for token handling
+import { styles } from './styles';
 
 export const Login = () => {
   const { intl } = useIntl();
@@ -25,9 +24,12 @@ export const Login = () => {
   const navigation: any = useNavigation();
   const { loginSchema } = useValidations();
 
+  // Using react-query to get the profile after login
+  const { refetch: refetchProfile } = useGetProfile();
+
   type FormData = {
-    email: string | number | any;
-    password: string | number | any;
+    email: string;
+    password: string;
   };
 
   const {
@@ -54,9 +56,20 @@ export const Login = () => {
             await AsyncHelper.setToken(response.token.access);
             await AsyncHelper.setRefreshToken(response.token.refresh);
 
-            // Navigate on success
+            // Refetch profile data after successful login
+            const profileResponse = await refetchProfile();
+            const profile = profileResponse?.data;
+            const name = profile?.name;
+
+            // Show the flash message with the user's name
+            if (name) {
+              showCustomFlashMessage(`Welcome, ${name}\nLogin successful`);
+            } else {
+              showCustomFlashMessage('Login successful');
+            }
+
+            // Navigate to the next screen
             navigation.navigate('BottomTabNavigator');
-            showCustomFlashMessage('Login successful');
           },
           onError: () => {
             // Handle login failure

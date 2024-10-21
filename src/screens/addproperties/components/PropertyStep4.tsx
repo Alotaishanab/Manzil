@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -11,15 +11,13 @@ import {
 } from 'react-native';
 import { fonts } from '@fonts';
 import { Colors } from '@colors';
-import { globalStyles } from '@globalStyles';
 import { useIntl } from '@context';
 import { CustomButton, TopSpace } from '@components';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const PropertyStep4 = ({
-  
-  setPropertyType,
+  propertyType,
   title,
   setTitle,
   description,
@@ -29,7 +27,6 @@ const PropertyStep4 = ({
   rentDuration,
   setRentDuration,
   handleNext,
-  handleBack,
 }) => {
   const { intl } = useIntl();
   const [errors, setErrors] = useState({});
@@ -62,7 +59,7 @@ const PropertyStep4 = ({
       valid = false;
     }
 
-    if (setPropertyType === 'rent' && !rentDuration) {
+    if (propertyType === 'Rent' && !rentDuration) {
       newErrors.rentDuration = 'Please select a rent duration.';
       valid = false;
     }
@@ -77,7 +74,7 @@ const PropertyStep4 = ({
   };
 
   const renderPriceLabel = () => {
-    if (setPropertyType === 'rent' && rentDuration) {
+    if (propertyType === 'Rent' && rentDuration) {
       return ` / ${rentDuration === 'semi-annual' ? '6 months' : rentDuration}`;
     }
     return '';
@@ -86,10 +83,9 @@ const PropertyStep4 = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Price Input */}
+        {/* Ad Title Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Ad Title</Text>
-          <TopSpace top={10} />
           <TextInput
             placeholder="Enter your property title here..."
             placeholderTextColor={Colors.light.black}
@@ -101,17 +97,16 @@ const PropertyStep4 = ({
             onChangeText={setTitle}
           />
           {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+        </View>
 
-          <TopSpace top={30} />
-          <View
-            style={[
-              styles.priceContainer,
-              !!errors.price && styles.errorBorder,
-            ]}
-          >
-            <Text style={styles.label}>
-              {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
-            </Text>
+        <TopSpace top={20} />
+
+        {/* Price Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>
+            {intl.formatMessage({ id: 'requestPropertyScreen.select-price' })}
+          </Text>
+          <View style={[styles.priceContainer, !!errors.price && styles.errorBorder]}>
             <TextInput
               placeholder="2,000,000"
               placeholderTextColor={Colors.light.grey}
@@ -123,30 +118,12 @@ const PropertyStep4 = ({
             <Text style={styles.priceLabel}>SAR{renderPriceLabel()}</Text>
           </View>
           {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
-
-          <TopSpace top={30} />
-          {/* Description Field */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Property Description</Text>
-            <TextInput
-              style={[
-                styles.descriptionInput,
-                !!errors.description && styles.errorBorder,
-              ]}
-              placeholder="Enter a brief description of the property"
-              placeholderTextColor={Colors.light.black}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
-            {errors.description && (
-              <Text style={styles.errorText}>{errors.description}</Text>
-            )}
-          </View>
         </View>
 
-        {/* Rent Duration Options (if selectedType is rent) */}
-        {setPropertyType === 'Rent' && (
+        <TopSpace top={20} />
+
+        {/* Rent Duration Options (only show for 'rent' property type) */}
+        {propertyType === 'Rent' && (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>
               {intl.formatMessage({
@@ -154,36 +131,56 @@ const PropertyStep4 = ({
               })}
             </Text>
             <View style={styles.rentDurationContainer}>
-              {['monthly', 'quarterly', 'semi-annual', 'annual'].map(
-                (duration) => (
-                  <TouchableOpacity
-                    key={duration}
+              {['monthly', 'quarterly', 'semi-annual', 'annual'].map((duration) => (
+                <TouchableOpacity
+                  key={duration}
+                  style={[
+                    styles.rentDurationButton,
+                    rentDuration === duration && styles.rentDurationSelected,
+                  ]}
+                  onPress={() => setRentDuration(duration)}
+                >
+                  <Text
                     style={[
-                      styles.rentDurationButton,
-                      rentDuration === duration && styles.rentDurationSelected,
+                      styles.rentDurationText,
+                      rentDuration === duration && styles.rentDurationTextSelected,
                     ]}
-                    onPress={() => setRentDuration(duration)}
                   >
-                    <Text
-                      style={[
-                        styles.rentDurationText,
-                        rentDuration === duration &&
-                          styles.rentDurationTextSelected,
-                      ]}
-                    >
-                      {duration === 'semi-annual'
-                        ? 'Semi-Annual'
-                        : duration.charAt(0).toUpperCase() + duration.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                )
-              )}
+                    {duration === 'semi-annual'
+                      ? 'Semi-Annual'
+                      : duration.charAt(0).toUpperCase() + duration.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
             {errors.rentDuration && (
               <Text style={styles.errorText}>{errors.rentDuration}</Text>
             )}
           </View>
         )}
+
+        <TopSpace top={20} />
+
+        {/* Description Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Property Description</Text>
+          <TextInput
+            style={[
+              styles.descriptionInput,
+              !!errors.description && styles.errorBorder,
+            ]}
+            placeholder="Enter a brief description of the property"
+            placeholderTextColor={Colors.light.black}
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
+          {errors.description && (
+            <Text style={styles.errorText}>{errors.description}</Text>
+          )}
+        </View>
+
+        <TopSpace top={20} />
 
         {/* Submit Button */}
         <CustomButton
@@ -208,6 +205,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingHorizontal: 0, // Add some horizontal padding
+  },
+  inputContainer: {
+    marginBottom: 20, // Ensure uniform spacing between input fields
   },
   textInputFullWidth: {
     height: 50,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   descriptionInput: {
-    height: 200,
+    height: 150,
     borderColor: Colors.light.inputBg,
     width: '100%',
     paddingHorizontal: 20,
@@ -235,15 +236,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
   },
-  inputContainer: {
-    marginBottom: 30,
-  },
-  label: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.medium,
-    marginBottom: 5,
-    fontSize: 16,
-  },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,6 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: Colors.light.inputBg,
     height: 50,
+    paddingHorizontal: 10, // Add padding for better spacing
   },
   priceInput: {
     flex: 1,
@@ -261,7 +254,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.bold,
   },
   priceLabel: {
-    marginRight: 10,
+    marginLeft: 10,
     fontSize: 18,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.bold,
@@ -277,16 +270,17 @@ const styles = StyleSheet.create({
   rentDurationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginVertical: 10,
   },
   rentDurationButton: {
+    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: Colors.light.primaryBtn,
     borderRadius: 5,
     backgroundColor: Colors.light.inputBg,
-    marginRight: 5,
+    marginHorizontal: 5, // Add margin between buttons
   },
   rentDurationSelected: {
     backgroundColor: Colors.light.primaryBtn,
@@ -294,7 +288,7 @@ const styles = StyleSheet.create({
   rentDurationText: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
-    textTransform: 'capitalize',
+    textAlign: 'center', // Center text in the button
   },
   rentDurationTextSelected: {
     color: 'white',

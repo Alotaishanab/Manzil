@@ -1,18 +1,20 @@
 import React from 'react';
-import { View, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'; // Google Maps provider
 import { FullScreenIcon, HouseIcon } from '@svgs'; // Icons
 import { Colors } from '@colors';
+import { useNavigation } from '@react-navigation/native'; // Import navigation hook
 
 export const CustomMap = ({
   showMaximizeScreen = true,
-  height = 250,
+  height = 200,
   markerPosition,
   showHome = true,
   isAbsoluteFill = true,
   mapType = 'standard',
-  setMapVisible, // Receive setMapVisible as a prop to handle full-screen button
 }) => {
+  const navigation = useNavigation(); // React Navigation hook
+
   return (
     <View
       style={[
@@ -20,7 +22,7 @@ export const CustomMap = ({
         styles.container,
         {
           height: height, // Height control
-          borderRadius: 30,
+          borderRadius: 5,
           overflow: 'hidden',
         },
       ]}
@@ -29,6 +31,10 @@ export const CustomMap = ({
         provider={PROVIDER_GOOGLE} // Use Google Maps provider
         style={styles.map}
         mapType={mapType}
+        scrollEnabled={false} // Disable scrolling
+        zoomEnabled={false} // Disable zooming
+        rotateEnabled={false} // Disable rotating
+        pitchEnabled={false} // Disable pitch (tilt)
         region={
           markerPosition
             ? {
@@ -60,7 +66,7 @@ export const CustomMap = ({
       {showMaximizeScreen && (
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => setMapVisible(true)} // Trigger full-screen view
+          onPress={() => navigation.navigate('MapScreen')} // Navigate to MapScreen
           style={styles.maximizeScreenBtn}
         >
           <FullScreenIcon width={25} height={25} />
@@ -72,7 +78,6 @@ export const CustomMap = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 30,
     overflow: 'hidden',
   },
   map: {

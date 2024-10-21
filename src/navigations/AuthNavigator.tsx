@@ -48,6 +48,7 @@ import {
   SimilarProperties,
   PropertyFullScreen,
   AddedProperties,
+  MapScreen,
 } from '@screens';
 import {BottomTabNavigator} from './bottomtab/BottomTabNavigator';
 
@@ -108,6 +109,7 @@ type AuthStackParamList = {
   CenterScreen?: any;
   PropertyScreen?: any;
   PropertyFullScreen?: any;
+  MapScreen?: any;
   AddedProperties?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -115,7 +117,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 export const AuthNavigator = () => {
   return (
     <AuthStack.Navigator
-      initialRouteName="SplashScreen" // SplashScreen  // Analytics // AddProperties
+      initialRouteName="BottomTabNavigator" // SplashScreen  // Analytics // AddProperties
       screenOptions={{headerShown: false}}>
       <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
       <AuthStack.Screen name="Onboarding" component={Onboarding} />
@@ -189,6 +191,7 @@ export const AuthNavigator = () => {
       <AuthStack.Screen name="SimilarProperties" component={SimilarProperties} />
       <AuthStack.Screen name="PropertyFullScreen" component={PropertyFullScreen} />
       <AuthStack.Screen name="AddedProperties" component={AddedProperties} />
+      <AuthStack.Screen name="MapScreen" component={MapScreen} />
     </AuthStack.Navigator>
   );
 };

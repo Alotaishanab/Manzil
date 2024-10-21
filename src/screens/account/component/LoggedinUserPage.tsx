@@ -1,18 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {Colors} from '@colors';
-import {useIntl} from '@context';
-import {TopSpace} from '@components';
+import { StyleSheet, Text, View } from 'react-native';
+import { Colors } from '@colors';
+import { useIntl } from '@context';
+import { TopSpace } from '@components';
 import IconTitleButtonArrow from '../../../../src/components/molecules/IconTitleButtonArrow';
-import {useNavigation} from '@react-navigation/native';
-import {fonts} from '@fonts';
+import { useNavigation } from '@react-navigation/native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; 
+import { fonts } from '@fonts';
 import { useLogOutUser } from '@services';
 
-const LoggedinUserPage = ({}: any) => {
-  const {intl, toggleLocale} = useIntl();
-  const {mutate: logoutUser} = useLogOutUser();
-
+const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any) => {
+  const { intl, toggleLocale } = useIntl();
+  const { mutate: logoutUser } = useLogOutUser();
   const navigation: any = useNavigation();
 
   const handleEmail = () => {
@@ -68,21 +68,39 @@ const LoggedinUserPage = ({}: any) => {
   const handleHelp = () => {
     navigation.navigate('ChatWithUs');
   };
+
   const handleLogout = () => {
     logoutUser(undefined, {
       onSuccess: () => {
-        // Navigate on success
         navigation.navigate('Login');
       },
       onError: () => {
-        console.error("Error logging out user")
+        console.error("Error logging out user");
       }
     });
-    
   };
+
   const handleRequests = () => {
     navigation.navigate('RequestList');
   };
+
+
+  const renderSkeleton = () => {
+    return (
+      <SkeletonPlaceholder>
+        <SkeletonPlaceholder.Item margin={10}>
+          <SkeletonPlaceholder.Item
+            width={150}
+            height={20}
+            borderRadius={4}
+            marginBottom={10}
+          />
+          <SkeletonPlaceholder.Item width={220} height={16} borderRadius={4} />
+        </SkeletonPlaceholder.Item>
+      </SkeletonPlaceholder>
+    );
+  };
+
   return (
     <View style={styles.mainWrap}>
       <View style={styles.headerView}>
@@ -97,17 +115,24 @@ const LoggedinUserPage = ({}: any) => {
         style={{
           padding: 6,
           paddingHorizontal: 10,
-          // margin: 15,
           marginHorizontal: 10,
           marginVertical: 5,
           borderRadius: 20,
           backgroundColor: Colors.light.background,
           marginTop: 4,
         }}>
-        <Text style={styles.greetingText}>
-          {intl.formatMessage({id: 'accountScreen.loggedin.hello'})} Faisal
-        </Text>
-        <Text style={styles.emailText}>faisal@gmail.com</Text>
+       {/* Show skeleton if loading, else show user data */}
+       {isLoading || !userData ? (
+          renderSkeleton() // Render the skeleton loader
+        ) : (
+          <>
+            <Text style={styles.greetingText}>
+              {intl.formatMessage({ id: 'accountScreen.loggedin.hello' })}{' '}
+              {userData.name}
+            </Text>
+            <Text style={styles.emailText}>{userData.email}</Text>
+          </>
+        )}
       </View>
 
       <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
@@ -366,5 +391,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
     color: Colors.light.profile,
     fontSize: 16,
+  },
+  skeletonName: {
+    backgroundColor: '#E0E0E0', // Light grey placeholder
+    height: 22,
+    width: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  skeletonEmail: {
+    backgroundColor: '#E0E0E0', // Light grey placeholder
+    height: 14,
+    width: 200,
+    borderRadius: 10,
   },
 });

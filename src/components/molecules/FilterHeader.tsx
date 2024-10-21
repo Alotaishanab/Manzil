@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,48 @@ import {
   StyleSheet,
   TextInput,
 } from 'react-native';
-import {ExploreIcon, FilterIcon} from '@svgs';
-import {Colors} from '@colors';
-import {fonts} from '../../../src/assets/fonts';
-import {globalStyles} from '../../../src/styles/globalStyles';
-import {useIntl} from '@context';
+import { ExploreIcon, FilterIcon } from '@svgs';
+import { Colors } from '@colors';
+import { fonts } from '../../../src/assets/fonts';
+import { globalStyles } from '../../../src/styles/globalStyles';
+import { useIntl } from '@context';
+import FilterModal from '../../helpers/FilterModal'; // Adjust the import path
 
-const FilterHeader = ({handleFilter, onFocusInput}: any) => {
-  const {intl} = useIntl();
+const FilterHeader = ({ handleFilter, onFocusInput }: any) => {
+  const { intl } = useIntl();
+  const [isFilterVisible, setFilterVisible] = useState(false);
+
+  // Function to toggle the filter modal
+  const toggleFilterModal = () => {
+    setFilterVisible(!isFilterVisible);
+  };
+
   return (
-    <View style={[globalStyles.simpleRow]}>
-      <View style={[styles.exploreWrap]}>
-        <ExploreIcon width={30} height={30} />
-        <TextInput
-          numberOfLines={2}
-          multiline
-          style={styles.inputStyle}
-          onFocus={onFocusInput}
-          placeholderTextColor={Colors.light.headingTitle}
-          placeholder={intl.formatMessage({
-            id: 'explore.search-placeholder',
-          })}
-        />
+    <View>
+      <View style={[globalStyles.simpleRow]}>
+        <View style={[styles.exploreWrap]}>
+          <ExploreIcon width={30} height={30} />
+          <TextInput
+            numberOfLines={2}
+            multiline
+            style={styles.inputStyle}
+            onFocus={onFocusInput}
+            placeholderTextColor={Colors.light.headingTitle}
+            placeholder={intl.formatMessage({
+              id: 'explore.search-placeholder',
+            })}
+          />
+        </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={toggleFilterModal} // Show modal when button is pressed
+          style={styles.filterBtn}>
+          <FilterIcon width={25} height={25} />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={handleFilter}
-        style={styles.filterBtn}>
-        <FilterIcon width={25} height={25} />
-      </TouchableOpacity>
+
+      {/* Filter Modal */}
+      <FilterModal isVisible={isFilterVisible} onClose={toggleFilterModal} />
     </View>
   );
 };
@@ -69,13 +82,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inputStyle: {
-    // width: '100%',
     flex: 1,
-
     height: '100%',
     fontSize: 11,
     lineHeight: 20,
-    // paddingHorizontal: 4,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
   },

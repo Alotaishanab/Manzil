@@ -154,11 +154,13 @@ export * from './SmokingIcon';
 export * from './StorageIcon';
 export * from './StreetIcon';
 export * from './SewageIcon';
+export * from './SatelliteIcon';
 
 // T
 export * from './TrashIcon';
 export * from './TermsUseIcon';
 export * from './TouchIcon';
+export * from './ThreeDMapIcon';
 
 export * from './TowerIcon';
 export * from './TimerIcon';

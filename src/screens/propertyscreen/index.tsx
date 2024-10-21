@@ -1,130 +1,166 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   SafeAreaView,
-  Animated,
-  PanResponder,
   TouchableOpacity,
   Image,
   StyleSheet,
   Dimensions,
   Alert,
-  ScrollView,
-  View, // Import View if not already imported
+  View,
+  ActivityIndicator,
+  Text,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import ModalHeader from './components/ModalHeader';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import HapticFeedback from 'react-native-haptic-feedback';
+import { useGetPropertyById } from '@services';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import ImageGallery from './components/ImageGallery';
 import TopIcons from './components/TopIcons';
+import { GenericModal, ReportAdModal } from '@components';
 import ModalContent from './components/ModalContent';
-import { GenericModal, ReportAdModal } from '@components'; // Ensure the path is correct
+import ContactButton from './components/ContactButton';
 
-const { height: screenHeight } = Dimensions.get('window');
+const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
 export const PropertyScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const collapsedHeight = screenHeight * 0.30;
-  const expandedHeight = screenHeight * 0.80;
-  const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const route = useRoute();
+  const { propertyId } = route.params;
+
+  const bottomSheetRef = useRef(null);
+  const scrollViewRef = useRef(null);
+  const scrollOffsetY = useRef({ current: 0 });
+
+  const snapPoints = ['33%', '83%'];
+  const [isReportAdModalVisible, setReportAdModalVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isReportAdModalVisible, setReportAdModalVisible] = useState(false); // State for ReportAdModal
-  const scrollOffsetY = useRef(0).current;
-  const scrollViewRef = useRef<ScrollView | null>(null); // Reference for the ScrollView
+  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (e, gestureState) => gestureState.dy !== 0,
-      onPanResponderMove: (e, gestureState) => {
-        const newHeight = collapsedHeight - gestureState.dy;
-        if (newHeight > 0 && newHeight < screenHeight) {
-          animatedHeight.setValue(newHeight);
-        }
-      },
-      onPanResponderRelease: (e, gestureState) => {
-        const toValue = gestureState.dy < -50 ? expandedHeight : collapsedHeight;
-        Animated.spring(animatedHeight, {
-          toValue,
-          useNativeDriver: false,
-          friction: 5,
-        }).start(() => {
-          setIsExpanded(toValue === expandedHeight);
-          if (toValue === collapsedHeight && scrollViewRef.current) {
-            // Reset scroll to top when the modal collapses
-            scrollViewRef.current.scrollTo({ y: 0, animated: true });
-          }
-        });
-      },
-    })
-  ).current;
+  const { data: property, isLoading, error } = useGetPropertyById(propertyId);
 
-  const handlePlaceholderClick = (index: number) => {
-    console.log(`Placeholder ${index + 1} clicked`);
-  };
+  useEffect(() => {
+    if (error) {
+      console.log("Error fetching property:", error);
+      Alert.alert("Error", "Failed to load property details.");
+    }
+
+    if (property) {
+      console.log("Fetched Property Data:", property); // Log the property data
+    }
+  }, [property, error]);
 
   const handleShare = () => {
     Alert.alert("Share", "Share this property with others.");
   };
 
   const handleTermsClick = () => {
-    navigation.navigate('TermsOfUse'); // Navigate to the Terms of Use screen
+    navigation.navigate('TermsOfUse');
   };
 
-  // Function to toggle ReportAdModal visibility
   const toggleReportAdModal = () => {
     setReportAdModalVisible(!isReportAdModalVisible);
   };
 
+  const handleBottomSheetChange = (index) => {
+  setIsBottomSheetExpanded(index === 1);
+  
+  if (index === 0 && scrollViewRef.current) {
+    // Ensure the scroll position resets after the modal animation completes
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ y: 0, animated: true });
+      }
+    }, 300); // Adjust delay if needed to ensure the animation completes
+  }
+  
+  HapticFeedback.trigger('impactLight');
+};
+
+
+  const category = property?.category || "Apartment";
+  const type = property?.type || "Sell";
+  const displayType = type === 'Sell' ? 'For Sale' : type === 'Rent' ? 'For Rent' : type;
+
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={[styles.closeButton, { top: insets.top + 15 }]}
-        onPress={() => navigation.goBack()} 
-      >
-        <Image source={require('../../assets/images/close.png')} style={styles.closeIconImage} />
-      </TouchableOpacity>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : property ? (
+        <>
+          <TouchableOpacity
+            style={[styles.closeButton, { top: insets.top + 15 }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Image source={require('../../assets/images/close.png')} style={styles.closeIconImage} />
+          </TouchableOpacity>
 
-      <TopIcons 
-        topInset={insets.top} 
-        onSavePress={() => Alert.alert("Save", "Save functionality is not implemented yet.")}
-        onSharePress={handleShare}
-        onReportPress={toggleReportAdModal} // Pass the toggle function to TopIcons
-      />
-
-      <ImageGallery imagesCount={9} onPlaceholderClick={handlePlaceholderClick} expandedHeight={expandedHeight} />
-
-      {/* Render your animated modal content */}
-      <Animated.View style={[styles.modalView, { height: animatedHeight }]}>
-        <ModalHeader panHandlers={panResponder.panHandlers} />
-        <ModalContent
-          imagesCount={9}
-          expandedHeight={expandedHeight}
-          onPlaceholderClick={handlePlaceholderClick}
-          scrollOffsetY={scrollOffsetY}
-          scrollViewRef={scrollViewRef} // Pass the ScrollView ref to ModalContent
-          isExpanded={isExpanded} // Pass the isExpanded state to ModalContent
-          handleTermsClick={handleTermsClick} // Pass the handleTermsClick function to ModalContent
-        />
-      </Animated.View>
-
-      {/* ReportAdModal for reporting ads */}
-      {isReportAdModalVisible && (
-        <View style={styles.reportAdModalOverlay}>
-          <ReportAdModal
-            isVisible={isReportAdModalVisible}
-            toggleVisible={toggleReportAdModal}
-            style={styles.reportAdModalVisible}
+          <TopIcons 
+            topInset={insets.top} 
+            onSavePress={() => Alert.alert("Save", "Save functionality is not implemented yet.")}
+            onSharePress={handleShare}
+            onReportPress={toggleReportAdModal}
           />
-        </View>
-      )}
 
-      {/* Generic Modal, if still needed */}
-      {isModalVisible && (
-        <GenericModal
-          visible={isModalVisible}
-          onClose={() => setModalVisible(false)}
-        />
+          <ImageGallery
+            imagesCount={9}
+            onPlaceholderClick={() => {}}
+            expandedHeight={screenHeight * 0.8}
+            property={property}
+          />
+        
+          <BottomSheet
+            ref={bottomSheetRef}
+            index={0}
+            snapPoints={snapPoints}
+            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+            onChange={handleBottomSheetChange}
+            handleIndicatorStyle={{ backgroundColor: '#aaa', width: 40, height: 5, borderRadius: 2.5 }}
+            handleComponent={() => (
+              <View style={styles.slipSection}>
+                <Text style={styles.leftText}>{category}</Text> 
+                <Text style={styles.rightText}>{displayType}</Text> 
+              </View>
+            )}
+          >
+            <BottomSheetScrollView
+              ref={scrollViewRef}
+              style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+              scrollEnabled={isBottomSheetExpanded} // Disable scrolling when collapsed
+            >
+              <ModalContent
+                property={property}
+                expandedHeight={screenHeight * 0.8}
+                isExpanded={isBottomSheetExpanded}
+                scrollOffsetY={scrollOffsetY}
+                scrollViewRef={scrollViewRef}
+                handleTermsClick={handleTermsClick}
+              />
+            </BottomSheetScrollView>
+          </BottomSheet>
+
+          <ContactButton />
+
+          {isReportAdModalVisible && (
+            <View style={styles.reportAdModalOverlay}>
+              <ReportAdModal
+                isVisible={isReportAdModalVisible}
+                toggleVisible={toggleReportAdModal}
+                style={styles.reportAdModalVisible}
+              />
+            </View>
+          )}
+
+          {isModalVisible && (
+            <GenericModal
+              visible={isModalVisible}
+              onClose={() => setModalVisible(false)}
+            />
+          )}
+        </>
+      ) : (
+        <Text style={styles.errorMessage}>Property details could not be loaded.</Text>
       )}
     </SafeAreaView>
   );
@@ -151,31 +187,57 @@ const styles = StyleSheet.create({
     height: 16,
     resizeMode: 'contain',
   },
-  modalView: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 10,
-    paddingBottom: 110,
-    zIndex: 100, // Adjust the zIndex to control stacking order
-  },
   reportAdModalOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Backdrop effect
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 200, // Higher than any other component
+    zIndex: 200,
   },
   reportAdModalVisible: {
-    zIndex: 201, // Even higher than the overlay to be safe
+    zIndex: 201,
+  },
+  errorMessage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'red',
+  },
+  slipSection: {
+    height: 35,
+    backgroundColor: 'green',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    width: screenWidth - 20,
+    alignSelf: 'center',
+    marginTop: -30,
+    zIndex: 102,
+  },
+  leftText: {
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'Jost',
+  },
+  rightText: {
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'Jost',
+  },
+  contactButtonContainer: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    alignItems: 'center',
+    zIndex: 300, // Ensure it stays above other elements
+    paddingBottom: 15,
   },
 });
 
