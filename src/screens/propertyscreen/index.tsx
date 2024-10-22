@@ -89,6 +89,8 @@ export const PropertyScreen: React.FC = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : property ? (
         <>
+
+        
           <TouchableOpacity
             style={[styles.closeButton, { top: insets.top + 15 }]}
             onPress={() => navigation.goBack()}
@@ -103,12 +105,12 @@ export const PropertyScreen: React.FC = () => {
             onReportPress={toggleReportAdModal}
           />
 
-          <ImageGallery
-            imagesCount={9}
-            onPlaceholderClick={() => {}}
-            expandedHeight={screenHeight * 0.8}
-            property={property}
-          />
+<ImageGallery
+  images={property.property_images} // Pass actual image URLs
+  expandedHeight={screenHeight * 0.8}
+  onPlaceholderClick={(index) => console.log(`Clicked on image ${index}`)}
+/>
+
         
           <BottomSheet
             ref={bottomSheetRef}

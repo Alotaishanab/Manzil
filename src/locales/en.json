@@ -522,5 +522,7 @@
   "buttons.continue":"Continue",
   "buttons.sell-all":"See all",
   "buttons.requests":"Requests",
+
+  "realEstate.authorityInfo": "Real Estate Authority"
   
 }

@@ -2,7 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Animated } from 'react-native';
 import { fonts } from '../../../assets/fonts/index'; // Import fonts
 
-const DescriptionBox: React.FC = () => {
+interface DescriptionBoxProps {
+  description: string;
+}
+
+const DescriptionBox: React.FC<DescriptionBoxProps> = ({ description }) => {
   const [expanded, setExpanded] = useState(false);
   const animation = useRef(new Animated.Value(0)).current; // Animation value for height
   const scaleAnim = useRef(new Animated.Value(1)).current; // Animation value for scaling
@@ -56,15 +60,8 @@ const DescriptionBox: React.FC = () => {
         <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.title}>Description</Text>
           <Text style={styles.description}>
-            {/* Placeholder for API data */}
-            This is a brief description of the property. It provides an overview of the key features and unique selling points of the property.
+            {description}
           </Text>
-          <Animated.View style={{ height: animatedHeight, opacity: animatedOpacity, overflow: 'hidden' }}>
-            <Text style={styles.additionalInfo}>
-              {/* Placeholder for API data */}
-              More detailed information about the property can be shown here, including amenities, nearby attractions, and historical significance.
-            </Text>
-          </Animated.View>
           <Text style={styles.showMoreText}>
             {expanded ? 'Show Less' : 'Show More'}
           </Text>
@@ -82,9 +79,9 @@ const styles = StyleSheet.create({
   container: {
     width: '97%',
     backgroundColor: '#fff',
-    borderRadius: 15, // Adjusted to match consistent card styling
-    elevation: 3, // Consistent shadow for Android
-    shadowColor: '#000', // Consistent shadow for iOS
+    borderRadius: 15,
+    elevation: 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -93,32 +90,32 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   title: {
-    fontSize: 16, // Consistent font size for titles
+    fontSize: 16,
     marginBottom: 10,
     color: '#000',
-    textAlign: 'center', // Center the title
-    fontFamily: fonts.primary.bold, // Use bold font for emphasis
+    textAlign: 'center',
+    fontFamily: fonts.primary.bold, 
   },
   description: {
-    fontSize: 14, // Smaller font size for main description
+    fontSize: 14,
     color: '#000',
     fontFamily: fonts.primary.regular,
-    lineHeight: 20, // Increase line spacing for readability
-    paddingHorizontal: 10, // Padding for consistent text alignment
+    lineHeight: 20,
+    paddingHorizontal: 10,
   },
   additionalInfo: {
-    fontSize: 14, // Consistent font size with description
+    fontSize: 14,
     color: '#000',
     marginTop: 10,
     fontFamily: fonts.primary.regular,
-    lineHeight: 20, // Increase line spacing for readability
-    paddingHorizontal: 10, // Consistent padding
+    lineHeight: 20,
+    paddingHorizontal: 10,
   },
   showMoreText: {
     marginTop: 10,
-    color: '#1E90FF', // Change color to a more noticeable blue
-    fontSize: 14, // Adjusted font size slightly smaller
-    fontFamily: fonts.primary.bold, // Use bold font for better emphasis
+    color: '#1E90FF',
+    fontSize: 14,
+    fontFamily: fonts.primary.bold,
     textAlign: 'center',
   },
 });

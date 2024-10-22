@@ -14,6 +14,7 @@ const cache = createIntlCache();
 const messages = {en, ar};
 
 interface IntlContextProps {
+  formatMessage(arg0: { id: string; defaultMessage: string; }): React.ReactNode;
   intl: IntlShape;
   locale: string;
   toggleLocale: () => void;

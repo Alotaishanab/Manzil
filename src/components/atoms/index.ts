@@ -8,3 +8,5 @@ export * from './InputFieldCode';
 export * from './CustomFlashMessage';
 export * from './AddPropertyBack';
 export * from './PropertyStepHeader';
+export * from './Ads';
+export * from './Survey';

@@ -505,5 +505,8 @@
   "buttons.search":"يبحث",
   "buttons.continue":"يكمل",
   "buttons.sell-all":"شاهد الكل",
-  "buttons.requests":"الطلبات"
+  "buttons.requests":"الطلبات",
+
+
+  "realEstate.authorityInfo": "الهيئة العامة للعقار"
 }

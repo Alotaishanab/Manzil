@@ -1,5 +1,5 @@
-import * as React from 'react';
-import Svg, {Path, SvgProps} from 'react-native-svg';
+import React from 'react';
+import Svg, { Path, SvgProps } from 'react-native-svg';
 
 export const UserIcon = (
   props: React.JSX.IntrinsicAttributes &
@@ -154,25 +154,25 @@ export const UserIcon = (
       | 'fontFeatureSettings'
       | 'fontVariantLigatures'
       | 'fontVariationSettings'
-    > & {readonly preserveAspectRatio?: string | undefined} & {},
+    > & { readonly preserveAspectRatio?: string | undefined } & {},
 ) => {
-  const {width, height} = props;
+  const { width, height } = props;
   return (
     <Svg
       xmlns="http://www.w3.org/2000/svg"
       width={width || 92}
       height={height || 94}
       fill="none"
-      {...props}>
+      {...props}
+    >
       <Svg
-        // xmlns="http://www.w3.org/2000/svg"
         width={92}
         height={92}
         y={1}
-        fill="#f8f8f8"
-        opacity="100%"
         viewBox="0 0 24 24"
-        {...props}>
+        fill="#000" // Set to black color
+        {...props}
+      >
         <Path fill="none" d="M0 0h24v24H0z" />
         <Path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
       </Svg>

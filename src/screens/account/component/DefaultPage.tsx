@@ -23,14 +23,9 @@ const DefaultPage = () => {
     }).start();
   };
 
-  // Function to handle press-out effect and navigate to login screen
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1, // Return to normal scale
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.navigate('Login'); // Navigate to the login screen, ensure 'Login' matches your route name
-    });
+  // Function to navigate to the login screen
+  const navigateToLogin = () => {
+    navigation.navigate('Login'); // Ensure 'Login' matches your route name
   };
 
   return (
@@ -50,7 +45,7 @@ const DefaultPage = () => {
       {/* Updated Animated Button */}
       <TouchableOpacity
         onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
+        onPressOut={() => scaleAnim.setValue(1)} // Reset scale on press out
         activeOpacity={0.7}
       >
         <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
@@ -65,6 +60,7 @@ const DefaultPage = () => {
             showRightIconButton={false}
             textButtonWithIcon={true}
             iconName="UserIcon"
+            handleClick={navigateToLogin} // Pass the navigation function directly
           />
         </Animated.View>
       </TouchableOpacity>
@@ -82,7 +78,6 @@ const DefaultPage = () => {
         handleClick={handleLegal}
         title={intl.formatMessage({ id: 'accountScreen.default.terms-of-use' })}
       />
-
       <SimpleButtonTextArrow
         handleClick={handleLegal}
         title={intl.formatMessage({ id: 'accountScreen.default.privacy-settings' })}

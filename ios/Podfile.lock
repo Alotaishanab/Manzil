@@ -1360,7 +1360,7 @@ PODS:
     - React-Core
   - RNDeviceInfo (11.1.0):
     - React-Core
-  - RNGestureHandler (2.20.0):
+  - RNGestureHandler (2.20.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1803,7 +1803,7 @@ SPEC CHECKSUMS:
   RNCPicker: b7873ba797dc586bfaf3307d737cbdc620a9ff3e
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNDeviceInfo: b899ce37a403a4dea52b7cb85e16e49c04a5b88e
-  RNGestureHandler: 28078232f2868d3dcb4d4b6c8ab8691700187664
+  RNGestureHandler: d965a561d5458dd1e10617602f55726e04e4aac5
   RNLocalize: b77875884750cb6a58cd6865863fe2ba2729b72b
   RNReactNativeHapticFeedback: 6d6363faa31a6cb23e467e02304b585ec59f0930
   RNReanimated: f9192536fa8a312c737eaf15c905f78831193ef1

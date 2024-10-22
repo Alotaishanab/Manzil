@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { useIntl } from '@context';
 import { useNavigation } from '@react-navigation/native';
 import { fonts } from '../../../assets/fonts/index';
+import { UserIcon } from '@assets'; // Importing the UserIcon component
 
 const TitleValueRow = ({ title, value, onPress, style }) => (
   <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
@@ -23,10 +24,9 @@ const TitleArrowIconWrap = ({ headingTitle, showIcon = true, style }) => (
 const AgentDetails = () => {
   const { intl } = useIntl();
   const navigation = useNavigation();
-  const [buttonPressed, setButtonPressed] = useState(false);
+  const [isIndependent, setIsIndependent] = useState(true); // Example state to show independent or agency
 
   const handleVisitPress = () => {
-    setButtonPressed(true);
     navigation.navigate('AgencyDetails');
   };
 
@@ -41,6 +41,18 @@ const AgentDetails = () => {
             showIcon={false}
             style={styles.titleStyle}
           />
+
+          {/* Show UserIcon or Agency Image */}
+          <View style={styles.iconWrapper}>
+            {isIndependent ? (
+              <UserIcon width={75} height={75} /> // Displaying the UserIcon for independent agents
+            ) : (
+              <Image
+                source={require('../../../assets/images/agencies/ag1.png')} // Replace with actual agency image
+                style={styles.agencyImage}
+              />
+            )}
+          </View>
 
           {/* Row Items with interactive feedback */}
           <TitleValueRow
@@ -68,24 +80,16 @@ const AgentDetails = () => {
             style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }}
           />
 
-          {/* Savills Branding */}
-          <View style={styles.savisWrap}>
-            <Text style={styles.savisText}>Savills</Text>
-          </View>
-
           {/* Visit Button */}
           <TouchableOpacity
-            style={[
-              styles.visitButton,
-              buttonPressed && styles.visitButtonPressed,
-            ]}
+            style={styles.visitButton}
             onPress={handleVisitPress}
             activeOpacity={0.7}
             accessible={true}
             accessibilityLabel={intl.formatMessage({ id: 'buttons.visit' })}
             accessibilityRole="button"
           >
-            <Text style={[styles.visitButtonText, buttonPressed && styles.visitButtonTextPressed]}>
+            <Text style={styles.visitButtonText}>
               {intl.formatMessage({ id: 'buttons.visit' })}
             </Text>
           </TouchableOpacity>
@@ -104,14 +108,15 @@ const styles = StyleSheet.create({
     width: '97%',
     backgroundColor: '#fff',
     borderRadius: 15,
-    padding: 15,
+    paddingVertical: 10, // Adjusted for padding consistency
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    elevation: 4,
-    marginVertical: 15,
+    elevation: 3,
+    marginVertical: 10,
     overflow: 'hidden',
+    alignItems: 'center', // Center items inside the card
   },
   titleWrap: {
     marginBottom: 15,
@@ -120,10 +125,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: {
-    fontSize: 16,
-    fontFamily: fonts.primary.regular,
+    fontSize: 16, // Consistent font size for titles
+    fontFamily: fonts.primary.bold, // Use bold font for emphasis
     color: '#000',
     flex: 1,
+    textAlign: 'center', // Center align for titles
   },
   headingIcon: {
     width: 20,
@@ -140,28 +146,21 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   titleText: {
-    fontSize: 14,
+    fontSize: 14, // Consistent font size with description
     color: '#333',
     fontFamily: fonts.primary.regular,
     flex: 1,
+    paddingHorizontal: 10, // Consistent padding
   },
   valueText: {
-    fontSize: 14,
+    fontSize: 14, // Adjusted font size
     color: '#000',
     fontFamily: fonts.primary.bold,
     textAlign: 'right',
-  },
-  savisWrap: {
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  savisText: {
-    fontSize: 18,
-    fontFamily: fonts.primary.bold,
-    color: '#000',
+    paddingHorizontal: 10, // Consistent padding
   },
   visitButton: {
-    width: '100%',
+    width: '50%',
     paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1.5,
@@ -169,18 +168,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 15,
-  },
-  visitButtonPressed: {
-    backgroundColor: '#4CAF50',
+    marginTop: 20, // Adjusted to give more spacing
   },
   visitButtonText: {
     color: '#4CAF50',
     fontSize: 14,
     fontFamily: fonts.primary.bold,
   },
-  visitButtonTextPressed: {
-    color: '#fff',
+  iconWrapper: {
+    marginVertical: 15,
+    alignItems: 'center',
+  },
+  agencyImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    resizeMode: 'cover',
   },
 });
 

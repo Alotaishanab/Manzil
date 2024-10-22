@@ -9,7 +9,7 @@ import AsyncHelper from '../../helpers/asyncHelper';
 //console.log('API_URL', API_URL);
 // http://127.0.0.1:8000/
 // const baseURL = 'http://192.168.1.221:3000';
-const QA = 'http://127.0.0.1:8000/'; // Set your QA base URL
+const QA = 'http://192.168.1.202:8000'; // Set your QA base URL
 
 type ApiResponse<T> = Promise<AxiosResponse<T>>;
 

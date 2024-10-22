@@ -1,111 +1,83 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { fonts } from '../../../assets/fonts/index'; // Import fonts
-import { useIntl } from '@context';
 
-// Example property data (replace with actual data from backend)
-const propertyDetails = {
-  propertyType: 'House', // This should be dynamic based on the actual property type
-  size: '1,863 sqft',
-  pricePerMeter: '$845/sqft',
-  propertyAge: '10 years',  // New field for property age
-  direction: 'North',
-  bedrooms: 3,
-  bathrooms: 2,
-  livingSpace: '2,000 sqft',
-  floorNumber: 5,
-  landSize: '10 acres',
-  beds: 2,
-  baths: 2,
-  waterfrontAccess: true,
-};
+interface PropertyDetailsProps {
+  title: string;
+  area: number;
+  bathrooms: number;
+  bedrooms: number;
+  livingRooms: number;
+  propertyCategory: string;
+  listingDate: string; // Date string to calculate property age
+}
 
-const propertyTypeFields = {
-  House: ['propertyType', 'bedrooms', 'bathrooms', 'size', 'pricePerMeter', 'propertyAge', 'direction'],
-  Apartment: ['propertyType', 'bedrooms', 'bathrooms', 'size', 'pricePerMeter', 'propertyAge', 'direction'],
-  Tower: ['propertyType', 'livingSpace', 'size', 'pricePerMeter', 'propertyAge', 'direction'],
-  Shop: ['propertyType', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'floorNumber'],
-  Farmhouse: ['propertyType', 'livingSpace', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'beds', 'baths', 'landSize'],
-  Chalet: ['propertyType', 'beds', 'baths', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'waterfrontAccess'],
-  Office: ['propertyType', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'floorNumber'],
-  Warehouse: ['propertyType', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'floorNumber'],
-  WorkerResidence: ['propertyType', 'size', 'pricePerMeter', 'propertyAge', 'direction', 'floorNumber'],
-};
+const PropertyDetails: React.FC<PropertyDetailsProps> = ({
+  title,
+  area,
+  bathrooms,
+  bedrooms,
+  livingRooms,
+  propertyCategory,
+  listingDate,
+}) => {
 
-const PropertyDetails: React.FC = () => {
-  const { intl } = useIntl();
+  // Calculate property age based on the listing date
+  const calculatePropertyAge = (listingDate: string) => {
+    const listingYear = new Date(listingDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return `${currentYear - listingYear} years`;
+  };
 
-  // Determine fields to display based on property type
-  const propertyType = propertyDetails.propertyType; // Replace with dynamic value
-  const fieldsToDisplay = propertyTypeFields[propertyType] || [];
+  const propertyDetails = {
+    title: title || 'N/A',
+    size: area ? `${area} sqft` : 'N/A',
+    bathrooms: bathrooms || 'N/A',
+    bedrooms: bedrooms || 'N/A',
+    livingRooms: livingRooms || 'N/A',
+    propertyCategory: propertyCategory || 'N/A',
+    propertyAge: listingDate ? calculatePropertyAge(listingDate) : 'N/A',
+    listingDate: listingDate ? new Date(listingDate).toLocaleDateString('en-US') : 'N/A', // Explicitly use 'en-US' locale
+  };
 
   return (
     <View style={styles.outerContainer}>
       <View style={styles.container}>
         <Text style={styles.title}>Property Details</Text>
-        
-        {/* Display fields that come before utility details */}
+
         <View style={styles.detailGrid}>
-          {fieldsToDisplay.includes('propertyType') && (
-            <View style={styles.largeDetailCard}>
-              <Text style={styles.largeDetailItem}>Property Type:</Text>
-              <Text style={styles.largeDetailValue}>{propertyDetails.propertyType}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('size') && (
-            <View style={styles.largeDetailCard}>
-              <Text style={styles.largeDetailItem}>Size:</Text>
-              <Text style={styles.largeDetailValue}>{propertyDetails.size}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('pricePerMeter') && (
-            <View style={styles.largeDetailCard}>
-              <Text style={styles.largeDetailItem}>Price per Meter:</Text>
-              <Text style={styles.largeDetailValue}>{propertyDetails.pricePerMeter}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('bedrooms') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Bedrooms:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.bedrooms}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('bathrooms') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Bathrooms:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.bathrooms}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('propertyAge') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Property Age:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.propertyAge}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('direction') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Direction:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.direction}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('livingSpace') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Living Space:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.livingSpace}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('floorNumber') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Floor Number:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.floorNumber}</Text>
-            </View>
-          )}
-          {fieldsToDisplay.includes('landSize') && (
-            <View style={styles.detailCard}>
-              <Text style={styles.detailItem}>Land Size:</Text>
-              <Text style={styles.detailValue}>{propertyDetails.landSize}</Text>
-            </View>
-          )}
+          <View style={styles.largeDetailCard}>
+            <Text style={styles.largeDetailItem}>Title:</Text>
+            <Text style={styles.largeDetailValue}>{propertyDetails.title}</Text>
+          </View>
+          <View style={styles.largeDetailCard}>
+            <Text style={styles.largeDetailItem}>Category:</Text>
+            <Text style={styles.largeDetailValue}>{propertyDetails.propertyCategory}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Size:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.size}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Bathrooms:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.bathrooms}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Bedrooms:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.bedrooms}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Living Rooms:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.livingRooms}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Property Age:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.propertyAge}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailItem}>Listing Date:</Text>
+            <Text style={styles.detailValue}>{propertyDetails.listingDate}</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -116,17 +88,17 @@ const styles = StyleSheet.create({
   outerContainer: {
     flexGrow: 1,
     alignItems: 'center',
-    },
+  },
   container: {
     width: '97%',
     backgroundColor: '#fff',
     borderRadius: 15,
-    padding: 15,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
+    paddingVertical: 10,
     marginVertical: 10,
     overflow: 'hidden',
   },

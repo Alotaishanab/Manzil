@@ -3,57 +3,56 @@ import { View, Text, StyleSheet } from 'react-native';
 import { fonts } from '../../../assets/fonts/index'; // Import fonts
 import { WaterIcon, ElectricityIcon, SewageIcon } from '@assets'; // Custom icons from your assets
 
-// Example utility data (replace with actual data from backend)
-const utilities = {
-  water: true,
-  electricity: true,
-  sewageSystem: false,
-};
+interface UtilitiesProps {
+  hasWater: boolean;
+  hasElectricity: boolean;
+  hasSewage: boolean;
+}
 
-const Utilities: React.FC = () => {
+const Utilities: React.FC<UtilitiesProps> = ({ hasWater, hasElectricity, hasSewage }) => {
   return (
-  <View style={styles.outerContainer}>
-    <View style={styles.utilityContainer}>
-      <Text style={styles.utilityTitle}>Utilities</Text>
-      
-      <View style={styles.utilityCardWrapper}>
-        {/* Water */}
-        <View style={styles.utilityCardContainer}>
-          <View style={[styles.statusIndicator, utilities.water ? styles.statusAvailable : styles.statusUnavailable]} />
-          <View style={[styles.utilityCard, utilities.water ? styles.utilityWaterAvailable : styles.utilityWaterUnavailable]}>
-            <WaterIcon width={24} height={24} color={utilities.water ? "#fff" : "#000"} />
-            <Text style={styles.utilityCardText}>Water</Text>
+    <View style={styles.outerContainer}>
+      <View style={styles.utilityContainer}>
+        <Text style={styles.utilityTitle}>Utilities</Text>
+        
+        <View style={styles.utilityCardWrapper}>
+          {/* Water */}
+          <View style={styles.utilityCardContainer}>
+            <View style={[styles.statusIndicator, hasWater ? styles.statusAvailable : styles.statusUnavailable]} />
+            <View style={[styles.utilityCard, hasWater ? styles.utilityWaterAvailable : styles.utilityWaterUnavailable]}>
+              <WaterIcon width={24} height={24} color={hasWater ? "#fff" : "#000"} />
+              <Text style={styles.utilityCardText}>Water</Text>
+            </View>
+            <Text style={[styles.statusText, hasWater ? styles.textAvailable : styles.textUnavailable]}>
+              {hasWater ? "Available" : "Unavailable"}
+            </Text>
           </View>
-          <Text style={[styles.statusText, utilities.water ? styles.textAvailable : styles.textUnavailable]}>
-            {utilities.water ? "Available" : "Unavailable"}
-          </Text>
-        </View>
 
-        {/* Electricity */}
-        <View style={styles.utilityCardContainer}>
-          <View style={[styles.statusIndicator, utilities.electricity ? styles.statusAvailable : styles.statusUnavailable]} />
-          <View style={[styles.utilityCard, utilities.electricity ? styles.utilityElectricityAvailable : styles.utilityElectricityUnavailable]}>
-            <ElectricityIcon width={24} height={24} color={utilities.electricity ? "#fff" : "#000"} />
-            <Text style={styles.utilityCardText}>Electricity</Text>
+          {/* Electricity */}
+          <View style={styles.utilityCardContainer}>
+            <View style={[styles.statusIndicator, hasElectricity ? styles.statusAvailable : styles.statusUnavailable]} />
+            <View style={[styles.utilityCard, hasElectricity ? styles.utilityElectricityAvailable : styles.utilityElectricityUnavailable]}>
+              <ElectricityIcon width={24} height={24} color={hasElectricity ? "#fff" : "#000"} />
+              <Text style={styles.utilityCardText}>Electricity</Text>
+            </View>
+            <Text style={[styles.statusText, hasElectricity ? styles.textAvailable : styles.textUnavailable]}>
+              {hasElectricity ? "Available" : "Unavailable"}
+            </Text>
           </View>
-          <Text style={[styles.statusText, utilities.electricity ? styles.textAvailable : styles.textUnavailable]}>
-            {utilities.electricity ? "Available" : "Unavailable"}
-          </Text>
-        </View>
 
-        {/* Sewage */}
-        <View style={styles.utilityCardContainer}>
-          <View style={[styles.statusIndicator, utilities.sewageSystem ? styles.statusAvailable : styles.statusUnavailable]} />
-          <View style={[styles.utilityCard, utilities.sewageSystem ? styles.utilitySewageAvailable : styles.utilitySewageUnavailable]}>
-            <SewageIcon width={24} height={24} color={utilities.sewageSystem ? "#fff" : "#000"} />
-            <Text style={styles.utilityCardText}>Sewage</Text>
+          {/* Sewage */}
+          <View style={styles.utilityCardContainer}>
+            <View style={[styles.statusIndicator, hasSewage ? styles.statusAvailable : styles.statusUnavailable]} />
+            <View style={[styles.utilityCard, hasSewage ? styles.utilitySewageAvailable : styles.utilitySewageUnavailable]}>
+              <SewageIcon width={24} height={24} color={hasSewage ? "#fff" : "#000"} />
+              <Text style={styles.utilityCardText}>Sewage</Text>
+            </View>
+            <Text style={[styles.statusText, hasSewage ? styles.textAvailable : styles.textUnavailable]}>
+              {hasSewage ? "Available" : "Unavailable"}
+            </Text>
           </View>
-          <Text style={[styles.statusText, utilities.sewageSystem ? styles.textAvailable : styles.textUnavailable]}>
-            {utilities.sewageSystem ? "Available" : "Unavailable"}
-          </Text>
         </View>
       </View>
-    </View>
     </View>
   );
 };
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     position: 'absolute',
-    top: -5, // Adjusted for smaller gap
+    top: -5,
     right: -8,
     borderWidth: 2,
     borderColor: '#fff',

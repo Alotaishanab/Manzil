@@ -1,81 +1,66 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, Easing } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { useIntl } from '@context';
 import { fonts } from '../../../assets/fonts/index';
+import { RegaIcon } from '@assets'; // Assuming you are importing the custom icon
 
 const TitleValueRow = ({ title, value, onPress }) => (
-  <TouchableOpacity style={styles.rowContainer} activeOpacity={0.7} onPress={onPress}>
+  <TouchableOpacity
+    style={styles.row}
+    activeOpacity={0.7}
+    onPress={onPress}
+  >
     <Text style={styles.titleText}>{title}</Text>
     <Text style={styles.valueText}>{value}</Text>
   </TouchableOpacity>
 );
 
-const TitleArrowIconWrap = ({ headingTitle, textStyle, isExpanded, onPress }) => {
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  // Rotate arrow icon based on isExpanded state
-  Animated.timing(rotateAnim, {
-    toValue: isExpanded ? 1 : 0,
-    duration: 300,
-    easing: Easing.linear,
-    useNativeDriver: true,
-  }).start();
-
-  const rotateInterpolate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
-
-  return (
-    <TouchableOpacity onPress={onPress} style={styles.titleContainer} activeOpacity={0.8}>
-      <Text style={[styles.headingText, textStyle]}>{headingTitle}</Text>
-      <Animated.Image
-        source={require('../../../assets/images/authorityIcon.png')}
-        style={[styles.headingIcon, { transform: [{ rotate: rotateInterpolate }] }]}
-      />
-    </TouchableOpacity>
-  );
-};
-
 const AdInfo = () => {
   const intl = useIntl();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const animatedHeight = useRef(new Animated.Value(0)).current;
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-    Animated.timing(animatedHeight, {
-      toValue: isExpanded ? 0 : 250, // Adjust height based on content
-      duration: 300,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: false,
-    }).start();
+  const copyToClipboard = (value: string) => {
+    Alert.alert("Copied to Clipboard", `${value} has been copied.`);
   };
 
   return (
-    <View style={styles.outerContainer}>
-      <View style={[styles.container, { maxWidth: '97%' }]}>
-        <TitleArrowIconWrap
-          headingTitle="Real Estate Authority Info"
-          textStyle={styles.headingText}
-          isExpanded={isExpanded}
-          onPress={toggleExpand}
-        />
+    <View style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={styles.titleWrap}>
+          <Text style={styles.title}>
+            Real Estate Authority Info
+          </Text>
+        </View>
 
-        <Animated.View style={[styles.collapsibleContent, { height: animatedHeight }]}>
-          <View style={styles.divider} />
-          <TitleValueRow title="Advertising License Number" value="321" onPress={() => { /* Handle Press */ }} />
-          <TitleValueRow title="Unified Number Establishment" value="25" onPress={() => { /* Handle Press */ }} />
-          <TitleValueRow title="FAL License No" value="7" onPress={() => { /* Handle Press */ }} />
-          <TitleValueRow title="Date Registration" value="2024/06/29" onPress={() => { /* Handle Press */ }} />
-        </Animated.View>
+        <View style={styles.divider} />
+
+        {/* Display information rows */}
+        <TitleValueRow
+          title="Advertising License Number"
+          value="321"
+          onPress={() => copyToClipboard("321")}
+        />
+        <TitleValueRow
+          title="Unified Number Establishment"
+          value="25"
+          onPress={() => copyToClipboard("25")}
+        />
+        <TitleValueRow
+          title="FAL License No"
+          value="7"
+          onPress={() => copyToClipboard("7")}
+        />
+        <TitleValueRow
+          title="Date Registration"
+          value="2024/06/29"
+          onPress={() => copyToClipboard("2024/06/29")}
+        />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  outerContainer: {
+  scrollContainer: {
     flexGrow: 1,
     alignItems: 'center',
   },
@@ -83,20 +68,27 @@ const styles = StyleSheet.create({
     width: '97%',
     backgroundColor: '#fff',
     borderRadius: 15,
-    elevation: 3,
+    paddingVertical: 10, // Adjusted for padding consistency
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
+    elevation: 3,
     marginVertical: 10,
     overflow: 'hidden',
   },
-  headingText: {
-    fontSize: 16,
-    fontFamily: fonts.primary.bold,
+  titleWrap: {
+    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 16, // Consistent font size for titles
+    fontFamily: fonts.primary.bold, // Use bold font for emphasis
     color: '#000',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'center', // Center align for titles
   },
   headingIcon: {
     width: 20,
@@ -104,51 +96,32 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginLeft: 8,
   },
-  titleContainer: {
+  row: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginVertical: 8,
+    paddingVertical: 8,
+    width: '100%',
+  },
+  titleText: {
+    fontSize: 14, // Consistent font size with description
+    color: '#333',
+    fontFamily: fonts.primary.regular,
+    flex: 1,
+    paddingHorizontal: 10, // Consistent padding
+  },
+  valueText: {
+    fontSize: 14, // Adjusted font size
+    color: '#000',
+    fontFamily: fonts.primary.bold,
+    textAlign: 'right',
+    paddingHorizontal: 10, // Consistent padding
   },
   divider: {
     height: 1,
     backgroundColor: '#e0e0e0',
     marginVertical: 10,
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    marginBottom: 8,
-    width: '95%',
-    alignSelf: 'center',
-  },
-  titleText: {
-    fontSize: 14,
-    color: '#333',
-    fontFamily: fonts.primary.regular,
-    flex: 1,
-  },
-  valueText: {
-    fontSize: 14,
-    color: '#000',
-    fontFamily: fonts.primary.bold,
-    textAlign: 'right',
-  },
-  collapsibleContent: {
-    overflow: 'hidden',
   },
 });
 

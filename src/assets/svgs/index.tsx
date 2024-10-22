@@ -136,6 +136,7 @@ export * from './ReloadIcon';
 export * from './ReceptionIcon';
 export * from './ReportIcon';
 export * from './RooftopIcon';
+export * from './RegaIcon';
 
 // S
 export * from './ShareIcon';

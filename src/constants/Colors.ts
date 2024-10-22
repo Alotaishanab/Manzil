@@ -6,6 +6,7 @@ export const Colors = {
     unselectBtn: '#edeeee',
     black: '#23262B',
     primaryButton: '#2f7919',
+    secondaryButton: '#6c757d', // New color for secondary buttons
     disabled: '#45ad28',
     primaryBtn: '#2e7a1a',
     serialNoGreen: '#307E20',
@@ -52,9 +53,10 @@ export const Colors = {
     subTitle: '#464D57',
     black: '#23262B',
     primaryButton: '#2f7919',
+    secondaryButton: '#4d4d4d', // Darker variant for secondary buttons
+    disabled: '#4ccc27',
     primaryBtn: '#2F7A19',
     unselectBtn: '#edeeee',
-    disabled: '#4ccc27',
     serialNoGreen: '#307E20',
     inputBg: '#f9fafb',
     greyDescription: '#cbcbcb',

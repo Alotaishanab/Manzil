@@ -1,68 +1,119 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import FullScreenImageViewer from './FullScreenImageViewer'; // Import the new full-screen component
 
 interface ImageGalleryProps {
-  imagesCount: number;
+  images: string[]; // Accept an array of image URLs
   onPlaceholderClick: (index: number) => void;
   expandedHeight: number;
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
-  imagesCount,
+  images,
   onPlaceholderClick,
   expandedHeight,
 }) => {
+  const [isViewerVisible, setViewerVisible] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const modalOverlapHeight = screenHeight * 0.30; // Approximate height of the modal when expanded (30% of the screen height)
-  const placeholderHeight = 200; // The height of each standard image placeholder
-  const halfWidth = (screenWidth / 2) - 15; // Calculate half of the screen width with padding
 
-  // Calculate total content height to help align with modal
-  const contentHeight = placeholderHeight * imagesCount - modalOverlapHeight;
+  const openFullScreenViewer = (index: number) => {
+    setSelectedIndex(index);
+    setViewerVisible(true);
+  };
+
+  const closeFullScreenViewer = () => {
+    setViewerVisible(false);
+  };
 
   return (
-    <ScrollView
-      style={styles.imageGallery}
-      contentContainerStyle={[
-        styles.scrollViewContent,
-        { paddingBottom: modalOverlapHeight - 5 }, // Ensure scrolling stops where the last placeholder aligns with the slip
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.galleryContainer}>
-        {Array.from({ length: imagesCount }).map((_, index) => {
-          // Every 3rd placeholder split into two smaller ones
-          if ((index + 1) % 3 === 0) {
-            return (
-              <View key={index} style={styles.rowContainer}>
-                <TouchableOpacity
-                  onPress={() => onPlaceholderClick(index)}
-                  style={[styles.halfImage, { backgroundColor: '#ccc' }]}
-                >
-                  <Text style={styles.placeholderText}>Placeholder {index + 1}a</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => onPlaceholderClick(index + 1)}
-                  style={[styles.halfImage, { backgroundColor: '#ccc' }]}
-                >
-                  <Text style={styles.placeholderText}>Placeholder {index + 1}b</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          } else {
-            return (
+    <>
+      <ScrollView
+        style={styles.imageGallery}
+        contentContainerStyle={[
+          styles.scrollViewContent,
+          { paddingBottom: modalOverlapHeight - 5 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.galleryContainer}>
+          {images.length === 1 ? (
+            // Special case: Single image, place it in the second position
+            <>
+              <View style={styles.image} />
               <TouchableOpacity
-                key={index}
-                onPress={() => onPlaceholderClick(index)}
-                style={[styles.image, { backgroundColor: '#ccc', marginBottom: 5 }]}
+                onPress={() => openFullScreenViewer(0)}
+                style={styles.image}
               >
-                <Text style={styles.placeholderText}>Placeholder {index + 1}</Text>
+                <Image
+                  source={{ uri: images[0] }}
+                  style={styles.imageElement}
+                  resizeMode="cover"
+                />
               </TouchableOpacity>
-            );
-          }
-        })}
-      </View>
-    </ScrollView>
+            </>
+          ) : (
+            // General case: Multiple images with a structured layout
+            images.map((imageUrl, index) => {
+              if ((index + 1) % 4 === 3) {
+                // Position for two half-images
+                return (
+                  <View key={index} style={styles.rowContainer}>
+                    <TouchableOpacity
+                      onPress={() => openFullScreenViewer(index)}
+                      style={styles.halfImage}
+                    >
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.imageElement}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
+                    {images[index + 1] && (
+                      <TouchableOpacity
+                        onPress={() => openFullScreenViewer(index + 1)}
+                        style={styles.halfImage}
+                      >
+                        <Image
+                          source={{ uri: images[index + 1] }}
+                          style={styles.imageElement}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              } else if ((index + 1) % 4 !== 0) {
+                // Position for full-width images
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => openFullScreenViewer(index)}
+                    style={styles.image}
+                  >
+                    <Image
+                      source={{ uri: imageUrl }}
+                      style={styles.imageElement}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                );
+              }
+              return null;
+            })
+          )}
+        </View>
+      </ScrollView>
+
+      {isViewerVisible && (
+        <FullScreenImageViewer
+          images={images}
+          initialIndex={selectedIndex}
+          onClose={closeFullScreenViewer}
+        />
+      )}
+    </>
   );
 };
 
@@ -96,10 +147,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderText: {
-    fontSize: 16,
-    color: '#000',
-    fontFamily: 'Jost',
+  imageElement: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
 });
 

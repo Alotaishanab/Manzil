@@ -7,7 +7,7 @@ import DescriptionBox from './DescriptionBox';
 import PropertyFeatures from './PropertyFeatures';
 import AdInfo from './AdInfo';
 import AgentDetails from './AgentDetails';
-import ModalHeader from './ContactButton';
+import TimetoAddress from './TimeToAddress';
 import Utilities from './Utilities';
 import { SimilarProperties } from '@screens';
 import { fonts } from '../../../assets/fonts/index';
@@ -72,11 +72,32 @@ const ModalContent: React.FC<ModalContentProps> = ({
       </View>
 
       <View style={styles.contentContainer}>
-        <PropertyDetails property={property} />
-        <Utilities/>
+      <PropertyDetails
+  title={property.title}
+  area={property.area}
+  bathrooms={property.bathrooms}
+  bedrooms={property.bedrooms}
+  livingRooms={property.living_rooms}
+  propertyCategory={property.property_category}
+  listingDate={property.listing_date}
+/>
+
+
+
+<Utilities 
+  hasWater={property.has_water}
+  hasElectricity={property.has_electricity}
+  hasSewage={property.has_sewage}
+/>
+
        
-        <DescriptionBox description={property.description} />
+<DescriptionBox 
+  description={property.description}
+
+/>
+
         <MapComponent location={property.location} />
+        <TimetoAddress/>
         <AdInfo property={property} />
         <AgentDetails contactInformation={property.contact_information} />
 
