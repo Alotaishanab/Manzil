@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, ActivityIndicator } from 'react-native';
 import { GenericModal, Screen } from '@components';
 import DefaultPage from './component/DefaultPage';
 import LoggedinUserPage from './component/LoggedinUserPage';
 import { AsyncHelper } from '../../../src/helpers/asyncHelper'; // Adjust the path
 import DeleteAccountContent from './component/DeleteAcountContent';
 import { useGetProfile } from '@services'; // Import the profile query hook
+import { Colors } from '@colors';
 
 export const Account = () => {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [isLoggedin, setIsLoggedin] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoggedin, setIsLoggedin] = useState<boolean | null>(null); // Start as null to indicate "checking"
+  const [loading, setLoading] = useState(true); // Track overall loading state
 
   // Check if the user is logged in (using AsyncHelper as you've done before)
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = await AsyncHelper.getToken();
       setIsLoggedin(!!token); // If token exists, set isLoggedin to true
-      setIsLoading(false); // Set loading to false once we know the login status
+      setLoading(false); // Stop loading once status is determined
     };
     checkLoginStatus();
   }, []);
@@ -38,8 +39,19 @@ export const Account = () => {
     toggleDeleteAccountModal();
   };
 
+  // Show a loader until the auth and profile status are fully determined
+  if (loading || isProfileLoading) {
+    return (
+      <Screen padding={0} showKeyboardAware={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      </Screen>
+    );
+  }
+
   // Show the logged-in page with profile data
-  if (isLoggedin) {
+  if (isLoggedin && profile && !isProfileLoading) {
     return (
       <Screen padding={0} showKeyboardAware={false}>
         <ScrollView showsVerticalScrollIndicator={false}>

@@ -34,8 +34,18 @@ import {
   UserLocation,
   useGetInterestedProperties,
 } from '@services';
+import { AsyncHelper } from '@helpers';
 
 export const Explore = () => {
+
+  useEffect(() => {
+    const markAsFirstTimeComplete = async () => {
+      await AsyncHelper.setFirstTimeFlag(); // Mark the initial process as complete
+    };
+
+    markAsFirstTimeComplete();
+  }, []);
+
   const [location, setLocation] = useState<UserLocation>({
     latitude: 37.76816965856596,
     longitude: -122.4264693260193,
@@ -74,6 +84,14 @@ export const Explore = () => {
       setIsLoading(true);
     }
   }, [nearByProperties]);
+
+  // Render skeletons when loading
+  const renderSkeletons = () => {
+    const skeletons = Array.from({ length: 5 }, (_, index) => (
+      <CardSkeleton key={`skeleton-${index}`} />
+    ));
+    return skeletons;
+  };
 
   const renderItem = ({ item }) => {
     switch (item.type) {
@@ -172,9 +190,10 @@ export const Explore = () => {
   return (
     <Screen padding={0} paddingHorizontal={10} showKeyboardAware={false}>
       <FlatList
-        data={combinedData}
+        data={isLoading ? [] : combinedData} // Show empty list if loading
         keyExtractor={(item, index) => `item-${index}`}
         renderItem={renderItem}
+        ListEmptyComponent={isLoading ? renderSkeletons : null} // Render skeletons if loading
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 120,

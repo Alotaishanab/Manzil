@@ -1,33 +1,51 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {launchScreen} from '@assets';
-import {useNavigation} from '@react-navigation/native';
-import {View, Animated, StyleSheet} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Animated, StyleSheet } from 'react-native';
+import { launchScreen } from '@assets'; // Ensure this points to your splash screen image asset
+import { useNavigation } from '@react-navigation/native';
+import AsyncHelper from '../../helpers/asyncHelper'; // Importing AsyncHelper
 
 export const SplashScreen = () => {
-  const navigation: any = useNavigation();
-  const [animationDone, setAnimationDone] = useState(false);
+  const navigation = useNavigation();
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.5)).current;
+  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
+
+  const determineFirstTimeStatus = async () => {
+    const firstTime = await AsyncHelper.isFirstTime();
+    setIsFirstTime(firstTime);
+  };
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 1000, // Shortened duration to 500ms
+        duration: 1000,
         useNativeDriver: true,
       }),
       Animated.spring(logoScale, {
         toValue: 1,
-        friction: 4, // Increased friction for a quicker, more 'bouncy' effect
-        tension: 150, // Added tension for extra 'springiness'
+        friction: 4,
+        tension: 150,
         useNativeDriver: true,
       }),
-    ]).start(() => setAnimationDone(true)); // Set the animationDone state to true when animation finishes
+    ]).start(() => {
+      determineFirstTimeStatus(); // Ensure the check happens after animation starts
+    });
   }, []);
 
-  if (animationDone) {
-    navigation.navigate('Onboarding');
-  }
+  useEffect(() => {
+    if (isFirstTime !== null) {
+      // Provide enough time for the splash screen to be visible
+      const timer = setTimeout(() => {
+        if (isFirstTime) {
+          navigation.replace('Auth'); // Navigate to onboarding/login flow
+        } else {
+          navigation.replace('MainApp'); // Navigate directly to Explore screen
+        }
+      }, 1500); // Adjust delay for smoother transitions
+      return () => clearTimeout(timer); // Clear timeout if component unmounts
+    }
+  }, [isFirstTime, navigation]);
 
   return (
     <View style={styles.container}>
@@ -35,7 +53,7 @@ export const SplashScreen = () => {
         source={launchScreen}
         style={[
           styles.logo,
-          {opacity: logoOpacity, transform: [{scale: logoScale}]},
+          { opacity: logoOpacity, transform: [{ scale: logoScale }] },
         ]}
       />
     </View>

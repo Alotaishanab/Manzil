@@ -6,6 +6,7 @@ export class AsyncHelper {
   private static REFRESH_TOKEN_KEY = 'refreshToken';
   private static FCM_TOKEN_KEY = 'fcmToken';
   private static USER_ID_KEY = 'userId';
+  private static FIRST_TIME_KEY = 'firstTime';
 
   // Set token
   static async setToken(token: string) {
@@ -13,6 +14,25 @@ export class AsyncHelper {
       await AsyncStorage.setItem(this.TOKEN_KEY, token);
     } catch (error) {
       console.error('Error saving token:', error);
+    }
+  }
+
+  // Set "first-time" flag after initial setup is completed
+  static async setFirstTimeFlag() {
+    try {
+      await AsyncStorage.setItem(this.FIRST_TIME_KEY, 'false'); // Indicate the initial process is completed
+    } catch (error) {
+      console.error('Error setting first-time flag:', error);
+    }
+  }
+
+  static async isFirstTime(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(this.FIRST_TIME_KEY);
+      return value === null; // If null, this means it's the first time
+    } catch (error) {
+      console.error('Error checking first-time status:', error);
+      return true; // Default to true if any error occurs
     }
   }
 
