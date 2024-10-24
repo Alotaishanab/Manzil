@@ -5,6 +5,8 @@ import requests
 def map_property(property_instance, distance=None):
 
     address = None
+    lat = None
+    lng = None
     if property_instance.coordinates:
         lat = property_instance.coordinates.y
         lng = property_instance.coordinates.x
@@ -41,8 +43,12 @@ def map_property(property_instance, distance=None):
         "storage_capacity": property_instance.storage_capacity,
         "number_of_units": property_instance.number_of_units,
         "property_features": property_instance.property_features,
-        "address": address
+        "address": address,
+        "ownership_type": property_instance.ownership_type
     }
+
+    if lat and lng:
+        property_data["coordinates"] = {"lat": lat, "long": lng}
 
     # Only add distance if it is available (for nearby property searches)
     if distance is not None:
