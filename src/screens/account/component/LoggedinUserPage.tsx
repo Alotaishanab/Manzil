@@ -16,63 +16,69 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
   const navigation: any = useNavigation();
 
   const handleEmail = () => {
-    navigation.navigate('ChangeEmail');
+    navigation.navigate('Auth', { screen: 'ChangeEmail' });
   };
 
   const handleChangePassword = () => {
-    navigation.navigate('ChangePassword');
+    navigation.navigate('Auth', { screen: 'ChangePassword' });
   };
+
   const handleNotifications = () => {
-    navigation.navigate('Notifications');
+    navigation.navigate('Auth', { screen: 'Notifications' });
   };
 
   const handlePrivacyPolicy = () => {
-    navigation.navigate('PrivacyPolicy');
+    navigation.navigate('Auth', { screen: 'PrivacyPolicy' });
   };
 
   const handleTermsOfUse = () => {
-    navigation.navigate('TermsOfUse');
+    navigation.navigate('Auth', { screen: 'TermsOfUse' });
   };
 
   const handleSendFeedback = () => {
-    navigation.navigate('SendFeedback');
+    navigation.navigate('Auth', { screen: 'SendFeedback' });
   };
+
   const handleDeleteAccount = () => {
-    navigation.navigate('DeleteAccount');
+    navigation.navigate('Auth', { screen: 'DeleteAccount' });
   };
+
   const toggleLanguage = () => {
     toggleLocale();
   };
 
   const handleSubscription = () => {
-    navigation.navigate('Subscriptions');
+    navigation.navigate('Auth', { screen: 'Subscriptions' });
   };
+
   const handlePaymentMethod = () => {
-    navigation.navigate('PaymentMethods');
+    navigation.navigate('Auth', { screen: 'PaymentMethods' });
   };
+
   const handlePaymentHistory = () => {
-    navigation.navigate('PaymentHistory');
+    navigation.navigate('Auth', { screen: 'PaymentHistory' });
   };
+
   const handleAnalytics = () => {
-    navigation.navigate('Analytics');
+    navigation.navigate('Auth', { screen: 'Analytics' });
   };
 
   const handleMyProperties = () => {
-    navigation.navigate('ListedProperties');
+    navigation.navigate('Auth', { screen: 'ListedProperties' });
   };
 
   const handleSubscribed = () => {
-    navigation.navigate('Subscribed');
+    navigation.navigate('Auth', { screen: 'Subscribed' });
   };
 
   const handleHelp = () => {
-    navigation.navigate('ChatWithUs');
+    navigation.navigate('Auth', { screen: 'ChatWithUs' });
   };
 
   const handleLogout = () => {
     logoutUser(undefined, {
       onSuccess: () => {
-        navigation.navigate('Login');
+        navigation.navigate('Auth', { screen: 'Login' });
       },
       onError: () => {
         console.error("Error logging out user");
@@ -81,8 +87,9 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
   };
 
   const handleRequests = () => {
-    navigation.navigate('RequestList');
+    navigation.navigate('Auth', { screen: 'RequestList' });
   };
+
 
 
   const renderSkeleton = () => {

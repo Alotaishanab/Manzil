@@ -34,7 +34,7 @@ import {
   SewageIcon,
 } from '@svgs'; // Ensure all icons are correctly imported
 import {useIntl} from '@context';
-import { useSaveProperty, useGetPropertyById } from '@services';
+import { useSaveProperty, useGetPropertyById, useTrackPropertyView, useTrackPropertyClick } from '@services';
 import { useNavigation } from '@react-navigation/native';
 
 const {width: screenWidth} = Dimensions.get('window');
@@ -60,11 +60,13 @@ export const PropertyCard = ({
 
 
   const handlePropertyClick = () => {
-    // Navigate to PropertyScreen and pass property_id as a parameter
-    navigation.navigate('PropertyScreen', {
-      propertyId: item.property_id,
+    // Navigate to PropertyScreen through the Auth stack and pass property_id as a parameter
+    navigation.navigate('Auth', {
+      screen: 'PropertyScreen',
+      params: { propertyId: item.property_id },
     });
   };
+  
 
   
 
@@ -376,108 +378,126 @@ export const PropertyCard = ({
 
   return (
     <TouchableHighlight
-      onPress={handlePropertyClick} // Use this handler to navigate
-      underlayColor="rgba(0, 0, 0, 0.05)"
-      style={[styles.mainWrapper]}
-    >
-      <View>
-        {/* Image Carousel */}
-        <View style={styles.carouselContainer}>
-          {media.length > 0 ? (
-            <Animated.FlatList
-              data={media}
-              horizontal
-              keyExtractor={(item, index) => `${item}-${index}`}
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={ITEM_WIDTH + SPACING}
-              decelerationRate="fast"
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                { useNativeDriver: true }
-              )}
-              renderItem={({ item, index }) => {
-                const inputRange = [
-                  (index - 1) * (ITEM_WIDTH + SPACING),
-                  index * (ITEM_WIDTH + SPACING),
-                  (index + 1) * (ITEM_WIDTH + SPACING),
-                ];
-  
-                const scale = scrollX.interpolate({
-                  inputRange,
-                  outputRange: [0.8, 1, 0.8],
-                  extrapolate: 'clamp',
-                });
-  
-                const translateX = scrollX.interpolate({
-                  inputRange,
-                  outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
-                  extrapolate: 'clamp',
-                });
-  
-                return item ? (
-                  <Animated.View
-                    style={[
-                      styles.imageContainer,
-                      { transform: [{ scale }, { translateX }] },
-                    ]}
-                  >
-                    {/* TouchableOpacity for the image click action */}
-                    <TouchableOpacity onPress={() => console.log('Image clicked')} activeOpacity={0.8}>
-                      <ImageBackground
-                        source={{ uri: item }}
-                        style={styles.imageBgContainer}
-                        imageStyle={styles.imageBgStyle}
-                      >
-                         {/* TouchableOpacity for the favorite button */}
-      <TouchableOpacity
-        onPress={handlePress}
-        style={styles.favoriteButton}
-        activeOpacity={0.7}
-        disabled={isSaving} // Disable button while saving
-      >
-        {isFavorite ? (
-          <HeartIcon width={30} height={30} />
-        ) : (
-          <HeartOutlineIcon width={30} height={30} />
-        )}
-      </TouchableOpacity>
-                      </ImageBackground>
-                    </TouchableOpacity>
-                  </Animated.View>
-                ) : null;
-              }}
-            />
-          ) : (
-            <Text>No media available</Text>
+  onPress={handlePropertyClick} // Navigate to PropertyScreen when the card is clicked
+  underlayColor="rgba(0, 0, 0, 0.05)"
+  style={[styles.mainWrapper]}
+>
+  <View>
+    {/* Image Carousel */}
+    <View style={styles.carouselContainer}>
+      {media.length > 0 ? (
+        <Animated.FlatList
+          data={media}
+          horizontal
+          keyExtractor={(item, index) => `${item}-${index}`}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={ITEM_WIDTH + SPACING}
+          decelerationRate="fast"
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: true }
           )}
+          renderItem={({ item, index }) => {
+            const inputRange = [
+              (index - 1) * (ITEM_WIDTH + SPACING),
+              index * (ITEM_WIDTH + SPACING),
+              (index + 1) * (ITEM_WIDTH + SPACING),
+            ];
+
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.8, 1, 0.8],
+              extrapolate: 'clamp',
+            });
+
+            const translateX = scrollX.interpolate({
+              inputRange,
+              outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
+              extrapolate: 'clamp',
+            });
+
+            return (
+              <Animated.View
+                style={[
+                  styles.imageContainer,
+                  { transform: [{ scale }, { translateX }] },
+                ]}
+              >
+                {/* TouchableOpacity for the image click action */}
+                <TouchableOpacity onPress={handlePropertyClick} activeOpacity={0.8}>
+                  <ImageBackground
+                    source={{ uri: item }}
+                    style={styles.imageBgContainer}
+                    imageStyle={styles.imageBgStyle}
+                  >
+                    {/* Favorite button inside the image */}
+                    <TouchableOpacity
+                      onPress={handlePress}
+                      style={styles.favoriteButton}
+                      activeOpacity={0.7}
+                      disabled={isSaving} // Disable button while saving
+                    >
+                      {isFavorite ? (
+                        <HeartIcon width={30} height={30} />
+                      ) : (
+                        <HeartOutlineIcon width={30} height={30} />
+                      )}
+                    </TouchableOpacity>
+                  </ImageBackground>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          }}
+        />
+      ) : (
+        <View style={styles.noMediaContainer}>
+          <Text>No media available</Text>
+          {/* Show favorite button even if there is no media */}
+          <TouchableOpacity
+            onPress={handlePress}
+            style={styles.favoriteButton}
+            activeOpacity={0.7}
+            disabled={isSaving}
+          >
+            {isFavorite ? (
+              <HeartIcon width={30} height={30} />
+            ) : (
+              <HeartOutlineIcon width={30} height={30} />
+            )}
+          </TouchableOpacity>
         </View>
-  
-        {/* Property Details */}
-        <View style={styles.contentWrapper}>
-          <View style={styles.priceLocationContainer}>
-            <View style={styles.priceFeaturedContainer}>
-              <Text style={styles.priceText}>
-                {item?.price ? `${formatPrice(item.price)} ﷼` : 'Price not available'}
-              </Text>
-            </View>
-            <Text style={styles.placeText}>
-              {item?.address || 'Address not available'}
-            </Text>
-            {renderPropertyDetails()}
-            {renderPropertyIcons()}
-          </View>
-  
-          <View style={styles.footerWrap}>
-            <Text style={styles.dateText}>
-              {item?.listing_date ? `Added on ${new Date(item.listing_date).toLocaleDateString('en-US')}` : 'Date not available'}
-            </Text>
-            <TouchableOpacity onPress={() => Share.open({ message: 'Check out this property!' })} style={styles.shareButton}>
-              <ShareIcon width={28} height={28} />
-            </TouchableOpacity>
-          </View>
+      )}
+    </View>
+
+    {/* Property Details */}
+    <View style={styles.contentWrapper}>
+      <View style={styles.priceLocationContainer}>
+        <View style={styles.priceFeaturedContainer}>
+          <Text style={styles.priceText}>
+            {item?.price ? `${formatPrice(item.price)} ﷼` : 'Price not available'}
+          </Text>
         </View>
+        <Text style={styles.placeText}>
+          {item?.address || 'Address not available'}
+        </Text>
+        {renderPropertyDetails()}
+        {renderPropertyIcons()}
       </View>
-    </TouchableHighlight>
+
+      <View style={styles.footerWrap}>
+        <Text style={styles.dateText}>
+          {item?.listing_date ? `Added on ${new Date(item.listing_date).toLocaleDateString('en-US')}` : 'Date not available'}
+        </Text>
+        <TouchableOpacity
+          onPress={() => Share.open({ message: 'Check out this property!' })}
+          style={styles.shareButton}
+        >
+          <ShareIcon width={28} height={28} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</TouchableHighlight>
   );  
 };
 

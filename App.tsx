@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { IntlProvider } from '@context';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -15,7 +16,9 @@ import { SplashScreen } from './src/screens/splash'; // Importing the SplashScre
 import { AuthNavigator } from './src/navigations';
 import { BottomTabNavigator } from './src/navigations/bottomtab/BottomTabNavigator'; // Assuming this is your Explore
 import { createStackNavigator } from '@react-navigation/stack';
+import useSessionTracker from './src/hooks/useSessionTracker'; // Import the custom session tracker hook
 
+// Initialize the Query Client
 const queryClient = new QueryClient();
 const Stack = createStackNavigator();
 
@@ -36,6 +39,8 @@ function App(): React.JSX.Element {
     setIsFirstTime(firstTime);
   };
 
+  useSessionTracker(); // Utilize the custom session tracking hook
+
   useEffect(() => {
     determineLocale();
     checkFirstTimeStatus();
@@ -46,10 +51,10 @@ function App(): React.JSX.Element {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaperProvider>
-        <ErrorBoundary FallbackComponent={CustomFallback}>
-          <IntlProvider locale={locale}>
-            <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <PaperProvider>
+          <ErrorBoundary FallbackComponent={CustomFallback}>
+            <IntlProvider locale={locale}>
               <NavigationContainer>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="Splash" component={SplashScreen} />
@@ -58,10 +63,10 @@ function App(): React.JSX.Element {
                 </Stack.Navigator>
                 <FlashMessage position="top" hideStatusBar={false} />
               </NavigationContainer>
-            </QueryClientProvider>
-          </IntlProvider>
-        </ErrorBoundary>
-      </PaperProvider>
+            </IntlProvider>
+          </ErrorBoundary>
+        </PaperProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

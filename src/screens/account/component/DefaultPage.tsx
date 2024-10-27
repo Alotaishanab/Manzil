@@ -24,9 +24,10 @@ const DefaultPage = () => {
   };
 
   // Function to navigate to the login screen
-  const navigateToLogin = () => {
-    navigation.navigate('Login'); // Ensure 'Login' matches your route name
-  };
+const navigateToLogin = () => {
+  navigation.navigate('Auth', { screen: 'Login' }); // Navigate through Auth stack
+};
+
 
   return (
     <View style={{ padding: 24 }}>

@@ -1,8 +1,10 @@
+import uuid
 from django.db import models
-from django.contrib.auth.models import PermissionsMixin, BaseUserManager
-from django.contrib.auth.base_user import AbstractBaseUser
-from .managers.UserManager import UserManager
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
 from django.utils import timezone
+
+from .permissions import IsAuthenticatedOrGuest
+from .managers.UserManager import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -24,3 +26,26 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"User: {self.user_id}, Email: {self.email}, Phone Verified: {self.phone_verified}, PhoneNumber: {self.phone_number}, Name: {self.name}, subscription_plan_id: {self.subscription_plan_id}"
+
+
+class UserSession(models.Model):
+    session_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
+    start_time = models.DateTimeField(default=timezone.now)
+    last_heartbeat = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.IntegerField(null=True, blank=True)
+
+    def update_heartbeat(self):
+        self.last_heartbeat = timezone.now()
+        self.save(update_fields=['last_heartbeat'])
+
+    def end_session(self):
+        self.end_time = timezone.now()
+        if self.start_time:
+            self.duration_seconds = int((self.end_time - self.start_time).total_seconds())
+        self.save(update_fields=['end_time', 'duration_seconds'])
+
+    def __str__(self):
+        return f"Session {self.session_id} for user {self.user or self.guest_id}"

@@ -8,5 +8,8 @@ urlpatterns = [
     path('property/<int:property_id>', user_views.get_property_by_id),
     path('<int:property_id>/save', user_views.save_property),
     path('user/saved-properties', user_views.get_user_saved_properties),
-
+    path('<int:property_id>/track-view', user_views.track_property_view, name='track-property-view'),
+    path('<int:property_id>/end-view', user_views.end_property_view, name='end-property-view'),
+    path('<int:property_id>/track-click', user_views.track_property_click, name='track-property-click'),
+    path('<int:property_id>/analytics', user_views.get_property_views_and_clicks, name='property-analytics'),
 ]

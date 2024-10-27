@@ -1,8 +1,9 @@
+from datetime import timezone
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from . import user_serializers
 from .models import Property, PropertyView, PropertyShare, PropertyClick, PropertyInquiry, SavedProperties
 from .utils import upload_to_s3
@@ -19,6 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def add_property(request):
     if request.method == 'POST':
         serializer = user_serializers.AddPropertySerializer(data=request.data)
@@ -144,82 +146,96 @@ def store_property_media(request, property_instance):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def explore_properties_by_location(request):
-
-    serializer = user_serializers.SearchNearbyPropertiesSerializer(
-        data=request.GET)
+    serializer = user_serializers.SearchNearbyPropertiesSerializer(data=request.GET)
 
     if not serializer.is_valid():
         return JsonResponse({"error": serializer.errors}, status=400)
 
-    user_id = request.user.user_id,
+    # Check if user is authenticated
+    if request.user.is_authenticated:
+        user_id = request.user.id  # Use 'id' unless you have 'user_id' field
+        guest_id = None
+    else:
+        user_id = None
+        guest_id = request.headers.get('Guest-Id')
+        if not guest_id:
+            return JsonResponse({"error": "Guest ID is required for unauthenticated users"}, status=400)
+
     user_lat = float(serializer.validated_data['latitude'])
     user_lon = float(serializer.validated_data['longitude'])
-    limit = serializer.validated_data['limit']
-    offset = serializer.validated_data['offset']
+    limit = serializer.validated_data.get('limit', 20)
+    offset = serializer.validated_data.get('offset', 0)
 
-    distance_meters = 50000
     user_location = Point(user_lon, user_lat)
 
+    # Exclude properties posted by the same user
     properties = (Property.objects
-                  .exclude(user_id=user_id)
-                  .filter(property_type__in=['Sell', 'Rent'])
+                  .exclude(user_id=user_id)  # For authenticated users
+                  .filter(property_type__in=['for_sale', 'long_term_rent', 'short_term_rent'])
                   .filter(coordinates__distance_lte=(user_location, D(km=50)))
                   .annotate(distance=Distance('coordinates', user_location))
                   .order_by('distance')
                   [offset:offset + limit])
 
-    result = [map_property(property, property.distance)
-              for property in properties]
+    result = [map_property(property, property.distance) for property in properties]
 
     return JsonResponse({"properties": result})
 
-
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def explore_properties_by_interests(request):
-
-    serializer = user_serializers.SearchInterestedPropertiesSerializer(
-        data=request.GET)
+    serializer = user_serializers.SearchInterestedPropertiesSerializer(data=request.GET)
     if not serializer.is_valid():
         return JsonResponse({"error": serializer.errors}, status=400)
 
-    user_id = request.user.user_id,
-    limit = serializer.validated_data['limit']
-    offset = serializer.validated_data['offset']
+    # Check if user is authenticated
+    if request.user.is_authenticated:
+        user_id = request.user.id
+        guest_id = None
+    else:
+        user_id = None
+        guest_id = request.headers.get('Guest-Id')
+        if not guest_id:
+            return JsonResponse({"error": "Guest ID is required for unauthenticated users"}, status=400)
 
-    # Get properties the user has interacted with (viewed, shared, clicked, inquired)
-    user_engagement = Property.objects.filter(
-        Q(views__user_id=user_id) |
-        Q(shares__user_id=user_id) |
-        Q(clicks__user_id=user_id) |
-        Q(inquiries__user_id=user_id)
-    ).distinct().values('property_type', 'area', 'price')
+    limit = serializer.validated_data.get('limit', 20)
+    offset = serializer.validated_data.get('offset', 0)
+
+    # Modify queries to include guest_id
+    engagement_filters = Q()
+    if user_id:
+        engagement_filters |= Q(views__user_id=user_id) | Q(shares__user_id=user_id) | Q(clicks__user_id=user_id) | Q(inquiries__user_id=user_id)
+    if guest_id:
+        engagement_filters |= Q(views__guest_id=guest_id) | Q(shares__guest_id=guest_id) | Q(clicks__guest_id=guest_id) | Q(inquiries__guest_id=guest_id)
+
+    user_engagement = Property.objects.filter(engagement_filters).distinct().values('property_type', 'area', 'price')
 
     if not user_engagement.exists():
         # If no engagement, return all properties except those by the current user
-        all_properties = Property.objects.exclude(user_id=user_id).order_by(
-            '-listing_date')[offset:offset + limit]
+        properties = Property.objects.exclude(user_id=user_id).order_by('-listing_date')[offset:offset + limit]
+        properties_list = [map_property(prop) for prop in properties]
+        return JsonResponse({"properties": properties_list})
 
-        properties = [map_property(prop) for prop in all_properties]
-
-        return JsonResponse({"properties": properties})
-
-    # Now find properties similar to those the user has engaged with
+    # Now find properties similar to those the user or guest has engaged with
     similar_properties = Property.objects.exclude(user_id=user_id).filter(
-        Q(property_type__in=user_engagement.values('property_type')) &
-        Q(area__in=user_engagement.values('area')) &
-        Q(price__in=user_engagement.values('price'))
+        Q(property_type__in=Subquery(user_engagement.values('property_type'))) &
+        Q(area__in=Subquery(user_engagement.values('area'))) &
+        Q(price__in=Subquery(user_engagement.values('price')))
     ).annotate(price_difference=F('price') - Subquery(user_engagement.values('price')[:1])).filter(
         price_difference__lte=10000  # Customize price range difference
     ).order_by('-listing_date')[offset:offset + limit]
 
-    # Return the list of similar properties as JSON
-    properties = [map_property(prop) for prop in similar_properties]
+    properties_list = [map_property(prop) for prop in similar_properties]
 
-    return JsonResponse({"properties": properties})
+    return JsonResponse({"properties": properties_list})
+
+
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_property_by_id(request, property_id):
     if request.method == 'GET':
         property_instance = get_object_or_404(Property, pk=property_id)
@@ -228,19 +244,17 @@ def get_property_by_id(request, property_id):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def save_property(request, property_id):
-    if request.method == 'POST':
-
-        user = request.user
-        try:
-            property_obj = Property.objects.get(property_id=property_id)
-        except ObjectDoesNotExist:
-            return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    user = request.user
+    try:
+        property_obj = Property.objects.get(property_id=property_id)
         if property_obj.user_id == user.user_id:
             return Response({"error": "You cannot save your own property"}, status=status.HTTP_400_BAD_REQUEST)
         if SavedProperties.objects.filter(user=user, property=property_obj).exists():
             return Response({"error": "This property is already saved"}, status=status.HTTP_409_CONFLICT)
 
+        # Save the property
         saved_property = SavedProperties.objects.create(
             user=user,
             property=property_obj
@@ -249,9 +263,13 @@ def save_property(request, property_id):
             "message": "Property saved successfully",
             "saved_id": saved_property.saved_id
         }, status=status.HTTP_201_CREATED)
+    except ObjectDoesNotExist:
+        return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_saved_properties(request):
     if request.method == 'GET':
         user = request.user
@@ -262,3 +280,107 @@ def get_user_saved_properties(request):
                   for saved_property in saved_properties]
 
         return JsonResponse({"properties": result})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def track_property_view(request, property_id):
+    if request.user.is_authenticated:
+        user = request.user
+        guest_id = None
+    else:
+        user = None
+        guest_id = request.headers.get('Guest-Id')
+        if not guest_id:
+            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
+
+    start_time = timezone.now()
+
+    # Start tracking the property view
+    PropertyView.objects.create(
+        property_id=property_id,
+        user=user,
+        guest_id=guest_id,
+        view_date=start_time
+    )
+
+    return Response({"message": "Property view started"}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def end_property_view(request, property_id):
+    duration = request.data.get('duration_seconds')
+    if not duration:
+        return Response({"error": "Duration is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.user.is_authenticated:
+        user = request.user
+        guest_id = None
+    else:
+        user = None
+        guest_id = request.headers.get('Guest-Id')
+        if not guest_id:
+            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Record the view
+        PropertyView.objects.create(
+            property_id=property_id,
+            user=user,
+            guest_id=guest_id,
+            duration_seconds=duration,
+            view_date=timezone.now()
+        )
+
+        # Update the property view count and total duration
+        property_obj = Property.objects.get(property_id=property_id)
+        property_obj.increment_view_count()  # Increment view count
+        property_obj.add_to_total_duration(duration)  # Add duration to total
+        
+        return Response({"message": "Property view tracked", "duration": duration}, status=status.HTTP_200_OK)
+    except Property.DoesNotExist:
+        return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def track_property_click(request, property_id):
+    if request.user.is_authenticated:
+        user = request.user
+        guest_id = None
+    else:
+        user = None
+        guest_id = request.headers.get('Guest-Id')
+        if not guest_id:
+            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
+
+    click_type = request.data.get('click_type', 'general')
+
+    # Record the click
+    PropertyClick.objects.create(
+        property_id=property_id,
+        user=user,
+        guest_id=guest_id,
+        click_type=click_type,
+        click_date=timezone.now()
+    )
+
+    return Response({"message": "Property click tracked"}, status=status.HTTP_201_CREATED)
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_property_views_and_clicks(request, property_id):
+    property_instance = get_object_or_404(Property, pk=property_id)
+
+    total_views = PropertyView.objects.filter(property=property_instance).count()
+    total_clicks = PropertyClick.objects.filter(property=property_instance).count()
+    total_saves = SavedProperties.objects.filter(property=property_instance).count()
+
+    return Response({
+        "property_id": property_id,
+        "total_views": total_views,
+        "total_clicks": total_clicks,
+        "total_saves": total_saves
+    }, status=status.HTTP_200_OK)

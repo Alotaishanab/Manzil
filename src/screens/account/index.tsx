@@ -12,20 +12,33 @@ export const Account = () => {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [checked, setChecked] = useState(false);
   const [isLoggedin, setIsLoggedin] = useState<boolean | null>(null); // Start as null to indicate "checking"
-  const [loading, setLoading] = useState(true); // Track overall loading state
 
-  // Check if the user is logged in (using AsyncHelper as you've done before)
+  // Check if the user is logged in
   useEffect(() => {
+    let isMounted = true;
     const checkLoginStatus = async () => {
-      const token = await AsyncHelper.getToken();
-      setIsLoggedin(!!token); // If token exists, set isLoggedin to true
-      setLoading(false); // Stop loading once status is determined
+      try {
+        const token = await AsyncHelper.getToken();
+        if (isMounted) {
+          setIsLoggedin(!!token); // If token exists, set isLoggedin to true
+        }
+      } catch (error) {
+        console.error('Error getting token:', error);
+        if (isMounted) {
+          setIsLoggedin(false);
+        }
+      }
     };
     checkLoginStatus();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Fetch profile data using the react-query hook
-  const { data: profile, isLoading: isProfileLoading, isError } = useGetProfile(); // Use query hook to get profile data
+  // Fetch profile data using the react-query hook, only when user is logged in
+  const { data: profile, isLoading: isProfileLoading, isError } = useGetProfile({
+    enabled: isLoggedin === true,
+  });
 
   const toggleDeleteAccountModal = () => {
     setShowDeleteAccount(!showDeleteAccount);
@@ -39,8 +52,9 @@ export const Account = () => {
     toggleDeleteAccountModal();
   };
 
-  // Show a loader until the auth and profile status are fully determined
-  if (loading || isProfileLoading) {
+  // Show loader only while checking login status
+  if (isLoggedin === null) {
+    // Still checking login status
     return (
       <Screen padding={0} showKeyboardAware={false}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -50,35 +64,8 @@ export const Account = () => {
     );
   }
 
-  // Show the logged-in page with profile data
-  if (isLoggedin && profile && !isProfileLoading) {
-    return (
-      <Screen padding={0} showKeyboardAware={false}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <LoggedinUserPage
-            toggleDeleteAccountModal={toggleDeleteAccountModal}
-            userData={profile} // Pass profile data to LoggedinUserPage
-            isLoading={isProfileLoading} // Control skeleton loading
-          />
-        </ScrollView>
-        <GenericModal
-          isVisible={showDeleteAccount}
-          modalTitle={''}
-          toggleModal={toggleDeleteAccountModal}
-        >
-          <DeleteAccountContent
-            checked={checked}
-            setChecked={setChecked}
-            handleDeleteAccount={handleDeleteAccount}
-            handleKeepAccount={handleKeepAccount}
-          />
-        </GenericModal>
-      </Screen>
-    );
-  }
-
-  // Handle case when profile data fails to load (user not logged in or API error)
-  if (!isLoggedin || isError) {
+  if (isLoggedin === false) {
+    // User is not logged in
     return (
       <Screen padding={0} showKeyboardAware={false}>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -86,6 +73,57 @@ export const Account = () => {
         </ScrollView>
       </Screen>
     );
+  }
+
+  if (isLoggedin === true) {
+    // User is logged in
+    if (isProfileLoading) {
+      return (
+        <Screen padding={0} showKeyboardAware={false}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+          </View>
+        </Screen>
+      );
+    }
+
+    if (profile) {
+      return (
+        <Screen padding={0} showKeyboardAware={false}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <LoggedinUserPage
+              toggleDeleteAccountModal={toggleDeleteAccountModal}
+              userData={profile}
+              isLoading={isProfileLoading}
+            />
+          </ScrollView>
+          <GenericModal
+            isVisible={showDeleteAccount}
+            modalTitle={''}
+            toggleModal={toggleDeleteAccountModal}
+          >
+            <DeleteAccountContent
+              checked={checked}
+              setChecked={setChecked}
+              handleDeleteAccount={handleDeleteAccount}
+              handleKeepAccount={handleKeepAccount}
+            />
+          </GenericModal>
+        </Screen>
+      );
+    }
+
+    if (isError) {
+      // Handle error fetching profile
+      return (
+        <Screen padding={0} showKeyboardAware={false}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Show an error message or fallback UI */}
+            <DefaultPage />
+          </ScrollView>
+        </Screen>
+      );
+    }
   }
 
   return null;

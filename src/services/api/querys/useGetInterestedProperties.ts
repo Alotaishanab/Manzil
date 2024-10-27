@@ -1,6 +1,8 @@
-import {useQuery} from '@tanstack/react-query';
+// src/hooks/useGetInterestedProperties.ts
+
+import { useQuery } from '@tanstack/react-query';
 import api from '../api';
-import {apiUrls} from '../../urls';
+import { apiUrls } from '../../urls';
 
 export interface GetInterestedPropertiesResponse {
   properties: {
@@ -8,26 +10,35 @@ export interface GetInterestedPropertiesResponse {
     property_type: string;
     title: string;
     description: string;
-    price: number;
+    price: string;
     contact_information: any;
   }[];
 }
 
-const getInterestedProperties =
-  async (): Promise<GetInterestedPropertiesResponse> => {
+const getInterestedProperties = async (): Promise<GetInterestedPropertiesResponse> => {
+  try {
     const response = await api.get<GetInterestedPropertiesResponse>(
       `${apiUrls.exploreInterestedProperties}`,
+      false // Do not send auth token
     );
 
-    console.log('response', response);
+    console.log('Interested Properties Response:', response);
 
-    /** @ts-ignore */
-    return response;
-  };
+    // Check if `response` is defined and properly formatted
+    if (!response || !response.properties) {
+      throw new Error('Invalid response structure for interested properties.');
+    }
+
+    return response; // Make sure to return the response correctly
+  } catch (error) {
+    console.error('Error fetching interested properties:', error);
+    throw error;
+  }
+};
 
 export const useGetInterestedProperties = () => {
   return useQuery<GetInterestedPropertiesResponse, Error>({
     queryKey: ['interestedProperties'],
-    queryFn: () => getInterestedProperties(),
+    queryFn: getInterestedProperties,
   });
 };

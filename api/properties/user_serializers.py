@@ -1,5 +1,14 @@
-from rest_framework import serializers
+# properties/user_serializers.py
 
+from rest_framework import serializers
+from .models import (
+    PropertyView,
+    Property,
+    PropertyShare,
+    PropertyClick,
+    PropertyInquiry,
+    SavedProperties
+)
 
 class PropertyFeatureSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -12,7 +21,7 @@ class MarkerPositionSerializer(serializers.Serializer):
     longitude = serializers.DecimalField(max_digits=20, decimal_places=17)
 
 
-class PropertyOwnerShipSerializer(serializers.Serializer):
+class PropertyOwnershipSerializer(serializers.Serializer):
     instrumentNumber = serializers.CharField(required=True)
     ownerIDNumber = serializers.CharField(required=False)
     ownerDOB = serializers.CharField(required=False)
@@ -34,7 +43,7 @@ class AddPropertySerializer(serializers.Serializer):
     location = serializers.CharField(required=False)
     markerPosition = MarkerPositionSerializer(required=True)
     status = serializers.CharField(required=False)
-    ownership = PropertyOwnerShipSerializer(required=True)
+    ownership = PropertyOwnershipSerializer(required=True)
     bedrooms = serializers.IntegerField(required=False)
     bathrooms = serializers.IntegerField(required=False)
     waterAccess = serializers.BooleanField(default=False)
@@ -54,7 +63,8 @@ class AddPropertySerializer(serializers.Serializer):
     storageCapacity = serializers.IntegerField(required=False)
     numberOfUnits = serializers.IntegerField(required=False)
     propertyFeature = serializers.ListField(
-        child=serializers.CharField(), required=False)
+        child=serializers.CharField(), required=False
+    )
     media = serializers.ListField(
         child=serializers.FileField(),
         required=False,
@@ -72,3 +82,18 @@ class SearchNearbyPropertiesSerializer(serializers.Serializer):
 class SearchInterestedPropertiesSerializer(serializers.Serializer):
     limit = serializers.IntegerField(default=20)
     offset = serializers.IntegerField(default=0)
+
+
+class PropertyViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyView
+        fields = '__all__'
+
+    def validate(self, data):
+        user = self.context['request'].user
+        guest_id = self.context['request'].headers.get('Guest-Id')
+
+        if not user.is_authenticated and not guest_id:
+            raise serializers.ValidationError("Authentication or Guest ID is required.")
+
+        return data

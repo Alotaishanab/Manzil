@@ -72,3 +72,9 @@ class UserChangePasswordSerializer(serializers.Serializer):
             )
 
         return data
+
+class UserSessionStartSerializer(serializers.Serializer):
+    guest_id = serializers.UUIDField(required=False)
+
+class UserSessionEndSerializer(serializers.Serializer):
+    session_id = serializers.UUIDField()

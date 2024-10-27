@@ -2,7 +2,8 @@ from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.contrib.gis.db.models import PointField  # For geographic coordinates
 from account.models import User  # Import the custom User model from the account app
-
+from django.utils import timezone
+from django.db.models import F
 
 class Property(models.Model):
     PROPERTY_TYPES = [
@@ -38,10 +39,7 @@ class Property(models.Model):
 
     # Basic property info
     property_id = models.AutoField(primary_key=True)
-    # Reference to the custom User model
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # agency = models.ForeignKey('agencies.Agency', null=True, blank=True,
-    #                            on_delete=models.SET_NULL)  # Nullable if no agency
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
     property_category = models.CharField(
         max_length=50, choices=PROPERTY_CATEGORY_CHOICES)
@@ -57,7 +55,6 @@ class Property(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True)
 
     location = models.CharField(max_length=255, blank=True, null=True)
-    # Geographic coordinates (lat/lon)
     coordinates = PointField()
     listing_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
@@ -121,6 +118,10 @@ class Property(models.Model):
     advertiser_info = models.JSONField(blank=True, null=True)
     similar_properties = models.JSONField(blank=True, null=True)
 
+    # New fields for tracking views
+    view_count = models.IntegerField(default=0)  # Track the number of views
+    total_view_duration = models.IntegerField(default=0)  # Track total duration in seconds
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -133,10 +134,19 @@ class Property(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Automatically calculate price_per_meter before saving
         if self.area and self.price:
             self.price_per_meter = self.price / self.area
         super().save(*args, **kwargs)
+
+    def increment_view_count(self):
+        """Increments the view count by 1."""
+        self.view_count = F('view_count') + 1
+        self.save(update_fields=['view_count'])
+    
+    def add_to_total_duration(self, duration):
+        """Adds the duration to the total view duration."""
+        self.total_view_duration = F('total_view_duration') + duration
+        self.save(update_fields=['total_view_duration'])
 
     def __str__(self):
         return f"{self.title} - {self.property_type}"
@@ -146,41 +156,51 @@ class PropertyView(models.Model):
     view_id = models.AutoField(primary_key=True)
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name='views')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
     view_date = models.DateTimeField(auto_now_add=True)
-    duration_seconds = models.IntegerField(
-        null=True, blank=True)  # Optional field
-    geo_location = PointField()
+    duration_seconds = models.IntegerField(null=True, blank=True)
+    geo_location = PointField(null=True, blank=True)
 
+    def __str__(self):
+        return f"View on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
 class PropertyShare(models.Model):
     share_id = models.AutoField(primary_key=True)
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name='shares')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
     share_date = models.DateTimeField(auto_now_add=True)
-    # Platform where the property was shared
     platform = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"Share of {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
 class PropertyClick(models.Model):
     click_id = models.AutoField(primary_key=True)
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name='clicks')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
     click_date = models.DateTimeField(auto_now_add=True)
-    click_type = models.CharField(max_length=50)  # Type of click
+    click_type = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"Click on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
 class PropertyInquiry(models.Model):
     inquiry_id = models.AutoField(primary_key=True)
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name='inquiries')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
     inquiry_date = models.DateTimeField(auto_now_add=True)
-    inquiry_type = models.CharField(max_length=50)  # Type of inquiry
+    inquiry_type = models.CharField(max_length=50)
     inquiry_details = models.TextField(blank=True)
 
+    def __str__(self):
+        return f"Inquiry on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
 class SavedProperties(models.Model):
     saved_id = models.AutoField(primary_key=True)

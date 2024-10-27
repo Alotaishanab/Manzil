@@ -29,12 +29,12 @@ export const CenterScreen = ({
   const navigation = useNavigation();
 
   const handleCardClick = (propertyId) => {
-    navigation.navigate('PropertyScreen', { propertyId });
+    navigation.navigate('Auth', { screen: 'PropertyScreen', params: { propertyId } });
   };
 
   const handleActionClick = (action) => {
     if (action === 'AddProperty') {
-      navigation.navigate('AddProperties');
+      navigation.navigate('Auth', { screen: 'AddProperties' });
     }
   };
 
@@ -42,7 +42,7 @@ export const CenterScreen = ({
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() =>
-        navigation.navigate('OrderDetails', { orderId: item.id })
+        navigation.navigate('Auth', { screen: 'OrderDetails', params: { orderId: item.id } })
       }
       style={styles.orderCard}
     >
@@ -78,7 +78,7 @@ export const CenterScreen = ({
           <Text style={styles.subTitle}>Incomplete Orders</Text>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('ViewAllIncompleteOrders')
+              navigation.navigate('Auth', { screen: 'ViewAllIncompleteOrders' })
             }
           >
             <Text style={styles.viewAllText}>View All →</Text>
@@ -108,7 +108,7 @@ export const CenterScreen = ({
           <Text style={styles.subTitle}>Your Properties</Text>
           {properties.length > 0 && (
             <TouchableOpacity
-              onPress={() => navigation.navigate('ViewAllProperties')}
+              onPress={() => navigation.navigate('Auth', { screen: 'ViewAllProperties' })}
             >
               <Text style={styles.viewAllText}>View All →</Text>
             </TouchableOpacity>
@@ -127,7 +127,7 @@ export const CenterScreen = ({
           <Text style={styles.subTitle}>Requested Properties</Text>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('ViewAllRequestedProperties')
+              navigation.navigate('Auth', { screen: 'ViewAllRequestedProperties' })
             }
           >
             <Text style={styles.viewAllText}>View All →</Text>
@@ -153,6 +153,7 @@ export const CenterScreen = ({
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

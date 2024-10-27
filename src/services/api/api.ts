@@ -1,15 +1,10 @@
-import axios, {AxiosInstance, AxiosResponse, AxiosRequestConfig} from 'axios';
-// import { showToast } from '../helpers';
+// src/services/api.ts
+
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
-//import {API_URL} from '@env';
+import { getGuestId } from '../../helpers/guestHelper'; // Correctly import getGuestId
 
-// import * as RootNavigation from '../navigation/NavigationService';
-// import { QA } from './urls';
-
-//console.log('API_URL', API_URL);
-// http://127.0.0.1:8000/
-// const baseURL = 'http://192.168.1.221:3000';
-const QA = 'http://192.168.1.202:8000'; // Set your QA base URL
+const QA = 'http://127.0.0.1:8000/'; // Set your QA base URL
 
 type ApiResponse<T> = Promise<AxiosResponse<T>>;
 
@@ -32,59 +27,49 @@ class Api {
 
     this.isRefreshing = false;
     this.failedQueue = [];
-
     this.initializeInterceptors();
   }
 
   private initializeInterceptors() {
-    this.client.interceptors.request.use(
-      async (config: AxiosRequestConfig) => {
-        const token = await AsyncHelper.getToken();
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      error => Promise.reject(error),
-    );
-
     this.client.interceptors.response.use(
       (response: AxiosResponse) => response.data,
-      async error => {
+      async (error) => {
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
-              this.failedQueue.push({resolve, reject});
+              this.failedQueue.push({ resolve, reject });
             })
-              .then(token => {
+              .then((token) => {
                 if (originalRequest.headers) {
                   originalRequest.headers.Authorization = `Bearer ${token}`;
                 }
                 return axios(originalRequest);
               })
-              .catch(err => Promise.reject(err));
+              .catch((err) => Promise.reject(err));
           }
 
           originalRequest._retry = true;
           this.isRefreshing = true;
-          const refreshToken = '';
-          // const refreshToken = await AsyncHelper.getRefreshToken();
+
+          const refreshToken = await AsyncHelper.getRefreshToken();
+          if (!refreshToken) {
+            console.warn('No refresh token available.');
+            this.logout();
+            return Promise.reject(error);
+          }
+
           return this.refreshToken(refreshToken)
-            .then(newToken => {
-              // AsyncHelper.setToken(newToken);
+            .then((newToken) => {
               this.client.defaults.headers.Authorization = `Bearer ${newToken}`;
-              if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-              }
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
               this.processQueue(null, newToken);
               return axios(originalRequest);
             })
-            .catch(err => {
+            .catch((err) => {
               this.processQueue(err, null);
               this.logout();
-              // RootNavigation.resetActions('WelcomeScreen');
               return Promise.reject(err);
             })
             .finally(() => {
@@ -92,14 +77,29 @@ class Api {
             });
         }
 
-        // showToast(error.response?.data?.message || 'An error occurred');
         return Promise.reject(error);
+      }
+    );
+
+    this.client.interceptors.request.use(
+      async (config) => {
+        const token = await AsyncHelper.getToken();
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        } else {
+          const guestId = await getGuestId(); // Use getGuestId as a function
+          if (guestId) {
+            config.headers['Guest-Id'] = guestId;
+          }
+        }
+        return config;
       },
+      (error) => Promise.reject(error)
     );
   }
 
   private processQueue(error: Error | null, token: string | null = null) {
-    this.failedQueue.forEach(prom => {
+    this.failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error);
       } else {
@@ -111,34 +111,39 @@ class Api {
   }
 
   private async refreshToken(refreshToken: string): Promise<string> {
-    const response: AxiosResponse<{accessToken: string}> = await axios.post(
-      `${QA}/auth/refresh-token`,
-      {
-        refreshToken,
-      },
-    );
-    return response.data.accessToken;
+    try {
+      const response: AxiosResponse<{ accessToken: string }> = await axios.post(
+        `${QA}auth/refresh-token`, // Ensure no double slashes
+        { refreshToken }
+      );
+
+      const newAccessToken = response.data.accessToken;
+      if (newAccessToken) {
+        await AsyncHelper.setToken(newAccessToken);
+      }
+
+      return newAccessToken;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      throw error;
+    }
   }
 
   private async logout(): Promise<void> {
     await AsyncHelper.removeToken();
-    // await AsyncHelper.removeRefreshToken();
-    // await AsyncHelper.removeFCMToken();
-    // await AsyncHelper.removeUserId();
+    await AsyncHelper.removeRefreshToken();
+    console.log('User logged out due to failed refresh token.');
   }
 
   private async addAuthToken(config: AxiosRequestConfig) {
-    //const token = '';
     const token = await AsyncHelper.getToken();
-
-    console.log('addAuthToken ', token);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
 
   async get<T>(route: string, sendAuthToken = true): ApiResponse<T> {
-    const config: AxiosRequestConfig = {headers: {}};
+    const config: AxiosRequestConfig = { headers: {} };
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
@@ -149,12 +154,12 @@ class Api {
     route: string,
     params: any,
     sendAuthToken = true,
-    multipart = false,
+    multipart = false
   ): ApiResponse<T> {
     const config: AxiosRequestConfig = {
       headers: multipart
-        ? {'Content-Type': 'multipart/form-data'}
-        : {'Content-Type': 'application/json'},
+        ? { 'Content-Type': 'multipart/form-data' }
+        : { 'Content-Type': 'application/json' },
     };
     if (sendAuthToken) {
       await this.addAuthToken(config);
@@ -165,10 +170,10 @@ class Api {
   async put<T>(
     route: string,
     params: any,
-    sendAuthToken = false,
+    sendAuthToken = false
   ): ApiResponse<T> {
     const config: AxiosRequestConfig = {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     };
     if (sendAuthToken) {
       await this.addAuthToken(config);
@@ -179,7 +184,7 @@ class Api {
   async delete<T>(
     route: string,
     params: any,
-    sendAuthToken = false,
+    sendAuthToken = false
   ): ApiResponse<T> {
     const config: AxiosRequestConfig = {
       data: params,

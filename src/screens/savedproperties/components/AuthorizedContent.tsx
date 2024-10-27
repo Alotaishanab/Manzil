@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { fonts } from '../../../../src/assets/fonts';
 import { Colors } from '@colors';
@@ -6,17 +6,16 @@ import AuthorizedHeader from './AuthorizedHeader';
 import { PropertyCard, TabButtons, TopSpace, SavedSearchModal } from '@components';
 import { useIntl } from '@context';
 import SavedCardSkeleton from '../../../components/molecules/CardSkeleton';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';  // Import useFocusEffect
 import { globalStyles } from '@globalStyles';
-import { useGetSavedProperties } from '@services';  // Import the query hook
-
+import { useGetSavedProperties } from '@services';
 
 const AuthorizedContent = () => {
   const { intl } = useIntl();
   const navigation: any = useNavigation();
 
   // Use the query hook to fetch saved properties
-  const { data, isLoading, error } = useGetSavedProperties();
+  const { data, isLoading, error, refetch } = useGetSavedProperties();  // Make sure refetch is returned
 
   const [btnSelected, setBtnSelected] = useState(
     intl.formatMessage({
@@ -33,49 +32,38 @@ const AuthorizedContent = () => {
     setIsModalVisible(!isModalVisible);
   };
 
+  // Use `useFocusEffect` to refetch data when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      refetch();  // Trigger a refetch when the screen gains focus
+    }, [refetch])
+  );
+
   const handleSortSelection = (option: string) => {
     setSelectedSortOption(option);
-  
     if (data && data.properties) {
-      console.log("Properties data:", data.properties); // Log the entire properties data
-  
-      // Sort logic depending on the option selected
+      console.log("Properties data:", data.properties);
       if (option === 'Most Recent') {
-        // Sort properties by most recent (based on listing_date)
-        data.properties.sort((a: any, b: any) => {
-          const dateA = a.listing_date ? new Date(a.listing_date) : new Date(0); // Handle undefined dates
-          const dateB = b.listing_date ? new Date(b.listing_date) : new Date(0);
-          return dateB - dateA;
-        });
+        data.properties.sort((a: any, b: any) => new Date(b.listing_date) - new Date(a.listing_date));
       } else if (option === 'Least Recent') {
-        // Sort properties by least recent (based on listing_date)
-        data.properties.sort((a: any, b: any) => {
-          const dateA = a.listing_date ? new Date(a.listing_date) : new Date(0); // Handle undefined dates
-          const dateB = b.listing_date ? new Date(b.listing_date) : new Date(0);
-          return dateA - dateB;
-        });
+        data.properties.sort((a: any, b: any) => new Date(a.listing_date) - new Date(b.listing_date));
       } else if (option === 'Most Expensive') {
         data.properties.sort((a: any, b: any) => b.price - a.price);
       } else if (option === 'Least Expensive') {
         data.properties.sort((a: any, b: any) => a.price - b.price);
       }
     }
-  
-    toggleModalVisible(); // Close the modal
+    toggleModalVisible();
   };
-  
-  
-  
 
   // Filter properties based on the selected tab (For Sale or To Rent)
   const filteredProperties = data?.properties.filter(property => 
     btnSelected === intl.formatMessage({ id: 'buttons.for-sale' })
-      ? property.property_type === 'Sell'  // Assuming 'Sell' is for 'For Sale'
-      : property.property_type === 'Rent'  // Assuming 'Rent' is for 'To Rent'
+      ? property.property_type === 'Sell'
+      : property.property_type === 'Rent'
   );
 
   const handleCard = (property: any) => {
-    // Navigate to PropertyScreen when a property is clicked
     navigation.navigate('PropertyScreen', { property });
   };
 
@@ -91,7 +79,6 @@ const AuthorizedContent = () => {
   };
 
   if (isLoading) {
-    // Render skeletons while loading
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -110,7 +97,6 @@ const AuthorizedContent = () => {
   }
 
   if (error) {
-    // Render an error message if the query fails
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
@@ -135,14 +121,13 @@ const AuthorizedContent = () => {
               intl.formatMessage({ id: 'buttons.for-sale' }),
               intl.formatMessage({ id: 'buttons.to-rent' }),
             ]}
-            onSelect={(option) => setBtnSelected(option)}  // Update selected tab
+            onSelect={(option) => setBtnSelected(option)}
             borderRadius={10}
             paddingVertical={10}
             selectedOption={btnSelected}
           />
           <TopSpace top={10} />
 
-          {/* Custom search button to open modal */}
           <View style={[globalStyles.simpleRow, { alignSelf: 'flex-end' }]}>
             <TouchableOpacity onPress={toggleModalVisible} style={styles.searchButton}>
               <Text style={styles.searchText}>
@@ -154,18 +139,16 @@ const AuthorizedContent = () => {
 
           <TopSpace top={10} />
 
-          {/* Render filtered saved properties */}
           <FlatList
-            data={filteredProperties}  // Use the filtered data
+            data={filteredProperties}
             contentContainerStyle={styles.flatListContentContainerStyle}
             ListFooterComponent={<View style={styles.footer} />}
             renderItem={renderProperty}
-            keyExtractor={(item) => item.property_id.toString()}  // Ensure proper key for each item
+            keyExtractor={(item) => item.property_id.toString()}
           />
         </View>
       </ScrollView>
 
-      {/* SavedSearchModal */}
       <SavedSearchModal
         isVisible={isModalVisible}
         toggleVisible={toggleModalVisible}
@@ -176,6 +159,7 @@ const AuthorizedContent = () => {
 };
 
 export default AuthorizedContent;
+
 
 const styles = StyleSheet.create({
   innerWrap: {
