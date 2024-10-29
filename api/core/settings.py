@@ -21,7 +21,6 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # core/settings.py
-APPEND_SLASH = False
 
 
 # Quick-start development settings - unsuitable for production
