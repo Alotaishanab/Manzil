@@ -49,52 +49,46 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleLogin = (data) => {
-    const { email, password } = data;
-    if (isValid) {
-      login(
-        { email, password },
-        {
-          onSuccess: async (response) => {
-            try {
-              console.log("Login successful, storing tokens and user ID...");
+  const handleLogin = (data: LoginCredentials) => {
+    const { mutate: login } = useLoginUser();
   
-              // Remove guest ID on successful login
-              await AsyncHelper.removeGuestId();
+    login(data, {
+      onSuccess: async (response) => {
+        try {
+          console.log("Login successful, storing tokens and user ID...");
   
-              // Save user ID, access token, and refresh token
-              await AsyncHelper.setUserId(response.user_id); // Store user_id
-              await AsyncHelper.setToken(response.token.access);
-              await AsyncHelper.setRefreshToken(response.token.refresh);
+          // End the guest session and remove guest-specific data
+          await AsyncHelper.removeGuestId();
+          
+          // Save user-specific session data
+          await AsyncHelper.setUserId(response.user.id);
+          await AsyncHelper.setToken(response.token.access);
+          await AsyncHelper.setRefreshToken(response.token.refresh);
   
-              console.log("Starting session...");
-              await startSessionHandler(); // This should use the stored user_id
+          console.log("Starting new session for logged-in user...");
+          
+          // Start a new user session
+          const newSession = await startSessionHandler();
   
-              // Navigate immediately after login; delay profile refetch
-              navigation.navigate("BottomTabNavigator");
+          if (newSession) {
+            console.log("Session started with ID:", newSession.session_id);
+            navigation.navigate("BottomTabNavigator");
+          } else {
+            console.error("Session start failed.");
+          }
   
-              // Optionally refetch profile after navigation to avoid blocking
-              setTimeout(async () => {
-                try {
-                  console.log("Refetching profile...");
-                  await refetchProfile();
-                  console.log("Profile refetched successfully");
-                } catch (refetchError) {
-                  console.error("Profile refetch failed:", refetchError);
-                }
-              }, 500);
-  
-            } catch (error) {
-              console.error("Error during login handling:", error);
-            }
-          },
-          onError: (error) => {
-            console.error("Login error:", error);
-          },
+        } catch (error) {
+          console.error("Error during login handling:", error);
         }
-      );
-    }
+      },
+      onError: (error) => {
+        console.error("Login error:", error);
+      },
+    });
   };
+  
+  
+
   
   
   

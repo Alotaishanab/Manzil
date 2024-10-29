@@ -1,9 +1,8 @@
-// hooks/useSessionTracker.ts
-
 import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { logSessionStartService, sendHeartbeat } from '../services/session/sessionService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncHelper from '../helpers/asyncHelper';
 
 const SESSION_KEY = 'active_session';
 const HEARTBEAT_INTERVAL = 0.2 * 60 * 1000; // 2 minutes in milliseconds
@@ -39,11 +38,18 @@ const useSessionTracker = () => {
 
   const startSessionHandler = async () => {
     try {
+      await AsyncStorage.removeItem(SESSION_KEY);
+
+      const isAuthenticated = await AsyncHelper.isAuthenticated();
+      const sessionType = isAuthenticated ? 'User' : 'Guest';
+      const userId = isAuthenticated ? await AsyncHelper.getUserId() : null;
+      const guestId = !isAuthenticated ? await AsyncHelper.getGuestId() || await AsyncHelper.generateGuestId() : null;
+
       const response = await logSessionStartService();
       if (response && response.session_id) {
-        console.log('Session started with session_id:', response.session_id);
+        console.log(`Session started as ${sessionType} with session_id: ${response.session_id}`);
         await AsyncStorage.setItem(SESSION_KEY, response.session_id);
-        startHeartbeat(response.session_id);
+        startHeartbeat(response.session_id, sessionType, guestId, userId);
       } else {
         console.error('No session_id returned from logSessionStartService');
       }
@@ -52,10 +58,22 @@ const useSessionTracker = () => {
     }
   };
 
-  const startHeartbeat = (sessionId: string) => {
-    stopHeartbeat(); // Clear any existing interval
-    heartbeatIntervalRef.current = setInterval(() => {
-      sendHeartbeat(sessionId).catch((error) => console.error('Failed to send heartbeat:', error));
+  const startHeartbeat = (sessionId: string, sessionType: string, guestId: string | null, userId: string | null) => {
+    stopHeartbeat();
+    heartbeatIntervalRef.current = setInterval(async () => {
+      try {
+        const storedSessionId = await AsyncStorage.getItem(SESSION_KEY);
+        if (storedSessionId === sessionId) {
+          console.log(`Sending heartbeat for ${sessionType} session, ID: ${sessionId}`);
+          console.log(`Heartbeat payload details: ${sessionType === 'User' ? `User ID: ${userId}` : `Guest ID: ${guestId}`}`);
+          await sendHeartbeat(sessionId, guestId, userId);
+        } else {
+          console.warn('Heartbeat canceled, session ID mismatch or missing.');
+          stopHeartbeat();
+        }
+      } catch (error) {
+        console.error('Failed to send heartbeat:', error);
+      }
     }, HEARTBEAT_INTERVAL);
   };
 
@@ -63,6 +81,7 @@ const useSessionTracker = () => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
+      console.log('Heartbeat stopped');
     }
   };
 

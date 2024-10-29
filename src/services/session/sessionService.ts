@@ -1,5 +1,3 @@
-// services/session/sessionService.ts
-
 import api from '../api/api';
 import { apiUrls } from '../utils/urls';
 import AsyncHelper from '../../helpers/asyncHelper';
@@ -11,7 +9,7 @@ import AsyncHelper from '../../helpers/asyncHelper';
 export const logSessionStartService = async (): Promise<{ session_id: string } | null> => {
   try {
     const isAuthenticated = await AsyncHelper.isAuthenticated();
-    const guestId = !isAuthenticated ? await AsyncHelper.getGuestId() : undefined;
+    const guestId = !isAuthenticated ? await AsyncHelper.getGuestId() || await AsyncHelper.generateGuestId() : undefined;
 
     const payload = guestId ? { guest_id: guestId } : {};
     const response = await api.post<{ session_id: string }>(apiUrls.startSession, payload, false);
@@ -25,22 +23,21 @@ export const logSessionStartService = async (): Promise<{ session_id: string } |
 /**
  * Sends a heartbeat to keep the session active.
  * @param {string} sessionId - The current session ID.
+ * @param {string} [guestId] - The guest ID if the session is for a guest.
+ * @param {string} [userId] - The user ID if the session is for a logged-in user.
  */
-export const sendHeartbeat = async (sessionId: string): Promise<void> => {
+export const sendHeartbeat = async (sessionId: string, guestId?: string | null, userId?: string | null) => {
   try {
-    const isAuthenticated = await AsyncHelper.isAuthenticated();
-    const userId = isAuthenticated ? await AsyncHelper.getUserId() : null;
-    const guestId = !isAuthenticated ? await AsyncHelper.getGuestId() : null;
-
     const payload = {
       session_id: sessionId,
       ...(userId ? { user_id: userId } : { guest_id: guestId }),
     };
 
-    await api.post(apiUrls.sessionHeartbeat, payload, false);
-    console.log("Heartbeat sent successfully for session:", sessionId);
+    console.log(`Sending heartbeat with payload:`, payload);
+    const response = await api.post('/account/user/session-heartbeat/', payload);
+    console.log('Heartbeat response:', response);
   } catch (error) {
-    console.error("Failed to send heartbeat:", error);
+    console.error('Failed to send heartbeat:', error);
     throw error;
   }
 };

@@ -28,7 +28,7 @@ const getProfile = async (): Promise<ProfileData> => {
 
 
 
-export const useGetProfile = () => {
+export const useGetProfile = (p0: { enabled: boolean; }) => {
   return useQuery<ProfileData, Error>({
     queryKey: ['profile'],
     queryFn: () => getProfile(),

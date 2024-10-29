@@ -20,8 +20,9 @@ export const Account = () => {
     checkLoginStatus();
   }, []);
 
+  // Only attempt to fetch profile if the user is logged in
   const { data: profile, isError } = useGetProfile({
-    enabled: isLoggedin,
+    enabled: isLoggedin && !!AsyncHelper.getToken(),
   });
 
   const toggleDeleteAccountModal = () => setShowDeleteAccount(!showDeleteAccount);

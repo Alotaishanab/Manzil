@@ -9,10 +9,15 @@ import { useNavigation } from '@react-navigation/native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; 
 import { fonts } from '@fonts';
 import { useLogOutUser } from '@services';
+import { AsyncHelper } from '@helpers';
+import useSessionTracker from '../../../hooks/useSessionTracker';
+
 
 const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any) => {
   const { intl, toggleLocale } = useIntl();
   const { mutate: logoutUser } = useLogOutUser();
+  const { startSessionHandler } = useSessionTracker();
+
   const navigation: any = useNavigation();
 
   const handleEmail = () => {
@@ -77,14 +82,31 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
 
   const handleLogout = () => {
     logoutUser(undefined, {
-      onSuccess: () => {
-        navigation.navigate('Auth', { screen: 'Login' });
+      onSuccess: async () => {
+        console.log("Logout successful, resetting to guest session.");
+        
+        // Clear user session data
+        await AsyncHelper.removeToken();
+        await AsyncHelper.removeRefreshToken();
+        await AsyncHelper.getGuestId();
+        await AsyncHelper.removeUserId();
+  
+        // Start a new guest session
+        const newGuestSessionId = await startSessionHandler(); 
+        console.log(`New guest session started with session_id: ${newGuestSessionId}`);
+        
+        // Navigate to Explore screen
+        navigation.navigate('Explore');
       },
       onError: () => {
-        console.error("Error logging out user");
-      }
+        console.error("Error logging out user.");
+      },
     });
   };
+  
+  
+
+
 
   const handleRequests = () => {
     navigation.navigate('Auth', { screen: 'RequestList' });
