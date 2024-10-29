@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import api from '../api';
-import {apiUrls} from '../../urls';
+import api from '../../api/api';
+import {apiUrls} from '../../utils/urls';
 
 export interface PropertyDetails {
   property_id: number;

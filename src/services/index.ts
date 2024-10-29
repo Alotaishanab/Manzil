@@ -1,2 +1,3 @@
 export * from './api';
-export * from './sessionService';
+export * from './session';
+export * from './utils';

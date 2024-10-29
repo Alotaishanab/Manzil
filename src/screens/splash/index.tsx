@@ -1,3 +1,5 @@
+// src/screens/splash/SplashScreen.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import { launchScreen } from '@assets'; // Ensure this points to your splash screen image asset

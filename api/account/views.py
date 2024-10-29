@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+import logging
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -23,6 +24,9 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 
 from .permissions import IsAuthenticatedOrGuest
+
+logger = logging.getLogger(__name__)
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -223,15 +227,37 @@ class SessionHeartbeatView(APIView):
 
     def post(self, request, format=None):
         session_id = request.data.get('session_id')
+        guest_id = request.data.get('guest_id')
+        user = request.user if request.user.is_authenticated else None
+        logger.debug(f"Heartbeat request received with session_id: {session_id}, user: {user}, guest_id: {guest_id}")
+
+        # Ensure session_id is present
         if not session_id:
-            return Response({'error': 'Session ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning("Heartbeat attempt without session_id")
+            return Response({'error': 'Session ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            session = UserSession.objects.get(session_id=session_id)
+            # Query by user if authenticated, otherwise by guest_id
+            if user:
+                session = UserSession.objects.get(session_id=session_id, user=user)
+                logger.info(f"Authenticated heartbeat for session {session_id} and user {user}")
+            elif guest_id:
+                session = UserSession.objects.get(session_id=session_id, guest_id=guest_id)
+                logger.info(f"Guest heartbeat for session {session_id} and guest {guest_id}")
+            else:
+                # If neither user nor guest_id is found, return an error
+                logger.warning("Heartbeat attempt without valid user or guest_id")
+                return Response({'error': 'User or Guest ID required for heartbeat.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Update session heartbeat
             session.update_heartbeat()
             return Response({'message': 'Heartbeat received'}, status=status.HTTP_200_OK)
+
         except UserSession.DoesNotExist:
+            logger.warning(f"Heartbeat received for non-existent session {session_id}")
             return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 class EndUserSessionView(APIView):
     permission_classes = [IsAuthenticatedOrGuest]

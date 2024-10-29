@@ -155,7 +155,7 @@ def explore_properties_by_location(request):
 
     # Check if user is authenticated
     if request.user.is_authenticated:
-        user_id = request.user.id  # Use 'id' unless you have 'user_id' field
+        user_id = request.user.user_id  # Use 'id' unless you have 'user_id' field
         guest_id = None
     else:
         user_id = None
@@ -192,7 +192,7 @@ def explore_properties_by_interests(request):
 
     # Check if user is authenticated
     if request.user.is_authenticated:
-        user_id = request.user.id
+        user_id = request.user.user_id
         guest_id = None
     else:
         user_id = None
@@ -282,105 +282,3 @@ def get_user_saved_properties(request):
         return JsonResponse({"properties": result})
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def track_property_view(request, property_id):
-    if request.user.is_authenticated:
-        user = request.user
-        guest_id = None
-    else:
-        user = None
-        guest_id = request.headers.get('Guest-Id')
-        if not guest_id:
-            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
-
-    start_time = timezone.now()
-
-    # Start tracking the property view
-    PropertyView.objects.create(
-        property_id=property_id,
-        user=user,
-        guest_id=guest_id,
-        view_date=start_time
-    )
-
-    return Response({"message": "Property view started"}, status=status.HTTP_201_CREATED)
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def end_property_view(request, property_id):
-    duration = request.data.get('duration_seconds')
-    if not duration:
-        return Response({"error": "Duration is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-    if request.user.is_authenticated:
-        user = request.user
-        guest_id = None
-    else:
-        user = None
-        guest_id = request.headers.get('Guest-Id')
-        if not guest_id:
-            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        # Record the view
-        PropertyView.objects.create(
-            property_id=property_id,
-            user=user,
-            guest_id=guest_id,
-            duration_seconds=duration,
-            view_date=timezone.now()
-        )
-
-        # Update the property view count and total duration
-        property_obj = Property.objects.get(property_id=property_id)
-        property_obj.increment_view_count()  # Increment view count
-        property_obj.add_to_total_duration(duration)  # Add duration to total
-        
-        return Response({"message": "Property view tracked", "duration": duration}, status=status.HTTP_200_OK)
-    except Property.DoesNotExist:
-        return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def track_property_click(request, property_id):
-    if request.user.is_authenticated:
-        user = request.user
-        guest_id = None
-    else:
-        user = None
-        guest_id = request.headers.get('Guest-Id')
-        if not guest_id:
-            return Response({"error": "Guest ID is required for unauthenticated users"}, status=status.HTTP_400_BAD_REQUEST)
-
-    click_type = request.data.get('click_type', 'general')
-
-    # Record the click
-    PropertyClick.objects.create(
-        property_id=property_id,
-        user=user,
-        guest_id=guest_id,
-        click_type=click_type,
-        click_date=timezone.now()
-    )
-
-    return Response({"message": "Property click tracked"}, status=status.HTTP_201_CREATED)
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def get_property_views_and_clicks(request, property_id):
-    property_instance = get_object_or_404(Property, pk=property_id)
-
-    total_views = PropertyView.objects.filter(property=property_instance).count()
-    total_clicks = PropertyClick.objects.filter(property=property_instance).count()
-    total_saves = SavedProperties.objects.filter(property=property_instance).count()
-
-    return Response({
-        "property_id": property_id,
-        "total_views": total_views,
-        "total_clicks": total_clicks,
-        "total_saves": total_saves
-    }, status=status.HTTP_200_OK)

@@ -17,12 +17,15 @@ import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMess
 import { useLoginUser, useGetProfile, useGetSavedProperties } from '@services'; // Added useGetSavedProperties
 import AsyncHelper from '../../../src/helpers/asyncHelper';
 import { styles } from './styles';
+import useSessionTracker from '../../hooks/useSessionTracker';
+
 
 export const Login = () => {
   const { intl } = useIntl();
   const { mutate: login } = useLoginUser();
   const navigation: any = useNavigation();
   const { loginSchema } = useValidations();
+  const { startSessionHandler } = useSessionTracker();
 
   // Using react-query to get the profile and saved properties after login
   const { refetch: refetchProfile } = useGetProfile();
@@ -46,31 +49,57 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleLogin = (data: FormData) => {
+  const handleLogin = (data) => {
     const { email, password } = data;
     if (isValid) {
       login(
         { email, password },
         {
           onSuccess: async (response) => {
-            // Save token using AsyncHelper
-            await AsyncHelper.setToken(response.token.access);
-            await AsyncHelper.setRefreshToken(response.token.refresh);
-
-            // Refetch profile and saved properties after successful login
-            await refetchProfile(); // Ensure profile is loaded immediately
-            await refetchSavedProperties(); // Preload saved properties
-
-            // Navigate to the next screen
-            navigation.navigate('BottomTabNavigator');
+            try {
+              console.log("Login successful, storing tokens and user ID...");
+  
+              // Remove guest ID on successful login
+              await AsyncHelper.removeGuestId();
+  
+              // Save user ID, access token, and refresh token
+              await AsyncHelper.setUserId(response.user_id); // Store user_id
+              await AsyncHelper.setToken(response.token.access);
+              await AsyncHelper.setRefreshToken(response.token.refresh);
+  
+              console.log("Starting session...");
+              await startSessionHandler(); // This should use the stored user_id
+  
+              // Navigate immediately after login; delay profile refetch
+              navigation.navigate("BottomTabNavigator");
+  
+              // Optionally refetch profile after navigation to avoid blocking
+              setTimeout(async () => {
+                try {
+                  console.log("Refetching profile...");
+                  await refetchProfile();
+                  console.log("Profile refetched successfully");
+                } catch (refetchError) {
+                  console.error("Profile refetch failed:", refetchError);
+                }
+              }, 500);
+  
+            } catch (error) {
+              console.error("Error during login handling:", error);
+            }
           },
-          onError: () => {
-            showCustomFlashMessage('Login failed. Please try again.');
+          onError: (error) => {
+            console.error("Login error:", error);
           },
         }
       );
     }
   };
+  
+  
+  
+  
+  
 
   const [hidePassword, setHidePassword] = useState(true);
   const togglePassword = () => {

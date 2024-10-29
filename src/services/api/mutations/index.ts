@@ -8,7 +8,6 @@ export * from './useResetUserPassword';
 export * from './useResendPhoneCode';
 export * from './useAddProperty';
 export * from './useSaveProperty';
-export * from './useLogSession';
 export * from './useEndPropertyView';
 export * from './useTrackPropertyClick';
 export * from './useTrackPropertyView';

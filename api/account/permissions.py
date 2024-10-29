@@ -1,12 +1,15 @@
-# account/permissions.py
+# backend/account/permissions.py
 
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission
 
-class IsAuthenticatedOrGuest(permissions.BasePermission):
+class IsAuthenticatedOrGuest(BasePermission):
     """
-    Custom permission to allow authenticated users or guests with a guest_id to start a session.
+    Allows access to authenticated users or guests based on guest_id.
     """
 
     def has_permission(self, request, view):
-        # Allow access if the user is authenticated or if the request has 'guest_id' in data.
-        return bool(request.user.is_authenticated or 'guest_id' in request.data)
+        if request.user.is_authenticated:
+            return True
+        # Allow access if 'guest_id' is present
+        guest_id = request.data.get('guest_id')
+        return guest_id is not None
