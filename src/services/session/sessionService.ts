@@ -1,19 +1,32 @@
+// services/session/sessionService.ts
+
 import api from '../api/api';
-import { apiUrls } from '../utils/urls';
-import AsyncHelper from '../../helpers/asyncHelper';
+import { apiUrls } from '../utils/urls'; // Adjusted import path if necessary
+import AsyncHelper from '../../helpers/asyncHelper'; // Correct default import
 
-/**
- * Starts a user session, checking if user is authenticated or guest.
- * @returns {Promise<{ session_id: string } | null>}
- */
-export const logSessionStartService = async (): Promise<{ session_id: string } | null> => {
+// Updated interface to include user_id
+interface SessionStartPayload {
+  guest_id?: string | null;
+  user_id?: string | null;
+}
+
+interface SessionStartResponse {
+  message: string;
+  session_id: string;
+  start_time: string;
+}
+
+export const logSessionStartService = async (
+  payload: SessionStartPayload
+): Promise<{ session_id: string } | null> => {
   try {
-    const isAuthenticated = await AsyncHelper.isAuthenticated();
-    const guestId = !isAuthenticated ? await AsyncHelper.getGuestId() || await AsyncHelper.generateGuestId() : undefined;
-
-    const payload = guestId ? { guest_id: guestId } : {};
-    const response = await api.post<{ session_id: string }>(apiUrls.startSession, payload, false);
-    return response;
+    const response = await api.post<SessionStartResponse>(
+      apiUrls.startSession,
+      payload,
+      false // sendAuthToken: false when initiating session
+    );
+    console.log('logSessionStartService response:', response); // Log entire response
+    return { session_id: response.session_id };
   } catch (error) {
     console.error('Failed to start session:', error);
     return null;
@@ -28,14 +41,30 @@ export const logSessionStartService = async (): Promise<{ session_id: string } |
  */
 export const sendHeartbeat = async (sessionId: string, guestId?: string | null, userId?: string | null) => {
   try {
-    const payload = {
-      session_id: sessionId,
-      ...(userId ? { user_id: userId } : { guest_id: guestId }),
-    };
+    const accessToken = await AsyncHelper.getToken(); // Retrieve the access token
+    const storedUserId = userId || await AsyncHelper.getUserId(); // Retrieve userId if not provided
 
-    console.log(`Sending heartbeat with payload:`, payload);
-    const response = await api.post('/account/user/session-heartbeat/', payload);
-    console.log('Heartbeat response:', response);
+    // Prepare the payload based on session type
+    const payload: any = { session_id: sessionId };
+    if (storedUserId) {
+      payload.user_id = storedUserId;
+    } else if (guestId) {
+      payload.guest_id = guestId;
+    }
+
+    // Log the relevant details
+    console.log(`Sending heartbeat for ${storedUserId ? 'User' : 'Guest'} session, ID: ${sessionId}`);
+    console.log('Heartbeat payload details:', storedUserId ? `User ID: ${storedUserId}` : `Guest ID: ${guestId}`);
+    console.log('Auth Token:', accessToken ? '[Token Present]' : '[No Token]');
+    console.log('Heartbeat payload:', payload);
+
+    // Determine whether to send the Authorization token
+    const sendAuthToken = !!accessToken;
+
+    // Send heartbeat with appropriate Authorization header handled by interceptors
+    const response = await api.post(apiUrls.sessionHeartbeat, payload, sendAuthToken);
+
+    console.log('Heartbeat response:', response); // Log entire response
   } catch (error) {
     console.error('Failed to send heartbeat:', error);
     throw error;

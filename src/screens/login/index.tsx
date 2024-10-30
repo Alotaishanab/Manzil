@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import {
   CustomButton,
   CustomTextInput,
@@ -50,43 +50,59 @@ export const Login = () => {
   });
 
   const handleLogin = (data: LoginCredentials) => {
-    const { mutate: login } = useLoginUser();
-  
     login(data, {
       onSuccess: async (response) => {
         try {
+          if (!response || !response.user || !response.token) {
+            console.error("Login response is incomplete:", response);
+            Alert.alert("Login Failed", "Incomplete login response from server.");
+            return;
+          }
+
           console.log("Login successful, storing tokens and user ID...");
-  
-          // End the guest session and remove guest-specific data
+
+          // Remove guest ID on successful login
           await AsyncHelper.removeGuestId();
-          
-          // Save user-specific session data
-          await AsyncHelper.setUserId(response.user.id);
+
+          // Save user ID, access token, and refresh token
+          await AsyncHelper.setUserId(response.user.id.toString()); // Ensure 'id' is a string
           await AsyncHelper.setToken(response.token.access);
           await AsyncHelper.setRefreshToken(response.token.refresh);
-  
-          console.log("Starting new session for logged-in user...");
-          
-          // Start a new user session
-          const newSession = await startSessionHandler();
-  
-          if (newSession) {
-            console.log("Session started with ID:", newSession.session_id);
-            navigation.navigate("BottomTabNavigator");
-          } else {
-            console.error("Session start failed.");
-          }
-  
+
+          // Verify userId is set
+          const storedUserId = await AsyncHelper.getUserId();
+          console.log('Stored user ID after login:', storedUserId);
+
+          // Start session and handle navigation
+          console.log("Starting session...");
+          await startSessionHandler();
+
+          // Navigate to the main app
+          navigation.navigate("BottomTabNavigator");
+          console.log("Navigated to BottomTabNavigator.");
+
+          // Optionally refetch profile after navigation to avoid blocking
+          setTimeout(async () => {
+            try {
+              console.log("Refetching profile...");
+              await refetchProfile(); // Ensure refetchProfile is defined/imported
+              console.log("Profile refetched successfully");
+            } catch (refetchError) {
+              console.error("Profile refetch failed:", refetchError);
+            }
+          }, 500);
+
         } catch (error) {
           console.error("Error during login handling:", error);
+          Alert.alert("Login Error", "An unexpected error occurred during login.");
         }
       },
       onError: (error) => {
         console.error("Login error:", error);
+        Alert.alert("Login Failed", "Invalid email or password.");
       },
     });
   };
-  
   
 
   

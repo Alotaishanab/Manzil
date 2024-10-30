@@ -1,9 +1,11 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+// api/api.ts
+
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
 
 const QA = 'http://127.0.0.1:8000/';
 
-type ApiResponse<T> = Promise<AxiosResponse<T>>;
+type ApiResponse<T> = Promise<T>;
 
 class Api {
   private client: AxiosInstance;
@@ -25,6 +27,7 @@ class Api {
   }
 
   private initializeInterceptors() {
+    // Request Interceptor
     this.client.interceptors.request.use(
       async (config) => {
         const token = await AsyncHelper.getToken();
@@ -41,13 +44,15 @@ class Api {
       (error) => Promise.reject(error)
     );
 
+    // Response Interceptor
     this.client.interceptors.response.use(
-      (response) => response.data,  // Only return response.data to simplify processing in the hooks
+      (response) => response.data, // Return response.data directly
       async (error) => {
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
+
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
               this.failedQueue.push({ resolve, reject });
@@ -61,6 +66,7 @@ class Api {
 
           this.isRefreshing = true;
           const refreshToken = await AsyncHelper.getRefreshToken();
+
           if (!refreshToken) {
             await this.logout();
             return Promise.reject(error);
@@ -105,13 +111,15 @@ class Api {
   private async refreshToken(refreshToken: string): Promise<string> {
     try {
       const response = await this.client.post<{ accessToken: string }>(
-        `${QA}auth/refresh-token`,
+        `auth/refresh-token`,
         { refreshToken }
       );
-      const newAccessToken = response.data.accessToken;
+      const newAccessToken = response.accessToken;
+
       if (newAccessToken) {
         await AsyncHelper.setToken(newAccessToken);
       }
+
       return newAccessToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -131,7 +139,7 @@ class Api {
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.get(route, config);
+    return this.client.get<T>(route, config);
   }
 
   async post<T>(
@@ -148,7 +156,7 @@ class Api {
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
-    return this.client.post(route, params, config);
+    return this.client.post<T>(route, params, config);
   }
 
   private async addAuthToken(config: AxiosRequestConfig) {

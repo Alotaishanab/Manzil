@@ -1,28 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+// components/Account.tsx
+
+import React, { useState } from 'react';
+import { ScrollView, Text } from 'react-native';
 import { GenericModal, Screen } from '@components';
 import DefaultPage from './component/DefaultPage';
 import LoggedinUserPage from './component/LoggedinUserPage';
 import { AsyncHelper } from '../../../src/helpers/asyncHelper';
 import DeleteAccountContent from './component/DeleteAcountContent';
 import { useGetProfile } from '@services';
+import { useFocusEffect } from '@react-navigation/native';
 
 export const Account = () => {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [checked, setChecked] = useState(false);
   const [isLoggedin, setIsLoggedin] = useState<boolean>(false);
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const token = await AsyncHelper.getToken();
-      setIsLoggedin(!!token); // True if token exists, else false (guest)
-    };
-    checkLoginStatus();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkLoginStatus = async () => {
+        const token = await AsyncHelper.getToken();
+        setIsLoggedin(!!token); // True if token exists, else false (guest)
+      };
+      checkLoginStatus();
+    }, [])
+  );
 
   // Only attempt to fetch profile if the user is logged in
   const { data: profile, isError } = useGetProfile({
-    enabled: isLoggedin && !!AsyncHelper.getToken(),
+    enabled: isLoggedin,
   });
 
   const toggleDeleteAccountModal = () => setShowDeleteAccount(!showDeleteAccount);
@@ -69,3 +74,5 @@ export const Account = () => {
 
   return null;
 };
+
+export default Account;

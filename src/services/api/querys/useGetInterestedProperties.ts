@@ -22,7 +22,6 @@ const getInterestedProperties = async (): Promise<GetInterestedPropertiesRespons
       false // Do not send auth token
     );
 
-    console.log('Interested Properties Response:', response);
 
     // Check if `response` is defined and properly formatted
     if (!response || !response.properties) {

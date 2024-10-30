@@ -28,7 +28,6 @@ const getNearByProperties = async (location: UserLocation): Promise<GetNearbyPro
       false // Explicitly tell it NOT to send auth token
     );
 
-    console.log('Nearby Properties Response:', response);
 
     // Check if `response` is defined and properly formatted
     if (!response || !response.properties) {
