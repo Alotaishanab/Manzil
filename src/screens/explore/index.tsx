@@ -212,7 +212,12 @@ export const Explore = () => {
   };
 
   return (
-    <Screen padding={0} paddingHorizontal={10} showKeyboardAware={false}>
+    <Screen
+      padding={0}
+      paddingHorizontal={10}
+      showKeyboardAware={false}
+      style={{ backgroundColor: '#F5F5F5' }} // Background color for Screen
+    >
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -266,13 +271,6 @@ export const Explore = () => {
             </TouchableOpacity>
           </>
         }
-      />
-      <PropertyTypeModal
-        isVisible={showPropertiesModal}
-        modalTitle={intl.formatMessage({
-          id: 'landPropertyDetailScreen.property-type',
-        })}
-        toggleModal={togglePropertyModal}
       />
     </Screen>
   );

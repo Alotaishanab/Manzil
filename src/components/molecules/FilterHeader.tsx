@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 20,
     color: Colors.light.headingTitle,
+    
     fontFamily: fonts.primary.regular,
   },
 });
