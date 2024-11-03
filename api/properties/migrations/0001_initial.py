@@ -65,8 +65,8 @@ class Migration(migrations.Migration):
                 ('similar_properties', models.JSONField(blank=True, null=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
-            options={
-                'constraints': [models.CheckConstraint(condition=models.Q(('property_age__gte', 0), ('property_age__lte', 99)), name='check_property_age_range'), models.CheckConstraint(condition=models.Q(('property_videos__len__lte', 3)), name='chk_property_videos')],
-            },
+            # options={
+            #     'constraints': [models.CheckConstraint(condition=models.Q(('property_age__gte', 0), ('property_age__lte', 99)), name='check_property_age_range'), models.CheckConstraint(condition=models.Q(('property_videos__len__lte', 3)), name='chk_property_videos')],
+            # },
         ),
     ]

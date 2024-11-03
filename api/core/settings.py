@@ -39,6 +39,7 @@ ALLOWED_HOSTS = ['localhost', '10.0.2.2', '127.0.0.1', '192.168.1.221', '192.168
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,8 +52,10 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'account',
-    'properties'
+    'properties',
+    'websocket',
 ]
+ASGI_APPLICATION = "core.asgi.application"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -185,5 +188,5 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 
 # Define GEOS and GDAL library paths
-GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
-GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
+# GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
+# GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
