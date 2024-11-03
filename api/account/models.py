@@ -15,6 +15,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_verified = models.BooleanField(default=False)
     preferences = models.JSONField(null=True, blank=True)
     subscription_plan_id = models.IntegerField(null=True, blank=True)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 

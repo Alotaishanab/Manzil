@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+<h1> we are on websocket page</h1>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/interactions/');
+
+        socket.onopen = function() {
+            console.log('WebSocket connection established.');
+            // Send a test message
+            socket.send(JSON.stringify({
+                interaction_type: 'click',
+                property_id: 1,
+                guest_id: 'guest_1234',
+                timestamp: new Date().toISOString(),
+                extra_data: {}
+            }));
+        };
+
+        socket.onmessage = function(event) {
+            console.log('Message from server:', event.data);
+        };
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed:', event);
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+    </script>
+</body>
+</html>
