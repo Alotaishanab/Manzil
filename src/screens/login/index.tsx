@@ -73,6 +73,9 @@ export const Login = () => {
           const storedUserId = await AsyncHelper.getUserId();
           console.log('Stored user ID after login:', storedUserId);
 
+          const storedToken = await AsyncHelper.getToken();
+          console.log('Stored Access Token:', storedToken);
+
           // Start session and handle navigation
           console.log("Starting session...");
           await startSessionHandler();

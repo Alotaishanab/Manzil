@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';import {
+import React, { useState, useRef } from 'react';
+import {
   Animated,
   FlatList,
   ImageBackground,
@@ -8,13 +9,13 @@ import React, { useState, useEffect } from 'react';import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from 'react-native';
+import Video from 'react-native-video';
 import Share from 'react-native-share';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; // Make sure this package is installed
-import {TopSpace} from '@components';
-import {Colors} from '@colors';
-import {fonts} from '@fonts';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import { TopSpace } from '@components';
+import { Colors } from '@colors';
+import { fonts } from '@fonts';
 import HapticFeedback from 'react-native-haptic-feedback';
 import {
   AreaIcon,
@@ -32,12 +33,14 @@ import {
   WaterIcon,
   ElectricityIcon,
   SewageIcon,
-} from '@svgs'; // Ensure all icons are correctly imported
-import {useIntl} from '@context';
-import { useSaveProperty, useGetPropertyById, useTrackPropertyView, useTrackPropertyClick } from '@services';
+  PlayIcon, // Ensure PlayIcon is correctly exported from '@svgs'
+} from '@svgs';
+import { useIntl } from '@context';
+import { useSaveProperty } from '@services';
 import { useNavigation } from '@react-navigation/native';
+import { isVideo, isImage } from '../../utils/mediaUtils';
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 const ITEM_WIDTH = screenWidth * 0.8;
 const SPACING = 20;
 const STACK_OFFSET = 60;
@@ -46,18 +49,16 @@ export const PropertyCard = ({
   item,
   marginBottom = 15,
   handleClick = () => {},
-  isFavorite = false, // Whether the property is favorited
-  handleFavoriteClick = () => {}, // To toggle favorite status
+  isFavorite = false,
+  handleFavoriteClick = () => {},
 }) => {
   const { intl } = useIntl();
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-  const scrollX = React.useRef(new Animated.Value(0)).current;
-  const navigation = useNavigation(); // Initialize navigation hook
-
+  const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
 
   // Use the save property mutation hook
   const { mutate: saveProperty, isLoading: isSaving } = useSaveProperty();
-
 
   const handlePropertyClick = () => {
     // Navigate to PropertyScreen through the Auth stack and pass property_id as a parameter
@@ -66,9 +67,6 @@ export const PropertyCard = ({
       params: { propertyId: item.property_id },
     });
   };
-  
-
-  
 
   const handlePress = () => {
     // Trigger haptic feedback when pressed
@@ -103,17 +101,15 @@ export const PropertyCard = ({
     );
   };
 
-
-
-
-  const media = [...(item?.property_images || []), ...(item?.property_videos || [])].filter(Boolean);
-
-
+  // Ensure images are first, then videos
+  const images = item?.property_images || [];
+  const videos = item?.property_videos || [];
+  const media = [...images, ...videos].filter(Boolean);
 
   const options = {
     title: 'Share this property',
     message: 'Check out this property!',
-    url: media[currentIndex]?.uri,
+    url: media[currentVisibleIndex], // Adjusted to use currentVisibleIndex
   };
 
   const handleShare = () => {
@@ -124,30 +120,23 @@ export const PropertyCard = ({
       });
   };
 
-  const handleImageChange = (index) => {
-    setCurrentIndex(index);
-  };
-
   const formatPrice = (price) => {
     // Format the price and remove .00 if exists
     return parseFloat(price).toLocaleString();
   };
 
-
   const renderPropertyIcons = () => {
-    const { property_category } = item || {}; // Use property_category instead of property_type
-    
+    const { property_category } = item || {};
+
     return (
       <View style={styles.iconRow}>
-        {/* Row 1: Area */}
-      {item?.area && (
-        <View style={styles.iconWrapper}>
-          <AreaIcon width={24} height={24} />
-          <Text style={styles.countText}>{`${parseInt(item.area).toLocaleString()} sq ft`}</Text>
-        </View>
-      )}
+        {item?.area && (
+          <View style={styles.iconWrapper}>
+            <AreaIcon width={24} height={24} />
+            <Text style={styles.countText}>{`${parseInt(item.area).toLocaleString()} sq ft`}</Text>
+          </View>
+        )}
 
-  
         {/* House specific icons */}
         {property_category === 'House' && (
           <>
@@ -171,7 +160,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Land specific icons */}
         {property_category === 'Land' && (
           <>
@@ -206,7 +195,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Warehouse specific icons */}
         {property_category === 'Warehouse' && (
           <>
@@ -224,7 +213,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Office specific icons */}
         {property_category === 'Office' && (
           <>
@@ -242,7 +231,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Chalet specific icons */}
         {property_category === 'Chalet' && (
           <>
@@ -266,7 +255,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Farmhouse specific icons */}
         {property_category === 'Farmhouse' && (
           <>
@@ -290,7 +279,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Tower specific icons */}
         {property_category === 'Tower' && (
           <>
@@ -308,9 +297,9 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Workers' Residence specific icons */}
-        {property_category === 'Workers Residence' && (
+        {property_category === "Workers Residence" && (
           <>
             {item?.number_of_units && (
               <View style={styles.iconWrapper}>
@@ -326,7 +315,7 @@ export const PropertyCard = ({
             )}
           </>
         )}
-  
+
         {/* Shop specific icons */}
         {property_category === 'Shop' && (
           <>
@@ -341,8 +330,6 @@ export const PropertyCard = ({
       </View>
     );
   };
-  
-  
 
   const renderPropertyDetails = () => {
     const propertyCategory = item?.property_category || 'Home';
@@ -356,17 +343,15 @@ export const PropertyCard = ({
     );
   };
 
-  const renderContent = () => {
-    return (
-      <View style={styles.propertyContainer}>
-        {/* Property Details */}
-        {renderPropertyDetails()}
-  
-        {/* Property Icons */}
-        {renderPropertyIcons()}
-      </View>
-    );
-  };
+  // Viewability Config for FlatList
+  const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+
+  // onViewableItemsChanged Callback
+  const onViewRef = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setCurrentVisibleIndex(viewableItems[0].index);
+    }
+  });
 
   const getDateInEnglish = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -377,138 +362,186 @@ export const PropertyCard = ({
   };
 
   return (
-    <TouchableHighlight
-  onPress={handlePropertyClick} // Navigate to PropertyScreen when the card is clicked
-  underlayColor="rgba(0, 0, 0, 0.05)"
-  style={[styles.mainWrapper]}
->
-  <View>
-    {/* Image Carousel */}
-    <View style={styles.carouselContainer}>
-      {media.length > 0 ? (
-        <Animated.FlatList
-          data={media}
-          horizontal
-          keyExtractor={(item, index) => `${item}-${index}`}
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={ITEM_WIDTH + SPACING}
-          decelerationRate="fast"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true }
-          )}
-          renderItem={({ item, index }) => {
-            const inputRange = [
-              (index - 1) * (ITEM_WIDTH + SPACING),
-              index * (ITEM_WIDTH + SPACING),
-              (index + 1) * (ITEM_WIDTH + SPACING),
-            ];
-
-            const scale = scrollX.interpolate({
-              inputRange,
-              outputRange: [0.8, 1, 0.8],
-              extrapolate: 'clamp',
-            });
-
-            const translateX = scrollX.interpolate({
-              inputRange,
-              outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
-              extrapolate: 'clamp',
-            });
-
-            return (
-              <Animated.View
-                style={[
-                  styles.imageContainer,
-                  { transform: [{ scale }, { translateX }] },
-                ]}
-              >
-                {/* TouchableOpacity for the image click action */}
-                <TouchableOpacity onPress={handlePropertyClick} activeOpacity={0.8}>
-                  <ImageBackground
-                    source={{ uri: item }}
-                    style={styles.imageBgContainer}
-                    imageStyle={styles.imageBgStyle}
-                  >
-                    {/* Favorite button inside the image */}
-                    <TouchableOpacity
-                      onPress={handlePress}
-                      style={styles.favoriteButton}
-                      activeOpacity={0.7}
-                      disabled={isSaving} // Disable button while saving
-                    >
-                      {isFavorite ? (
-                        <HeartIcon width={30} height={30} />
-                      ) : (
-                        <HeartOutlineIcon width={30} height={30} />
-                      )}
-                    </TouchableOpacity>
-                  </ImageBackground>
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          }}
-        />
-      ) : (
-        <View style={styles.noMediaContainer}>
-          <Text>No media available</Text>
-          {/* Show favorite button even if there is no media */}
-          <TouchableOpacity
-            onPress={handlePress}
-            style={styles.favoriteButton}
-            activeOpacity={0.7}
-            disabled={isSaving}
-          >
-            {isFavorite ? (
-              <HeartIcon width={30} height={30} />
-            ) : (
-              <HeartOutlineIcon width={30} height={30} />
+    <View style={[styles.mainWrapper, { marginBottom }]}>
+      {/* Image and Video Carousel */}
+      <View style={styles.carouselContainer}>
+        {media.length > 0 ? (
+          <Animated.FlatList
+            data={media}
+            horizontal
+            keyExtractor={(item, index) => `${item}-${index}`}
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={ITEM_WIDTH + SPACING}
+            decelerationRate="fast"
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
             )}
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+            onViewableItemsChanged={onViewRef.current}
+            viewabilityConfig={viewConfigRef.current}
+            renderItem={({ item, index }) => {
+              const inputRange = [
+                (index - 1) * (ITEM_WIDTH + SPACING),
+                index * (ITEM_WIDTH + SPACING),
+                (index + 1) * (ITEM_WIDTH + SPACING),
+              ];
 
-    {/* Property Details */}
-    <View style={styles.contentWrapper}>
-      <View style={styles.priceLocationContainer}>
-        <View style={styles.priceFeaturedContainer}>
-          <Text style={styles.priceText}>
-            {item?.price ? `${formatPrice(item.price)} ﷼` : 'Price not available'}
-          </Text>
-        </View>
-        <Text style={styles.placeText}>
-          {item?.address || 'Address not available'}
-        </Text>
-        {renderPropertyDetails()}
-        {renderPropertyIcons()}
+              const scale = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.8, 1, 0.8],
+                extrapolate: 'clamp',
+              });
+
+              const translateX = scrollX.interpolate({
+                inputRange,
+                outputRange: [-STACK_OFFSET, 0, STACK_OFFSET],
+                extrapolate: 'clamp',
+              });
+
+              const isCurrent = index === currentVisibleIndex;
+              const isVid = isVideo(item);
+
+              return (
+                <Animated.View
+                  style={[
+                    styles.imageContainer,
+                    { transform: [{ scale }, { translateX }] },
+                  ]}
+                >
+                  {isImage(item) ? (
+                    <TouchableOpacity onPress={handlePropertyClick} activeOpacity={0.8}>
+                      <ImageBackground
+                        source={{ uri: item }}
+                        style={styles.imageBgContainer}
+                        imageStyle={styles.imageBgStyle}
+                      >
+                        {/* Favorite button inside the image */}
+                        <TouchableOpacity
+                          onPress={handlePress}
+                          style={styles.favoriteButton}
+                          activeOpacity={0.7}
+                          disabled={isSaving}
+                        >
+                          {isFavorite ? (
+                            <HeartIcon width={30} height={30} />
+                          ) : (
+                            <HeartOutlineIcon width={30} height={30} />
+                          )}
+                        </TouchableOpacity>
+                      </ImageBackground>
+                    </TouchableOpacity>
+                  ) : isVid ? (
+                    <View style={styles.videoContainer}>
+                      <Video
+                        source={{ uri: item }}
+                        style={styles.videoStyle}
+                        controls={true}
+                        paused={!isCurrent} // Autoplay if current
+                        repeat={true} // Loop the video
+                        resizeMode="cover"
+                        onError={(error) => {
+                          console.error('Video Playback Error:', error);
+                        }}
+                      />
+                      {/* Play Button Overlay */}
+                      {!isCurrent && (
+                        <TouchableOpacity
+                          onPress={() => setCurrentVisibleIndex(index)}
+                          style={styles.playButton}
+                          activeOpacity={0.7}
+                        >
+                          {PlayIcon ? (
+                            <PlayIcon width={50} height={50} />
+                          ) : (
+                            <Text style={{ color: '#fff', fontSize: 24 }}>▶️</Text> // Placeholder
+                          )}
+                        </TouchableOpacity>
+                      )}
+                      {/* Favorite button inside the video */}
+                      <TouchableOpacity
+                        onPress={handlePress}
+                        style={styles.favoriteButton}
+                        activeOpacity={0.7}
+                        disabled={isSaving}
+                      >
+                        {isFavorite ? (
+                          <HeartIcon width={30} height={30} />
+                        ) : (
+                          <HeartOutlineIcon width={30} height={30} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  ) : null}
+                </Animated.View>
+              );
+            }}
+          />
+        ) : (
+          <View style={styles.noMediaContainer}>
+            <Text>No media available</Text>
+            {/* Show favorite button even if there is no media */}
+            <TouchableOpacity
+              onPress={handlePress}
+              style={styles.favoriteButton}
+              activeOpacity={0.7}
+              disabled={isSaving}
+            >
+              {isFavorite ? (
+                <HeartIcon width={30} height={30} />
+              ) : (
+                <HeartOutlineIcon width={30} height={30} />
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
-      <View style={styles.footerWrap}>
-        <Text style={styles.dateText}>
-          {item?.listing_date ? `Added on ${new Date(item.listing_date).toLocaleDateString('en-US')}` : 'Date not available'}
-        </Text>
-        <TouchableOpacity
-          onPress={() => Share.open({ message: 'Check out this property!' })}
-          style={styles.shareButton}
-        >
-          <ShareIcon width={28} height={28} />
-        </TouchableOpacity>
-      </View>
+      {/* TouchableHighlight for the rest of the card */}
+      <TouchableHighlight
+        onPress={handlePropertyClick}
+        underlayColor="rgba(0, 0, 0, 0.05)"
+        style={styles.contentWrapper}
+      >
+        <View>
+          {/* Property Details */}
+          <View style={styles.priceLocationContainer}>
+            <View style={styles.priceFeaturedContainer}>
+              <Text style={styles.priceText}>
+                {item?.price ? `${formatPrice(item.price)} ﷼` : 'Price not available'}
+              </Text>
+            </View>
+            <Text style={styles.placeText}>
+              {item?.address || 'Address not available'}
+            </Text>
+            {renderPropertyDetails()}
+            {renderPropertyIcons()}
+          </View>
+
+          <View style={styles.footerWrap}>
+            <Text style={styles.dateText}>
+              {item?.listing_date
+                ? `Added on ${getDateInEnglish(item.listing_date)}`
+                : 'Date not available'}
+            </Text>
+            <TouchableOpacity
+              onPress={handleShare}
+              style={styles.shareButton}
+            >
+              <ShareIcon width={28} height={28} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableHighlight>
     </View>
-  </View>
-</TouchableHighlight>
-  );  
+  );
 };
-
 
 const styles = StyleSheet.create({
   mainWrapper: {
-    paddingVertical: 15,
     borderRadius: 20,
     shadowColor: 'rgba(0, 0, 0, 0.1)',
     backgroundColor: Colors.light.background,
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
@@ -537,6 +570,15 @@ const styles = StyleSheet.create({
   imageBgStyle: {
     borderRadius: 20,
   },
+  videoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  videoStyle: {
+    width: '100%',
+    height: '100%',
+  },
   favoriteButton: {
     position: 'absolute',
     top: 15,
@@ -545,10 +587,20 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 5,
   },
+  playButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   priceLocationContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   priceFeaturedContainer: {
     flexDirection: 'row',
@@ -587,26 +639,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     fontSize: 14,
   },
-  propertyContainer: {
-    flexDirection: 'column', // Stack details and icons vertically
-    alignSelf: 'flex-start',  // Align content to the left
-    marginTop: 4,  // Add some space between the header and the first element
-  },
   iconRow: {
-    flexDirection: 'row',  // Icons in a row
-    alignItems: 'center',  // Align icons and text vertically
-    marginTop: 10,  // Space between the text and the icons
-    flexWrap: 'wrap',  // Allow icons to wrap if there are many
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    flexWrap: 'wrap',
   },
   iconWrapper: {
-    flexDirection: 'row',  // Icon and text side by side
-    alignItems: 'center',  // Vertically align icons and text
-    marginRight: 20,  // Space between icons
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 20,
   },
   footerWrap: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   dateText: {
     color: Colors.light.serialNoGreen,
@@ -640,6 +689,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
+  },
+  noMediaContainer: {
+    width: ITEM_WIDTH,
+    height: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

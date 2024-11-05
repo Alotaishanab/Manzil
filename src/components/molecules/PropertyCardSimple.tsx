@@ -1,3 +1,5 @@
+// src/components/PropertyCardSimple.tsx
+
 import React from 'react';
 import {
   View,
@@ -5,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Image,
 } from 'react-native';
 import { fonts } from '../../../src/assets/fonts';
 import { Colors } from '@colors';
@@ -15,13 +18,14 @@ import {
   BedIcon,
 } from '@svgs'; // Import other icons as needed
 import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient'; // Import for gradient
+
 
 const { width: screenWidth } = Dimensions.get('window');
-const ITEM_WIDTH = screenWidth * 0.8;
+const ITEM_WIDTH = screenWidth * 0.55; // Adjusted as per previous scaling
 
 export const PropertyCardSimple = ({ item }) => {
   const navigation = useNavigation();
-
 
   // Function to handle click and navigate to PropertyScreen
   const handleClick = () => {
@@ -30,10 +34,25 @@ export const PropertyCardSimple = ({ item }) => {
   };
 
   return (
+    <LinearGradient
+    colors={['#e6e6e6', '#ffffff']} // Subtle gradient colors for border effect
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+    style={styles.borderWrapper}
+  >
+
     <View style={styles.mainWrapper}>
       <TouchableOpacity activeOpacity={0.9} onPress={handleClick}>
-        {/* Use the ImageCarousel component */}
-        
+        {/* Property Image */}
+        <Image
+          source={
+            item.image
+              ? { uri: item.image }
+              : require('../../../src/assets/images/nafath.png') // Ensure you have a placeholder image in your assets
+          }
+          style={styles.propertyImage}
+          resizeMode="cover"
+        />
 
         <TopSpace top={10} />
 
@@ -77,19 +96,22 @@ export const PropertyCardSimple = ({ item }) => {
             </View>
           </View>
         </View>
-
-        <TopSpace top={20} />
-        <View style={styles.footerWrap}>
-          <Text style={styles.dateText}>
-            Added on {item.dateAdded}
-          </Text>
-        </View>
       </TouchableOpacity>
     </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  borderWrapper: {
+    borderRadius: 35, // Outer border radius slightly larger than mainWrapper for layering
+    padding: 3, // Space for the gradient effect
+    marginBottom: 15,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
   mainWrapper: {
     paddingVertical: 0,
     borderRadius: 30,
@@ -104,6 +126,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginRight: 20,
   },
+  propertyImage: {
+    width: '100%',
+    height: 150, // Adjust height as needed
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: Colors.light.imagePlaceholder, // Optional: background color while image loads
+  },
   priceLocationContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -112,7 +141,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     color: Colors.light.headingTitle,
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: fonts.primary.bold,
     marginBottom: 5,
   },
@@ -121,19 +150,19 @@ const styles = StyleSheet.create({
   },
   placeText: {
     color: Colors.light.serialNoGreen,
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: fonts.primary.medium,
   },
   descriptionText: {
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
-    fontSize: 16,
+    fontSize: 12,
   },
   countText: {
     marginLeft: 5,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
-    fontSize: 14,
+    fontSize: 10,
   },
   iconRow: {
     flexDirection: 'row',
@@ -154,7 +183,7 @@ const styles = StyleSheet.create({
   dateText: {
     color: Colors.light.serialNoGreen,
     fontFamily: fonts.primary.regular,
-    fontSize: 12,
+    fontSize: 8,
   },
 });
 

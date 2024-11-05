@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
-import { launchScreen } from '@assets'; // Ensure this points to your splash screen image asset
+import { launchScreen } from '@assets';
 import { useNavigation } from '@react-navigation/native';
-import AsyncHelper from '../../helpers/asyncHelper'; // Importing AsyncHelper
+import AsyncHelper from '../../helpers/asyncHelper';
 
 export const SplashScreen = () => {
   const navigation = useNavigation();
@@ -12,12 +12,13 @@ export const SplashScreen = () => {
   const logoScale = useRef(new Animated.Value(0.5)).current;
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
 
-  const determineFirstTimeStatus = async () => {
-    const firstTime = await AsyncHelper.isFirstTime();
-    setIsFirstTime(firstTime);
-  };
-
   useEffect(() => {
+    const determineFirstTimeStatus = async () => {
+      const firstTime = await AsyncHelper.isFirstTime();
+      setIsFirstTime(firstTime);
+    };
+
+    // Run animation and check first-time status in parallel
     Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
@@ -31,21 +32,21 @@ export const SplashScreen = () => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      determineFirstTimeStatus(); // Ensure the check happens after animation starts
+      determineFirstTimeStatus(); // Check first-time status after animation
     });
   }, []);
 
   useEffect(() => {
     if (isFirstTime !== null) {
-      // Provide enough time for the splash screen to be visible
+      // Set a timer to allow the splash screen to be displayed before navigating
       const timer = setTimeout(() => {
         if (isFirstTime) {
-          navigation.replace('Auth'); // Navigate to onboarding/login flow
+          navigation.replace('Auth', { screen: 'Onboarding' }); // Navigate to nested Onboarding screen
         } else {
-          navigation.replace('MainApp'); // Navigate directly to Explore screen
+          navigation.replace('MainApp');
         }
-      }, 1500); // Adjust delay for smoother transitions
-      return () => clearTimeout(timer); // Clear timeout if component unmounts
+      }, 1500); // Adjust delay if needed
+      return () => clearTimeout(timer); // Clear the timer on unmount
     }
   }, [isFirstTime, navigation]);
 

@@ -5,6 +5,7 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MapLayerIcon, PenIcon } from '@svgs'; // Assuming these are your custom icons
 import { throttle } from 'lodash';
+import { Colors } from '@colors';
 
 const cities = [
   { name: 'Dammam', latitude: 26.3927, longitude: 49.9777 },
@@ -176,11 +177,17 @@ const styles = StyleSheet.create({
   mapLayerBtn: {
     position: 'absolute',
     right: 20,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 50,
-    zIndex: 10,
-  },
+    backgroundColor: 'white',
+    width: 50,
+    height: 50,
+    padding: 20,
+    borderRadius: 30,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.light.filterLine,
+    alignItems: 'center',
+    zIndex: 1001,
+   },   
   drawYourSearchAreaViewStyle: {
     position: 'absolute',
     alignSelf: 'center',

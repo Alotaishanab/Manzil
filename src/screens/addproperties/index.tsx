@@ -339,26 +339,27 @@ export const AddProperties = () => {
         );
 
         addProperty(propertyData, {
-            onSuccess: () => {
-                // Stop loading animation and navigate on success
-                setIsLoading(false);
-                navigation.navigate('PropertyScreen');
-            },
-            onError: (error) => {
-                // Stop loading animation and show error modal
-                setIsLoading(false);
-                setErrorMessage(error.message || "An unexpected error occurred");
-                setShowErrorModal(true);
-            },
+          onSuccess: (data) => {
+            // Stop loading animation
+            setIsLoading(false);
+            console.log('Property created with ID:', data.propertyId);
+            // Navigate to PropertyScreen with propertyId
+            navigation.navigate('PropertyScreen', { propertyId: data.propertyId });
+          },
+          onError: (error) => {
+            // Stop loading animation and show error modal
+            setIsLoading(false);
+            setErrorMessage(error.message || "An unexpected error occurred");
+            setShowErrorModal(true);
+          },
         });
-    } catch (error) {
+      } catch (error) {
         // Stop loading animation and show error modal
         setIsLoading(false);
         setErrorMessage(error.message || "An unexpected error occurred");
         setShowErrorModal(true);
-    }
-};
-
+      }
+    };
 
   const handleSubmit = () => {
     let valid = true;

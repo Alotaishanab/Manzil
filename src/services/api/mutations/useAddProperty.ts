@@ -1,6 +1,7 @@
 import {useMutation} from '@tanstack/react-query';
 import api from '../api';
-import {apiUrls} from '../../urls';
+import {apiUrls} from '../../utils/urls';
+import AsyncHelper from '../../../helpers/asyncHelper'; // Adjust the import path accordingly
 
 export interface AddPropertyResponse {
   propertyId: number;
@@ -72,82 +73,117 @@ export interface AddPropertyPayload {
   propertyFeature: PropertyFeature[];
 }
 
-const addProperty = async (payload: AddPropertyPayload) => {
+const addProperty = async (payload: AddPropertyPayload): Promise<AddPropertyResponse> => {
   try {
     const formData = new FormData();
 
-    // Append the non-file data fields
+    // Append non-file fields
     formData.append('propertyType', payload.propertyType);
     formData.append('area', payload.area);
     formData.append('propertyCategory', payload.propertyCategory);
     formData.append('title', payload.title);
-    formData.append('propertyAge', payload.propertyAge);
+    formData.append('propertyAge', String(payload.propertyAge));
     formData.append('description', payload.description);
     formData.append('ownershipType', payload.ownershipType);
-    formData.append('floorPlan', payload.floorPlan);
+    formData.append('floorPlan', payload.floorPlan || '');
     formData.append('electricityAccess', String(payload.electricityAccess));
     formData.append('sewageSystem', String(payload.sewageSystem));
     formData.append('waterAccess', String(payload.waterAccess));
     formData.append('price', payload.price);
 
     if (payload.markerPosition) {
-      formData.append(
-        'markerPosition.latitude',
-        String(payload.markerPosition.latitude),
-      );
-
-      formData.append(
-        'markerPosition.longitude',
-        String(payload.markerPosition.longitude),
-      );
+      formData.append('markerPosition.latitude', String(payload.markerPosition.latitude));
+      formData.append('markerPosition.longitude', String(payload.markerPosition.longitude));
     }
 
-    if (payload.bedrooms) {
+    // Append optional fields
+    if (payload.bedrooms !== undefined && payload.bedrooms !== null) {
       formData.append('bedrooms', String(payload.bedrooms));
     }
-    if (payload.bathrooms) {
+    if (payload.bathrooms !== undefined && payload.bathrooms !== null) {
       formData.append('bathrooms', String(payload.bathrooms));
     }
-    if (payload.floors) {
+    if (payload.floors !== undefined && payload.floors !== null) {
       formData.append('floors', String(payload.floors));
     }
-    if (payload.livingRooms) {
+    if (payload.livingRooms !== undefined && payload.livingRooms !== null) {
       formData.append('livingRooms', String(payload.livingRooms));
     }
+    if (payload.rooms !== undefined && payload.rooms !== null) {
+      formData.append('rooms', String(payload.rooms));
+    }
+    if (payload.floorNumber !== undefined && payload.floorNumber !== null) {
+      formData.append('floorNumber', String(payload.floorNumber));
+    }
+    if (payload.numberOfStreets !== undefined && payload.numberOfStreets !== null) {
+      formData.append('numberOfStreets', String(payload.numberOfStreets));
+    }
+    if (payload.direction) {
+      formData.append('direction', payload.direction);
+    }
+    if (payload.footTraffic) {
+      formData.append('footTraffic', payload.footTraffic);
+    }
+    if (payload.parkingSpaces !== undefined && payload.parkingSpaces !== null) {
+      formData.append('parkingSpaces', String(payload.parkingSpaces));
+    }
+    if (payload.numberOfGates !== undefined && payload.numberOfGates !== null) {
+      formData.append('numberOfGates', String(payload.numberOfGates));
+    }
+    if (payload.loadingDocks !== undefined && payload.loadingDocks !== null) {
+      formData.append('loadingDocks', String(payload.loadingDocks));
+    }
+    if (payload.storageCapacity !== undefined && payload.storageCapacity !== null) {
+      formData.append('storageCapacity', String(payload.storageCapacity));
+    }
+    if (payload.numberOfUnits !== undefined && payload.numberOfUnits !== null) {
+      formData.append('numberOfUnits', String(payload.numberOfUnits));
+    }
+    if (payload.proximity) {
+      formData.append('proximity', payload.proximity);
+    }
 
+    // Append ownership information
     if (payload.ownership) {
-      for (const ownershipKey of Object.keys(payload.ownership)) {
-        formData.append(
-          `ownership.${ownershipKey}`,
-          String(payload.ownership[ownershipKey]),
-        );
+      for (const [key, value] of Object.entries(payload.ownership)) {
+        formData.append(`ownership.${key}`, String(value));
       }
     }
 
-    if (payload.rooms) {
-      formData.append('rooms', String(payload.rooms));
+    // Append media files
+    if (payload.media && payload.media.length > 0) {
+      payload.media.forEach((file, index) => {
+        const formattedFile = {
+          uri: file.uri,
+          name: file.fileName || `media_${index}.${file.type.split('/')[1] || 'jpg'}`,
+          type: file.type,
+        };
+        console.log(`Appending media file ${index}:`, formattedFile);
+        formData.append('media', formattedFile);
+      });
     }
-    if (payload.floorNumber) {
-      formData.append('floorNumber', String(payload.floorNumber));
-    }
 
-    formData.append('direction', payload.direction || '');
-
-    payload.media.forEach(file => {
-      formData.append('media', file);
-    });
-
+    // Append property features as JSON string
     formData.append('propertyFeature', JSON.stringify(payload.propertyFeature));
 
+    // Retrieve the token using AsyncHelper
+    const token = await AsyncHelper.getToken();
+    console.log('Retrieved Token:', token); // Log the token
+
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    // Do NOT set 'Content-Type' manually; let Axios handle it
+    // Pass 'multipart=true' to let the Axios instance handle headers
     const response = await api.post<AddPropertyResponse>(
       apiUrls.addProperty,
       formData,
-      true,
-      true,
+      true, // Set multipart to true
+      true  // Ensure sendAuthToken is true
     );
 
     console.log('Add property response', response);
-
     return response;
   } catch (error) {
     console.log('error adding property', error);
@@ -157,7 +193,6 @@ const addProperty = async (payload: AddPropertyPayload) => {
 
 export const useAddProperty = () => {
   return useMutation<AddPropertyResponse, Error, AddPropertyPayload>({
-    /** @ts-ignore */
     mutationFn: addProperty,
   });
 };

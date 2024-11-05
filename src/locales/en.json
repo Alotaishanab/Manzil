@@ -187,6 +187,7 @@
   "explore-search.suggested-search": "Suggested searches",
   "explore-search.draw-scratch" :"Draw from Scratch",
   "explore-search.draw-search-area":"Draw your search area",
+  "explore.recommended-for-you":"Recommended For You",
 
   "changemailScreen.header": "Change email",
   "changemailScreen.description": "Any enquiries you've sent before changing your email will go to your old email address .",
@@ -522,6 +523,7 @@
   "buttons.continue":"Continue",
   "buttons.sell-all":"See all",
   "buttons.requests":"Requests",
+  "buttons.explore-with-ai":"Search With AI",
 
   "realEstate.authorityInfo": "Real Estate Authority"
   

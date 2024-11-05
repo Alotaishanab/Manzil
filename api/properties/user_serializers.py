@@ -34,36 +34,36 @@ class PropertyOwnershipSerializer(serializers.Serializer):
 class AddPropertySerializer(serializers.Serializer):
     propertyType = serializers.CharField()
     propertyCategory = serializers.CharField()
-    propertyAge = serializers.IntegerField(required=False)
-    ownershipType = serializers.CharField()
+    propertyAge = serializers.IntegerField(required=False, allow_null=True)
+    ownershipType = serializers.ChoiceField(choices=['independent', 'multipleOwners', 'agency'])
     title = serializers.CharField()
     description = serializers.CharField()
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     area = serializers.DecimalField(max_digits=10, decimal_places=2)
-    location = serializers.CharField(required=False)
-    markerPosition = MarkerPositionSerializer(required=True)
-    status = serializers.CharField(required=False)
-    ownership = PropertyOwnershipSerializer(required=True)
-    bedrooms = serializers.IntegerField(required=False)
-    bathrooms = serializers.IntegerField(required=False)
+    location = serializers.CharField(required=False, allow_blank=True)
+    markerPosition = MarkerPositionSerializer(required=False, allow_null=True)
+    status = serializers.CharField(required=False, allow_blank=True)
+    ownership = PropertyOwnershipSerializer(required=False, allow_null=True)
+    bedrooms = serializers.IntegerField(required=False, allow_null=True)
+    bathrooms = serializers.IntegerField(required=False, allow_null=True)
     waterAccess = serializers.BooleanField(default=False)
     electricityAccess = serializers.BooleanField(default=False)
     sewageSystem = serializers.BooleanField(default=False)
-    direction = serializers.CharField(required=False)
-    floors = serializers.IntegerField(required=False)
-    livingRooms = serializers.IntegerField(required=False)
-    rooms = serializers.IntegerField(required=False)
-    floorNumber = serializers.IntegerField(required=False)
-    numberOfStreets = serializers.IntegerField(required=False)
-    footTraffic = serializers.CharField(required=False)
-    proximity = serializers.CharField(required=False)
-    parkingSpaces = serializers.IntegerField(required=False)
-    numberOfGates = serializers.IntegerField(required=False)
-    loadingDocks = serializers.IntegerField(required=False)
-    storageCapacity = serializers.IntegerField(required=False)
-    numberOfUnits = serializers.IntegerField(required=False)
+    direction = serializers.ChoiceField(choices=['North', 'South', 'East', 'West'], required=False, allow_null=True)
+    floors = serializers.IntegerField(required=False, allow_null=True)
+    livingRooms = serializers.IntegerField(required=False, allow_null=True)
+    rooms = serializers.IntegerField(required=False, allow_null=True)
+    floorNumber = serializers.IntegerField(required=False, allow_null=True)
+    numberOfStreets = serializers.IntegerField(required=False, allow_null=True)
+    footTraffic = serializers.ChoiceField(choices=['High', 'Medium', 'Low'], required=False, allow_null=True)
+    proximity = serializers.CharField(required=False, allow_blank=True)
+    parkingSpaces = serializers.IntegerField(required=False, allow_null=True)
+    numberOfGates = serializers.IntegerField(required=False, allow_null=True)
+    loadingDocks = serializers.IntegerField(required=False, allow_null=True)
+    storageCapacity = serializers.IntegerField(required=False, allow_null=True)
+    numberOfUnits = serializers.IntegerField(required=False, allow_null=True)
     propertyFeature = serializers.ListField(
-        child=serializers.CharField(), required=False
+        child=serializers.CharField(), required=False, allow_empty=True
     )
     media = serializers.ListField(
         child=serializers.FileField(),
@@ -71,6 +71,15 @@ class AddPropertySerializer(serializers.Serializer):
         allow_empty=True
     )
 
+    def validate_media(self, value):
+        allowed_mime_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/mov']
+        max_file_size = 50 * 1024 * 1024  # 50 MB
+        for file in value:
+            if file.content_type not in allowed_mime_types:
+                raise serializers.ValidationError(f"Unsupported file type: {file.content_type}")
+            if file.size > max_file_size:
+                raise serializers.ValidationError(f"File size exceeds limit: {file.size} bytes")
+        return value
 
 class SearchNearbyPropertiesSerializer(serializers.Serializer):
     latitude = serializers.DecimalField(max_digits=20, decimal_places=17)

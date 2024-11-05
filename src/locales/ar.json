@@ -173,6 +173,7 @@
   "explore.guest-favorite": "الضيف المفضل",
   "explore.over-amazing-views": "أكثر من 1000 مشاهدة مذهلة",
   "explore.top-agencies":"أعلى الوكالات",
+  "explore.recommended-for-you":" استكشف بالذكاء الاصطناعي",
 
   "explore-search.for-sale": "للبيع",
   "explore-search.for-rent": "للإيجار",
@@ -506,6 +507,8 @@
   "buttons.continue":"يكمل",
   "buttons.sell-all":"شاهد الكل",
   "buttons.requests":"الطلبات",
+  "buttons.explore-with-ai":"ابحث مع الذكاء الاصطناعي",
+
 
 
   "realEstate.authorityInfo": "الهيئة العامة للعقار"

@@ -3,7 +3,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
 
-const QA = 'http://127.0.0.1:8000/';
+const QA = 'http://192.168.1.103:8000/';
 
 type ApiResponse<T> = Promise<T>;
 
@@ -16,8 +16,7 @@ class Api {
     this.client = axios.create({
       baseURL: QA,
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        'Accept': 'application/json',
       },
     });
 
@@ -148,11 +147,12 @@ class Api {
     sendAuthToken = true,
     multipart = false
   ): ApiResponse<T> {
-    const config: AxiosRequestConfig = {
-      headers: multipart
-        ? { 'Content-Type': 'multipart/form-data' }
-        : { 'Content-Type': 'application/json' },
-    };
+    const config: AxiosRequestConfig = { headers: {} };
+    if (multipart) {
+      // Do NOT set 'Content-Type'; let Axios handle it
+    } else {
+      config.headers['Content-Type'] = 'application/json';
+    }
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }

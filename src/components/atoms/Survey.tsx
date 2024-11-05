@@ -1,5 +1,7 @@
+// src/components/Survey.tsx
+
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { fonts } from '../../assets/fonts';
 
@@ -8,6 +10,8 @@ interface SurveyProps {
   onYes: () => void;
   onNo: () => void;
 }
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export const Survey: React.FC<SurveyProps> = ({ question, onYes, onNo }) => {
   const [answered, setAnswered] = useState(false);
@@ -31,7 +35,7 @@ export const Survey: React.FC<SurveyProps> = ({ question, onYes, onNo }) => {
           <Text style={styles.questionText}>{question}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.buttonYes} onPress={handleYes}>
-              <Text style={styles.buttonText}>Yes</Text>
+              <Text style={styles.buttonTextYes}>Yes</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonNo} onPress={handleNo}>
               <Text style={styles.buttonTextNo}>No</Text>
@@ -45,21 +49,23 @@ export const Survey: React.FC<SurveyProps> = ({ question, onYes, onNo }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    backgroundColor: Colors.light.cardBackground,
-    borderRadius: 10,
+    width: screenWidth * 0.9, // 80% of the screen width
+    padding: 20,
+    backgroundColor: '#FFFFFF', // Changed to white for better contrast
+    borderRadius: 20, // Reduced borderRadius for a less pill-shaped card
     marginVertical: 10,
     alignItems: 'center',
-    elevation: 3, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 }, // iOS shadow
-    shadowOpacity: 0.25, // iOS shadow
-    shadowRadius: 3.84, // iOS shadow
+    alignSelf: 'center', // Center the card horizontally
+    elevation: 5, // Increased elevation for a more prominent shadow
+    shadowColor: '#000', // iOS shadow color
+    shadowOffset: { width: 0, height: 2 }, // iOS shadow offset
+    shadowOpacity: 0.25, // iOS shadow opacity
+    shadowRadius: 3.84, // iOS shadow radius
   },
   questionText: {
-    fontSize: 16,
+    fontSize: 18, // Increased font size for better readability
     color: Colors.light.headingTitle,
-    marginBottom: 15,
+    marginBottom: 20, // Increased margin for better spacing
     textAlign: 'center',
     fontFamily: fonts.primary.regular,
   },
@@ -71,32 +77,38 @@ const styles = StyleSheet.create({
   },
   buttonYes: {
     backgroundColor: Colors.light.primaryBtn,
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 20,
-    marginRight: 30, // Space between the "Yes" and "No" buttons
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25, // Pill-shaped button
+    marginRight: 15, // Space between the "Yes" and "No" buttons
+    borderWidth: 1,
+    borderColor: Colors.light.primaryBtn,
   },
   buttonNo: {
-    backgroundColor: '#F5F5F5', // Light grey background for "No" button
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 20,
+    backgroundColor: Colors.light.background, // Light background for "No" button
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25, // Pill-shaped button
+    borderWidth: 1,
+    borderColor: 'red', // Red border to match the text color
   },
-  buttonText: {
+  buttonTextYes: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: fonts.primary.regular,
     textAlign: 'center',
+    textDecorationLine: 'underline', // Underline the "Yes" text
   },
   buttonTextNo: {
-    color: 'red', // Red text color to match the example
-    fontSize: 14,
+    color: 'red',
+    fontSize: 16,
     fontFamily: fonts.primary.regular,
     textAlign: 'center',
+    textDecorationLine: 'underline', // Underline the "No" text
   },
   thankYouText: {
-    fontSize: 16,
-    color: Colors.light.serialNoGreen, // Use a green color for the thank you message
+    fontSize: 18,
+    color: Colors.light.serialNoGreen, // Ensure this color contrasts well with the background
     textAlign: 'center',
     fontFamily: fonts.primary.regular,
   },

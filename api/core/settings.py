@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-0-ix1ad7uqk_g*&pqvj9-!-t)qxr(9y+2a1jy$*ic$h^-1y6x@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '10.0.2.2', '127.0.0.1', '192.168.1.221', '192.168.1.202']
+ALLOWED_HOSTS = ['localhost', '10.0.2.2', '127.0.0.1', '192.168.1.221', '192.168.1.103']
 
 
 
@@ -70,7 +70,8 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    "USER_ID_FIELD": "user_id",
+    'USER_ID_FIELD': 'user_id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 MIDDLEWARE = [

@@ -1,9 +1,152 @@
+// src/screens/styles.ts
+
 import { StyleSheet } from 'react-native';
 import { Colors } from '@colors';
 import { width } from '../../hooks/useDimension';
 import { fonts } from '../../../src/assets/fonts';
+import { globalStyles } from '../../../src/styles/globalStyles';
 
 export const styles = StyleSheet.create({
+  // FilterHeader Styles
+  exploreWrap: {
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    flex: 1,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.light.inputBg,
+  },
+  filterBtn: {
+    borderWidth: 1.5,
+    borderRadius: 17,
+    backgroundColor: 'white',
+    width: 50,
+    height: 50,
+    marginLeft: 10,
+    justifyContent: 'center',
+    borderColor: Colors.light.filterLine,
+    alignItems: 'center',
+    zIndex: 1001, // Ensure it stays above other components
+  },
+  inputStyle: {
+    flex: 1,
+    height: '100%',
+    fontSize: 11,
+    lineHeight: 20,
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.regular,
+  },
+  // Bottom Widget Styles
+  bottomWidget: {
+    position: 'absolute',
+    bottom: 20 + 10, // 40px offset + 50px bottom nav height (adjust as needed)
+    alignSelf: 'center',
+    // Optional: Slightly shift to the left by 10px
+    // Adjust based on your layout
+    // Alternatively, use transform for finer control
+    // transform: [{ translateX: -10 }],
+    backgroundColor: Colors.light.primaryBtn,
+    borderRadius: 30, // Increased for a more pill-shaped appearance
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10, // Added padding for better touch area
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 }, // Increased shadow offset for depth
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6, // Slightly increased elevation for Android
+    // Optional: Add a border for better separation
+    borderWidth: 1,
+    borderColor: Colors.light.border, // Define in your Colors if needed
+  },
+  widgetButton: {
+    width: 30,
+    height: 30, // Increased height for better touch targets
+    borderRadius: 25,
+    backgroundColor: Colors.light.secondaryBtn, // Use a secondary color for contrast
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Optional: Add a shadow for the button
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  separator: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#fff',
+    marginHorizontal: 10, // Increased spacing for better visibility
+  },
+
+  // Error Message Styles
+  errorContainer: {
+    padding: 10,
+    backgroundColor: Colors.light.errorBackground,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  errorText: {
+    color: Colors.light.errorText,
+    textAlign: 'center',
+  },
+
+  // Agencies Section Styles
+  topAgencyWrap: {
+    backgroundColor: 'white',
+    borderRadius: 30,
+    paddingTop: 20,
+    paddingHorizontal: 10,
+    marginHorizontal: 0,
+    paddingBottom: 20, // Added padding for bottom
+  },
+  topAgencyText: {
+    fontSize: 16, // Ensure this matches the desired font size
+    fontWeight: 'bold',
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium, // Ensure consistent font family
+  },
+  sellAll: {
+    fontSize: 14,
+    color: Colors.light.primaryBtn,
+    fontWeight: '600',
+    fontFamily: fonts.primary.regular, // Ensure consistent font family
+  },
+  searchWithAiText: {
+    fontSize: 14,
+    color: Colors.light.primaryBtn,
+    fontWeight: '600',
+    fontFamily: fonts.primary.regular,
+    marginRight: 5, // Space between text and arrow icon
+  },
+  agenciesList: {
+    paddingVertical: 10,
+  },
+
+  // Recommended Section Styles
+  recommendedSectionWrap: {
+    backgroundColor: 'white',
+    borderRadius: 30,
+    paddingHorizontal: 10,
+    marginHorizontal: 0,
+    paddingBottom: 20, // Added padding for bottom
+    marginTop: 20, // Space between Top Agencies and Recommended Section
+  },
+  recommendedTitle: {
+    fontSize: 16, // Same as topAgencyText for consistency
+    fontWeight: 'bold',
+    color: Colors.light.headingTitle,
+    fontFamily: fonts.primary.medium,
+  },
+  recommendedList: {
+    paddingVertical: 10,
+  },
+
+  // Additional Styles from User's styles.ts
   filterSquareBtn: {
     borderWidth: 1.5,
     borderRadius: 17,
@@ -49,24 +192,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: '#f7f7f7',
   },
-  topAgencyWrap: {
-    backgroundColor: 'white',
-    borderRadius: 30,
-    paddingTop: 20,
-    paddingHorizontal: 10,
-    marginHorizontal: 0,
-    paddingBottom: 20, // Added padding for bottom
-  },
-  topAgencyText: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.bold,
-    fontSize: 20,
-  },
-  sellAll: {
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    fontSize: 13,
-  },
   agencyBtn: {
     width: width * 0.45, // Set a fixed width for each card
     height: 180, // Adjusted height for card size
@@ -101,41 +226,15 @@ export const styles = StyleSheet.create({
     width: '100%', // Full width for text background
     paddingVertical: 5, // Padding for text
   },
-  aiSearchContainer: {
-    backgroundColor: Colors.light.secondaryBtn, // Use a complementary background color
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 25, // Rounded corners for a more modern look
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    shadowColor: '#000', // Subtle shadow for a floating effect
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3, // For Android shadow
-    marginVertical: 10, // Some spacing from other elements
-  },
-  aiSearchContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aiSearchText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.primaryBtn,
-    marginRight: 8, // Space between text and icon
-    fontFamily: 'Jost', // Ensure the font is consistent
-  },
-  icon: {
-    marginLeft: 4, // Fine-tune spacing
-  },
+
+  // Underline Style (if needed)
   underline: {
     height: 1,
-    backgroundColor: '#E0E0E0',  // Light gray color for the underline
+    backgroundColor: '#E0E0E0', // Light gray color for the underline
     marginTop: 5,
     marginLeft: 15,
     marginRight: 15,
   },
+
+  
 });
