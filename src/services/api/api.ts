@@ -3,7 +3,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
 
-const QA = 'http://192.168.1.103:8000/';
+const QA = 'http://127.0.0.1:8000/';
 
 type ApiResponse<T> = Promise<T>;
 

@@ -6,8 +6,9 @@ import { logSessionStartService, sendHeartbeat } from '../services/session/sessi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AsyncHelper from '../helpers/asyncHelper';
 
-const SESSION_KEY = 'active_session';
-const HEARTBEAT_INTERVAL = 0.2 * 60 * 1000; // 2 minutes in milliseconds
+const GUEST_SESSION_KEY = 'guest_session';
+const USER_SESSION_KEY = 'user_session';
+const HEARTBEAT_INTERVAL = 0.1 * 60 * 1000; // 1 minute in milliseconds
 
 const useSessionTracker = () => {
   const appState = useRef<AppStateStatus>(AppState.currentState);
@@ -16,10 +17,16 @@ const useSessionTracker = () => {
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       try {
-        if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
           console.log('App has come to the foreground. Starting session.');
           await startSessionHandler();
-        } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+        } else if (
+          appState.current === 'active' &&
+          nextAppState.match(/inactive|background/)
+        ) {
           console.log('App is going to the background. Stopping heartbeat.');
           stopHeartbeat();
         }
@@ -29,7 +36,10 @@ const useSessionTracker = () => {
       appState.current = nextAppState;
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
     startSessionHandler(); // Start session on initial load
 
     return () => {
@@ -40,49 +50,96 @@ const useSessionTracker = () => {
 
   const startSessionHandler = async () => {
     try {
-      const existingSessionId = await AsyncStorage.getItem(SESSION_KEY);
-      if (existingSessionId) {
-        console.log(`Existing session found with ID: ${existingSessionId}. No new session created.`);
-        startHeartbeat(existingSessionId, null, await AsyncHelper.getUserId());
-        return;
-      }
-
       const isAuthenticated = await AsyncHelper.isAuthenticated();
-      const sessionType = isAuthenticated ? 'User' : 'Guest';
-      const userId = isAuthenticated ? await AsyncHelper.getUserId() : null;
-      const guestId = !isAuthenticated ? (await AsyncHelper.getGuestId()) || (await AsyncHelper.generateGuestId()) : null;
 
-      console.log(`Session Type: ${sessionType}, User ID: ${userId}, Guest ID: ${guestId}`);
+      if (isAuthenticated) {
+        const existingUserSessionId = await AsyncStorage.getItem(
+          USER_SESSION_KEY
+        );
+        if (existingUserSessionId) {
+          console.log(
+            `Existing user session found with ID: ${existingUserSessionId}. No new session created.`
+          );
+          const userId = await AsyncHelper.getUserId();
+          startHeartbeat(existingUserSessionId, null, userId);
+          return;
+        }
 
-      const payload: any = {};
-      if (isAuthenticated && userId) {
-        payload.user_id = userId;
-      } else if (guestId) {
-        payload.guest_id = guestId;
-      }
-
-      const response = await logSessionStartService(payload);
-      if (response && response.session_id) {
-        console.log(`Session started as ${sessionType} with session_id: ${response.session_id}`);
-        await AsyncStorage.setItem(SESSION_KEY, response.session_id);
-        startHeartbeat(response.session_id, guestId, userId); // Pass userId
+        const userId = await AsyncHelper.getUserId();
+        const sessionId = await logSessionStartService({ user_id: userId });
+        if (sessionId) {
+          console.log(`User session started with session_id: ${sessionId}`);
+          await AsyncStorage.setItem(USER_SESSION_KEY, sessionId);
+          // Clear any existing guest session
+          await AsyncStorage.removeItem(GUEST_SESSION_KEY);
+          startHeartbeat(sessionId, null, userId);
+        } else {
+          console.error(
+            'No session_id returned from logSessionStartService for user session'
+          );
+        }
       } else {
-        console.error('No session_id returned from logSessionStartService');
+        const existingGuestSessionId = await AsyncStorage.getItem(
+          GUEST_SESSION_KEY
+        );
+        if (existingGuestSessionId) {
+          console.log(
+            `Existing guest session found with ID: ${existingGuestSessionId}. No new session created.`
+          );
+          const guestId = await AsyncHelper.getGuestId();
+          startHeartbeat(existingGuestSessionId, guestId, null);
+          return;
+        }
+
+        const guestId = await AsyncHelper.getGuestId();
+        const sessionId = await logSessionStartService({ guest_id: guestId });
+        if (sessionId) {
+          console.log(`Guest session started with session_id: ${sessionId}`);
+          await AsyncStorage.setItem(GUEST_SESSION_KEY, sessionId);
+          startHeartbeat(sessionId, guestId, null);
+        } else {
+          console.error(
+            'No session_id returned from logSessionStartService for guest session'
+          );
+        }
       }
     } catch (error) {
       console.error('Failed to start session:', error);
     }
   };
 
-  const startHeartbeat = (sessionId: string, guestId: string | null, userId: string | null) => {
+  const startHeartbeat = (
+    sessionId: string,
+    guestId: string | null,
+    userId: string | null
+  ) => {
     stopHeartbeat();
     heartbeatIntervalRef.current = setInterval(async () => {
       try {
-        const storedSessionId = await AsyncStorage.getItem(SESSION_KEY);
-        if (storedSessionId === sessionId) {
-          console.log(`Sending heartbeat for session, ID: ${sessionId}`);
-          console.log(`Heartbeat payload details: ${userId ? `User ID: ${userId}` : `Guest ID: ${guestId}`}`);
-          await sendHeartbeat(sessionId, guestId, userId); // Pass userId
+        let currentSessionId = '';
+        let currentGuestId: string | null = null;
+        let currentUserId: string | null = null;
+
+        if (userId) {
+          currentSessionId =
+            (await AsyncStorage.getItem(USER_SESSION_KEY)) || '';
+          currentUserId = userId;
+        } else {
+          currentSessionId =
+            (await AsyncStorage.getItem(GUEST_SESSION_KEY)) || '';
+          currentGuestId = guestId;
+        }
+
+        if (currentSessionId === sessionId) {
+          console.log(
+            `Sending heartbeat for ${userId ? 'User' : 'Guest'} session, ID: ${sessionId}`
+          );
+          console.log(
+            `Heartbeat payload details: ${
+              userId ? `User ID: ${userId}` : `Guest ID: ${guestId}`
+            }`
+          );
+          await sendHeartbeat(sessionId, currentGuestId, currentUserId);
         } else {
           console.warn('Heartbeat canceled, session ID mismatch or missing.');
           stopHeartbeat();

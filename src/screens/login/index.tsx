@@ -28,8 +28,8 @@ export const Login = () => {
   const { startSessionHandler } = useSessionTracker();
 
   // Using react-query to get the profile and saved properties after login
-  const { refetch: refetchProfile } = useGetProfile();
-  const { refetch: refetchSavedProperties } = useGetSavedProperties(); // Add refetch for saved properties
+  const { refetch: refetchProfile } = useGetProfile({ enabled: false }); // Disable initial fetch
+  const { refetch: refetchSavedProperties } = useGetSavedProperties({ enabled: false }); // Add refetch for saved properties
 
   type FormData = {
     email: string;
@@ -49,7 +49,7 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleLogin = (data: LoginCredentials) => {
+  const handleLogin = (data: FormData) => {
     login(data, {
       onSuccess: async (response) => {
         try {
@@ -80,20 +80,18 @@ export const Login = () => {
           console.log("Starting session...");
           await startSessionHandler();
 
-          // Navigate to the main app
-          navigation.navigate("BottomTabNavigator");
-          console.log("Navigated to BottomTabNavigator.");
+          // Navigate to the Account screen
+          navigation.navigate("Account"); // Navigate directly to Account screen
+          console.log("Navigated to Account screen.");
 
-          // Optionally refetch profile after navigation to avoid blocking
-          setTimeout(async () => {
-            try {
-              console.log("Refetching profile...");
-              await refetchProfile(); // Ensure refetchProfile is defined/imported
-              console.log("Profile refetched successfully");
-            } catch (refetchError) {
-              console.error("Profile refetch failed:", refetchError);
-            }
-          }, 500);
+          // Refetch profile and saved properties after navigation
+          console.log("Refetching profile...");
+          await refetchProfile(); // Refetch profile
+          console.log("Profile refetched successfully");
+
+          console.log("Refetching saved properties...");
+          await refetchSavedProperties(); // Refetch saved properties
+          console.log("Saved properties refetched successfully");
 
         } catch (error) {
           console.error("Error during login handling:", error);

@@ -1,13 +1,14 @@
 // src/services/websocket/WebSocketManager.ts
 
 import EventEmitter from 'eventemitter3';
-import AsyncHelper from '../../helpers/asyncHelper'; // Correct import path
+import AsyncHelper from '../../helpers/asyncHelper'; // Ensure the correct import path
 import { getWebSocketUrl } from '../utils/urls';
 import NetInfo from '@react-native-community/netinfo';
+import { InteractionType } from '../logging';
 
 // Define the structure of interaction events
-interface InteractionEvent {
-  interaction_type: string;
+export interface InteractionEvent {
+  interaction_type: InteractionType;
   property_id?: number | string;
   timestamp: string;
   extra_data?: Record<string, any>;
@@ -22,6 +23,7 @@ class WebSocketManager extends EventEmitter {
   private reconnectInterval: number = 5000; // in milliseconds
   private wsUrl: string;
   private isManuallyClosed: boolean = false;
+  private maxQueueSize: number = 1000; // Prevent memory issues
 
   private constructor() {
     super();
@@ -48,15 +50,20 @@ class WebSocketManager extends EventEmitter {
   }
 
   // Establish WebSocket connection
-  public async connect() {
+  public async connect(): Promise<void> {
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      console.log('WebSocket is already connected or connecting.');
+      return;
+    }
+
     try {
-      const guestId = await AsyncHelper.getGuestId(); // Retrieve guest ID
-      const token = await AsyncHelper.getToken(); // Retrieve token if available
+      const guestId = await this.getGuestId(); // Retrieve guest ID
+      const token = await this.getToken(); // Retrieve token if available
 
       // Determine connection URL
       const finalWsUrl = token 
-        ? `${this.wsUrl}?token=${token}` 
-        : `${this.wsUrl}?guest_id=${guestId}`;
+        ? `${this.wsUrl}?token=${encodeURIComponent(token)}` 
+        : `${this.wsUrl}?guest_id=${encodeURIComponent(guestId || '')}`;
 
       console.log(`Connecting to WebSocket URL: ${finalWsUrl}`); // Debugging
 
@@ -91,7 +98,7 @@ class WebSocketManager extends EventEmitter {
 
       this.socket.onerror = (error) => {
         console.error('WebSocket error:', error.message);
-        this.socket?.close();
+        // Errors are also handled by onclose, so no need to close here explicitly
       };
     } catch (error) {
       console.error('Error establishing WebSocket connection:', error);
@@ -104,29 +111,74 @@ class WebSocketManager extends EventEmitter {
   }
 
   // Send a message through WebSocket or queue it if not connected
-  public async send(event: InteractionEvent) {
-    if (this.isConnected && this.socket) {
-      this.socket.send(JSON.stringify(event));
+  public async send(event: InteractionEvent): Promise<void> {
+    if (this.isConnected && this.socket && this.socket.readyState === WebSocket.OPEN) {
+      try {
+        this.socket.send(JSON.stringify(event));
+      } catch (error) {
+        console.error('Error sending WebSocket message:', error);
+        this.queueMessage(event);
+      }
     } else {
       console.log('WebSocket not connected. Queueing message.');
+      this.queueMessage(event);
+    }
+  }
+
+  // Queue a message with size check
+  private queueMessage(event: InteractionEvent): void {
+    if (this.messageQueue.length < this.maxQueueSize) {
       this.messageQueue.push(event);
+    } else {
+      console.warn('Message queue is full. Dropping message:', event);
     }
   }
 
   // Flush the message queue by sending all queued messages
-  private flushQueue() {
-    while (this.messageQueue.length > 0 && this.isConnected && this.socket) {
+  private flushQueue(): void {
+    while (this.messageQueue.length > 0 && this.isConnected && this.socket && this.socket.readyState === WebSocket.OPEN) {
       const event = this.messageQueue.shift();
       if (event) {
-        this.socket.send(JSON.stringify(event));
+        try {
+          this.socket.send(JSON.stringify(event));
+        } catch (error) {
+          console.error('Error flushing WebSocket queue:', error);
+          // Re-queue the message if sending fails
+          this.messageQueue.unshift(event);
+          break; // Exit the loop to prevent infinite attempts
+        }
       }
     }
   }
 
   // Close the WebSocket connection manually
-  public close() {
+  public close(): void {
     this.isManuallyClosed = true;
-    this.socket?.close();
+    if (this.socket) {
+      this.socket.close();
+    }
+  }
+
+  // Retrieve guest ID (Assuming it's stored in AsyncHelper)
+  public async getGuestId(): Promise<string | undefined> {
+    try {
+      const guestId = await AsyncHelper.getGuestId();
+      return guestId;
+    } catch (error) {
+      console.error('Error retrieving guest ID:', error);
+      return undefined;
+    }
+  }
+
+  // Retrieve token (Assuming it's stored in AsyncHelper)
+  public async getToken(): Promise<string | undefined> {
+    try {
+      const token = await AsyncHelper.getToken();
+      return token;
+    } catch (error) {
+      console.error('Error retrieving token:', error);
+      return undefined;
+    }
   }
 }
 

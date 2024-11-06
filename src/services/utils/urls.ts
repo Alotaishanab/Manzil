@@ -27,8 +27,7 @@ export const apiUrls = {
   // Session-related endpoints
   startSession: 'account/user/start-session/',
   sessionHeartbeat: 'account/user/session-heartbeat/',
-  endSession: 'account/user/end-session/',
 };
 
 // WebSocket URL for the QA environment
-export const getWebSocketUrl = (): string => 'ws://qa.example.com/ws/log-interactions/';
+export const getWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/log-interactions/';

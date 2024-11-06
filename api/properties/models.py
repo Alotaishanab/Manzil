@@ -1,9 +1,15 @@
+# properties/models.py
+
+import uuid
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import ArrayField, JSONField
-from django.contrib.gis.db.models import PointField  # For geographic coordinates
-from account.models import User  # Import the custom User model from the account app
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
 from django.utils import timezone
 from django.db.models import F
+from django.db import transaction
+from account.models import User  # Ensure this path is correct
+from django.contrib.postgres.fields import ArrayField, JSONField
+from django.conf import settings
+import jwt
 
 class Property(models.Model):
     PROPERTY_TYPES = [
@@ -34,41 +40,38 @@ class Property(models.Model):
         ('rented', 'Rented'),
     ]
 
-    OWNERSHIP_TYPE_CHOICES = [('independent', 'Independent'),
-                              ('multipleOwners', 'Multiple Owners'), ('agency', 'Agency')]
+    OWNERSHIP_TYPE_CHOICES = [
+        ('independent', 'Independent'),
+        ('multipleOwners', 'Multiple Owners'),
+        ('agency', 'Agency')
+    ]
 
     # Basic property info
     property_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
-    property_category = models.CharField(
-        max_length=50, choices=PROPERTY_CATEGORY_CHOICES)
+    property_category = models.CharField(max_length=50, choices=PROPERTY_CATEGORY_CHOICES)
     property_age = models.IntegerField(blank=True, null=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    area = models.DecimalField(
-        max_digits=10, decimal_places=2, help_text="Size in square meters")
+    area = models.DecimalField(max_digits=10, decimal_places=2, help_text="Size in square meters")
 
-    price_per_meter = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+    price_per_meter = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     location = models.CharField(max_length=255, blank=True, null=True)
-    coordinates = PointField()
+    coordinates = models.PointField()
     listing_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, blank=True, null=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, blank=True, null=True)
 
-    ownership_type = models.CharField(
-        max_length=50, choices=OWNERSHIP_TYPE_CHOICES)
+    ownership_type = models.CharField(max_length=50, choices=OWNERSHIP_TYPE_CHOICES)
 
     contact_information = models.TextField(blank=True, null=True)
 
     # Media fields
     property_images = ArrayField(models.TextField(), blank=True, null=True)
-    property_videos = ArrayField(
-        models.TextField(), blank=True, null=True, size=3)
+    property_videos = ArrayField(models.TextField(), blank=True, null=True, size=3)
 
     # Featured fields
     is_featured = models.BooleanField(default=False)
@@ -102,18 +105,15 @@ class Property(models.Model):
     parking_spaces = models.IntegerField(blank=True, null=True)
     number_of_gates = models.IntegerField(blank=True, null=True)
     loading_docks = models.IntegerField(blank=True, null=True)
-    storage_capacity = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+    storage_capacity = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     number_of_units = models.IntegerField(blank=True, null=True)
 
     # Additional Fields
     property_features = models.JSONField(blank=True, null=True)
     ad_id = models.IntegerField(null=True, blank=True)
     ad_license_number = models.CharField(max_length=100, blank=True, null=True)
-    unified_number_of_establishment = models.CharField(
-        max_length=100, blank=True, null=True)
-    fal_license_number = models.CharField(
-        max_length=100, blank=True, null=True)
+    unified_number_of_establishment = models.CharField(max_length=100, blank=True, null=True)
+    fal_license_number = models.CharField(max_length=100, blank=True, null=True)
     fal_registration_date = models.DateTimeField(blank=True, null=True)
     advertiser_info = models.JSONField(blank=True, null=True)
     similar_properties = models.JSONField(blank=True, null=True)
@@ -125,12 +125,10 @@ class Property(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(property_age__gte=0) & models.Q(
-                    property_age__lte=99),
+                check=models.Q(property_age__gte=0) & models.Q(property_age__lte=99),
                 name="check_property_age_range"
             ),
-            models.CheckConstraint(check=models.Q(
-                property_videos__len__lte=3), name="chk_property_videos")
+            models.CheckConstraint(check=models.Q(property_videos__len__lte=3), name="chk_property_videos")
         ]
 
     def save(self, *args, **kwargs):
@@ -142,7 +140,7 @@ class Property(models.Model):
         """Increments the view count by 1."""
         self.view_count = F('view_count') + 1
         self.save(update_fields=['view_count'])
-    
+
     def add_to_total_duration(self, duration):
         """Adds the duration to the total view duration."""
         self.total_view_duration = F('total_view_duration') + duration
@@ -154,21 +152,20 @@ class Property(models.Model):
 
 class PropertyView(models.Model):
     view_id = models.AutoField(primary_key=True)
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name='views')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='views')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest_id = models.CharField(max_length=255, null=True, blank=True)
     view_date = models.DateTimeField(auto_now_add=True)
     duration_seconds = models.IntegerField(null=True, blank=True)
-    geo_location = PointField(null=True, blank=True)
+    geo_location = models.PointField(null=True, blank=True)
 
     def __str__(self):
         return f"View on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
+
 class PropertyShare(models.Model):
     share_id = models.AutoField(primary_key=True)
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name='shares')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='shares')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest_id = models.CharField(max_length=255, null=True, blank=True)
     share_date = models.DateTimeField(auto_now_add=True)
@@ -177,10 +174,10 @@ class PropertyShare(models.Model):
     def __str__(self):
         return f"Share of {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
+
 class PropertyClick(models.Model):
     click_id = models.AutoField(primary_key=True)
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name='clicks')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='clicks')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest_id = models.CharField(max_length=255, null=True, blank=True)
     click_date = models.DateTimeField(auto_now_add=True)
@@ -189,10 +186,10 @@ class PropertyClick(models.Model):
     def __str__(self):
         return f"Click on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
+
 class PropertyInquiry(models.Model):
     inquiry_id = models.AutoField(primary_key=True)
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name='inquiries')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='inquiries')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest_id = models.CharField(max_length=255, null=True, blank=True)
     inquiry_date = models.DateTimeField(auto_now_add=True)
@@ -202,12 +199,11 @@ class PropertyInquiry(models.Model):
     def __str__(self):
         return f"Inquiry on {self.property} by {self.user or 'Guest ' + self.guest_id}"
 
+
 class SavedProperties(models.Model):
     saved_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='saved_properties')
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name='saved_by_users')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_properties')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='saved_by_users')
     saved_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -215,3 +211,30 @@ class SavedProperties(models.Model):
 
     def __str__(self):
         return f"User {self.user_id} saved Property {self.property_id} on {self.saved_date}"
+
+
+# New Models for Tracking User Actions
+
+class SearchLog(models.Model):
+    search_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
+    search_query = models.CharField(max_length=255)
+    filters = models.JSONField(blank=True, null=True)
+    search_date = models.DateTimeField(auto_now_add=True)
+    geo_location = models.PointField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Search '{self.search_query}' by {self.user or 'Guest ' + self.guest_id} on {self.search_date}"
+
+
+class ScrollLog(models.Model):
+    scroll_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    guest_id = models.CharField(max_length=255, null=True, blank=True)
+    time_diff = models.IntegerField(help_text="Time spent scrolling in seconds")
+    scroll_date = models.DateTimeField(auto_now_add=True)
+    geo_location = models.PointField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Scroll for {self.user or 'Guest ' + self.guest_id} - {self.time_diff} seconds on {self.scroll_date}"

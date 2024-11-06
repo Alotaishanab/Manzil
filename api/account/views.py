@@ -213,13 +213,17 @@ class StartUserSessionView(APIView):
                 guest_id=guest_id
             )
 
+            logger.info(f"Session started: session_id={session.session_id}, user={user}, guest_id={guest_id}")
+
             return Response({
                 'message': 'Session started',
                 'session_id': str(session.session_id),
                 'start_time': session.start_time
             }, status=status.HTTP_201_CREATED)
         else:
+            logger.error(f"Session start failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SessionHeartbeatView(APIView):
@@ -251,6 +255,8 @@ class SessionHeartbeatView(APIView):
 
             # Update session heartbeat
             session.update_heartbeat()
+            logger.debug(f"Session {session_id} heartbeat updated at {session.last_heartbeat}")
+
             return Response({'message': 'Heartbeat received'}, status=status.HTTP_200_OK)
 
         except UserSession.DoesNotExist:
@@ -259,25 +265,37 @@ class SessionHeartbeatView(APIView):
 
 
 
+
+
 class EndUserSessionView(APIView):
     permission_classes = [IsAuthenticatedOrGuest]
 
     def post(self, request, format=None):
-        serializer = UserSessionEndSerializer(data=request.data)
-        if serializer.is_valid():
-            session_id = serializer.validated_data['session_id']
-            try:
-                session = UserSession.objects.get(session_id=session_id)
-                session.end_session()
-                return Response({
-                    'message': 'Session ended',
-                    'session_id': str(session.session_id),
-                    'duration_seconds': session.duration_seconds,
-                    'end_time': session.end_time
-                }, status=status.HTTP_200_OK)
-            except UserSession.DoesNotExist:
-                return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
-            except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        session_id = request.data.get('session_id')
+        guest_id = request.data.get('guest_id')
+        user = request.user if request.user.is_authenticated else None
+        logger.debug(f"End session request received with session_id: {session_id}, user: {user}, guest_id: {guest_id}")
+
+        if not session_id:
+            logger.warning("End session attempt without session_id")
+            return Response({'error': 'Session ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            if user:
+                session = UserSession.objects.get(session_id=session_id, user=user)
+                logger.info(f"Ending authenticated session {session_id} for user {user}")
+            elif guest_id:
+                session = UserSession.objects.get(session_id=session_id, guest_id=guest_id)
+                logger.info(f"Ending guest session {session_id} for guest {guest_id}")
+            else:
+                logger.warning("End session attempt without valid user or guest_id")
+                return Response({'error': 'User or Guest ID required to end session.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            session.delete()
+            logger.debug(f"Session {session_id} terminated.")
+
+            return Response({'message': 'Session ended successfully.'}, status=status.HTTP_200_OK)
+
+        except UserSession.DoesNotExist:
+            logger.warning(f"End session attempt for non-existent session {session_id}")
+            return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
