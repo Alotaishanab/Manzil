@@ -1,9 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+// src/components/CustomMap.tsx
+
+import React, { useCallback, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import MapViewClustering from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MapLayerIcon, PenIcon } from '@svgs'; // Assuming these are your custom icons
+import { MapLayerIcon, PenIcon } from '@svgs'; // Custom SVG icons
 import { throttle } from 'lodash';
 import { Colors } from '@colors';
 
@@ -26,25 +29,25 @@ const cities = [
 ];
 
 export const CustomMap = () => {
-  const mapRef = useRef(null);
+  const mapRef = useRef<MapView>(null);
   const insets = useSafeAreaInsets();
   const [drawing, setDrawing] = useState(false);
-  const [coordinates, setCoordinates] = useState([]);
+  const [coordinates, setCoordinates] = useState<Array<{ latitude: number; longitude: number }>>([]);
   const [showDrawMessage, setShowDrawMessage] = useState(false);
-  const [mapType, setMapType] = useState('standard');
+  const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
   const [cityLocked, setCityLocked] = useState(false);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   // Throttle handler to improve drawing performance
   const throttledHandleMapPress = useCallback(
-    throttle((newCoordinate) => {
+    throttle((newCoordinate: { latitude: number; longitude: number }) => {
       setCoordinates((prevCoords) => [...prevCoords, newCoordinate]);
     }, 50),
     []
   );
 
   const handleMapPress = useCallback(
-    (e) => {
+    (e: any) => {
       if (drawing) {
         const newCoordinate = e.nativeEvent.coordinate;
         throttledHandleMapPress(newCoordinate);
@@ -66,7 +69,7 @@ export const CustomMap = () => {
   }, []);
 
   // Zoom into selected city
-  const zoomInToCity = (city) => {
+  const zoomInToCity = (city: { name: string; latitude: number; longitude: number }) => {
     setCityLocked(true);
     setSelectedCity(city.name);
     const region = {
@@ -75,12 +78,12 @@ export const CustomMap = () => {
       latitudeDelta: 0.3,
       longitudeDelta: 0.3,
     };
-    mapRef.current.animateToRegion(region, 1000);
+    mapRef.current?.animateToRegion(region, 1000);
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <MapView
+      <MapViewClustering
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
@@ -94,6 +97,11 @@ export const CustomMap = () => {
           latitudeDelta: 20,
           longitudeDelta: 20,
         }}
+        clusterColor={Colors.light.primaryButton}
+        clusterTextColor="#fff"
+        clusterBorderColor="#fff"
+        clusterBorderWidth={1}
+        radius={50}
       >
         {cities.map((city, index) => (
           selectedCity !== city.name && (
@@ -102,11 +110,12 @@ export const CustomMap = () => {
               coordinate={{ latitude: city.latitude, longitude: city.longitude }}
               onPress={() => zoomInToCity(city)}
             >
-              <View style={styles.marker}>
-                <View style={styles.markerBackground}>
+              
+              <Callout>
+                <View style={styles.callout}>
                   <Text style={styles.markerText}>{city.name}</Text>
                 </View>
-              </View>
+              </Callout>
             </Marker>
           )
         ))}
@@ -116,9 +125,9 @@ export const CustomMap = () => {
           <>
             <Polyline
               coordinates={coordinates}
-              strokeColor="#307e20" // Set to green
-              strokeWidth={6}       // Increase stroke width for visibility
-              zIndex={2}            // Ensure the polyline is above other map elements
+              strokeColor="#307e20"
+              strokeWidth={6}
+              zIndex={2}
             />
             <Marker
               coordinate={coordinates[coordinates.length - 1]}
@@ -126,7 +135,7 @@ export const CustomMap = () => {
             />
           </>
         )}
-      </MapView>
+      </MapViewClustering>
 
       {/* Display draw area message */}
       {drawing && showDrawMessage && (
@@ -160,15 +169,8 @@ export const CustomMap = () => {
 };
 
 const styles = StyleSheet.create({
-  marker: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  markerBackground: {
-    backgroundColor: '#307e20',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+  callout: {
+    padding: 5,
   },
   markerText: {
     color: '#fff',
@@ -180,14 +182,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: 50,
     height: 50,
-    padding: 20,
-    borderRadius: 30,
+    padding: 10,
+    borderRadius: 25,
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.light.filterLine,
     alignItems: 'center',
     zIndex: 1001,
-   },   
+  },
   drawYourSearchAreaViewStyle: {
     position: 'absolute',
     alignSelf: 'center',

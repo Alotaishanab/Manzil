@@ -5,7 +5,6 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   Dimensions,
   TouchableOpacity,
   Platform,
@@ -15,52 +14,36 @@ import { useNavigation } from '@react-navigation/native';
 import { Colors } from '@colors'; // Ensure this is correctly imported
 import { fonts } from '@fonts';   // Ensure this is correctly imported
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AddedProperties } from '@screens';
+import Icon from 'react-native-vector-icons/Ionicons';
+import LottieView from 'lottie-react-native';
+import { promotionAnimation, emptyAnimation } from '@assets'; // Ensure these are correctly imported
+import { BlurView } from '@react-native-community/blur'; // Correct import for React Native CLI
 
 const { width: screenWidth } = Dimensions.get('window');
-const ITEM_WIDTH = screenWidth * 0.8;
 
 export const CenterScreen = ({
   incompleteOrders = [],
-  completedOrders = [],
-  properties = [],
   requestedProperties = [],
 }) => {
   const navigation = useNavigation();
 
-  const handleCardClick = (propertyId) => {
-    navigation.navigate('Auth', { screen: 'PropertyScreen', params: { propertyId } });
-  };
-
   const handleActionClick = (action) => {
     if (action === 'AddProperty') {
       navigation.navigate('Auth', { screen: 'AddProperties' });
+    } else if (action === 'PromoteProperty') {
+      navigation.navigate('Auth', { screen: 'PromoteProperty' });
+    } else if (action === 'RequestProperty') {
+      navigation.navigate('Auth', { screen: 'RequestProperty' });
+    } else if (action === 'AddOrder') {
+      navigation.navigate('Auth', { screen: 'AddOrder' }); // Ensure 'AddOrder' screen exists
     }
   };
 
-  const renderOrder = ({ item, type }) => (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() =>
-        navigation.navigate('Auth', { screen: 'OrderDetails', params: { orderId: item.id } })
-      }
-      style={styles.orderCard}
-    >
-      <Text style={styles.orderText}>{item.title}</Text>
-      <Text style={styles.continueText}>
-        {type === 'completed' ? 'View Order' : 'Continue Order'}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  const renderPlaceholderPropertyCard = () => (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() => handleActionClick('AddProperty')}
-      style={styles.placeholderPropertyCard}
-    >
-      <Text style={styles.placeholderText}>Add Property</Text>
-    </TouchableOpacity>
+  const renderNoData = (message) => (
+    <View style={styles.noDataContainer}>
+      <LottieView source={emptyAnimation} autoPlay loop style={styles.emptyAnimation} />
+      <Text style={styles.noDataText}>{message}</Text>
+    </View>
   );
 
   return (
@@ -68,111 +51,220 @@ export const CenterScreen = ({
       {/* StatusBar for better appearance */}
       <StatusBar
         barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
+        backgroundColor="transparent"
+        translucent
       />
 
-      <Text style={styles.title}>Manzil</Text>
-
-      {/* Incomplete Orders Section */}
-      <View style={styles.sectionContainer}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.subTitle}>Incomplete Orders</Text>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('Auth', { screen: 'ViewAllIncompleteOrders' })
-            }
-          >
-            <Text style={styles.viewAllText}>View All →</Text>
-          </TouchableOpacity>
-        </View>
-        {incompleteOrders.length > 0 ? (
-          <FlatList
-            data={incompleteOrders}
-            renderItem={({ item }) =>
-              renderOrder({ item, type: 'incomplete' })
-            }
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.ordersList}
-          />
-        ) : (
-          <Text style={styles.noOrdersText}>
-            You do not have any incomplete orders
-          </Text>
-        )}
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>Manzil</Text>
       </View>
 
-      {/* Your Properties Section */}
-      <View style={styles.sectionContainer}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.subTitle}>Your Properties</Text>
-          {properties.length > 0 && (
+      {/* Main Content */}
+      <View style={styles.mainContent}>
+        {/* Promote Property Section */}
+        <View style={styles.promoteContainer}>
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="light"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="white"
+          />
+          <LottieView
+            source={promotionAnimation}
+            autoPlay
+            loop
+            style={styles.promotionAnimation}
+          />
+          <Text style={styles.promoteTitle}>Promote Your Property</Text>
+          <Text style={styles.promoteDescription}>
+            Boost your property's visibility and attract more potential buyers or renters.
+          </Text>
+          <TouchableOpacity
+            style={styles.promoteButton}
+            onPress={() => handleActionClick('PromoteProperty')}
+          >
+            <Text style={styles.promoteButtonText}>Promote Now</Text>
+            <Icon name="rocket-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Orders Section */}
+        <View style={styles.ordersContainer}>
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="light"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="white"
+          />
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Orders</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Auth', { screen: 'ViewAllProperties' })}
+              style={styles.addButton}
+              onPress={() => handleActionClick('AddOrder')}
             >
-              <Text style={styles.viewAllText}>View All →</Text>
+              <Icon name="add-circle-outline" size={24} color={Colors.light.primaryBtn} />
             </TouchableOpacity>
+          </View>
+          {incompleteOrders.length > 0 ? (
+            incompleteOrders.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.orderCard}
+                onPress={() =>
+                  navigation.navigate('Auth', {
+                    screen: 'OrderDetails',
+                    params: { orderId: item.id },
+                  })
+                }
+              >
+                <Icon name="alert-circle" size={24} color={Colors.light.warning} />
+                <Text style={styles.orderText}>{item.title}</Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            renderNoData('No orders')
           )}
         </View>
-        {properties.length > 0 ? (
-          <AddedProperties handleClick={handleCardClick} />
-        ) : (
-          renderPlaceholderPropertyCard()
-        )}
-      </View>
 
-      {/* Requested Properties Section */}
-      <View style={styles.sectionContainer}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.subTitle}>Requested Properties</Text>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('Auth', { screen: 'ViewAllRequestedProperties' })
-            }
-          >
-            <Text style={styles.viewAllText}>View All →</Text>
-          </TouchableOpacity>
-        </View>
-        {requestedProperties.length > 0 ? (
-          <FlatList
-            data={requestedProperties}
-            renderItem={({ item }) =>
-              renderOrder({ item, type: 'requested' })
-            }
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.ordersList}
+        {/* Requested Properties Section */}
+        <View style={styles.requestedPropertiesContainer}>
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="light"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="white"
           />
-        ) : (
-          <Text style={styles.noOrdersText}>
-            You do not have any requested properties
-          </Text>
-        )}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Requested Properties</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => handleActionClick('RequestProperty')}
+            >
+              <Icon name="add-circle-outline" size={24} color={Colors.light.primaryBtn} />
+            </TouchableOpacity>
+          </View>
+          {requestedProperties.length > 0 ? (
+            requestedProperties.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.orderCard}
+                onPress={() =>
+                  navigation.navigate('Auth', {
+                    screen: 'PropertyRequestDetails',
+                    params: { requestId: item.id },
+                  })
+                }
+              >
+                <Icon name="help-circle" size={24} color={Colors.light.primaryBtn} />
+                <Text style={styles.orderText}>{item.title}</Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            renderNoData('No requested properties')
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background || '#FFFFFF',
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 10,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
   },
   title: {
-    fontSize: screenWidth * 0.08,
+    fontSize: 28,
     fontFamily: fonts.primary.bold || 'System',
-    color: Colors.light.primary || '#1D3557',
-    marginBottom: 25,
-    textAlign: 'center',
+    color: '#8B4513', // Brown color like palm tree
+    fontWeight: '800',
   },
-  subTitle: {
-    fontSize: screenWidth * 0.05,
-    fontFamily: fonts.primary.medium || 'System',
-    color: Colors.light.headingTitle || '#1D3557',
-    marginBottom: 10,
+  mainContent: {
+    flex: 1,
+  },
+  promoteContainer: {
+    borderRadius: 20,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 20,
+    overflow: 'hidden', // Ensure content is clipped within rounded corners
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white overlay
+    // Shadows
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  promotionAnimation: {
+    width: 80,
+    height: 80,
+  },
+  promoteTitle: {
+    fontSize: 20,
+    fontFamily: fonts.primary.bold || 'System',
+    color: '#1D3557',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  promoteDescription: {
+    fontSize: 14,
+    fontFamily: fonts.primary.regular || 'System',
+    color: '#457B9D',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  promoteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#228B22', // Forest green
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  promoteButtonText: {
+    color: '#fff',
+    fontFamily: fonts.primary.bold || 'System',
+    fontSize: 16,
+    fontWeight: '700',
+    marginRight: 10,
+  },
+  ordersContainer: {
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 20,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    // Shadows
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  requestedPropertiesContainer: {
+    borderRadius: 20,
+    padding: 15,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    // Shadows
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -180,71 +272,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  viewAllText: {
-    color: Colors.light.primaryBtn || '#457B9D',
-    fontFamily: fonts.primary.regular || 'System',
-    fontSize: screenWidth * 0.04,
-    textDecorationLine: 'underline',
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: fonts.primary.bold || 'System',
+    color: '#1D3557',
+    fontWeight: '700',
   },
-  sectionContainer: {
-    marginBottom: 30,
+  addButton: {
+    padding: 5,
   },
-  noOrdersText: {
-    color: Colors.light.textMuted || '#A8A8A8',
+  orderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(237, 242, 244, 0.9)',
+    borderRadius: 15,
+    padding: 10,
+    marginBottom: 8,
+  },
+  orderText: {
+    marginLeft: 10,
+    fontSize: 14,
     fontFamily: fonts.primary.medium || 'System',
-    fontSize: screenWidth * 0.045,
+    color: '#1D3557',
+    fontWeight: '600',
+    flexShrink: 1, // Ensure text wraps if too long
+  },
+  noDataContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  noDataText: {
+    color: '#A8A8A8',
+    fontFamily: fonts.primary.medium || 'System',
+    fontSize: 14,
     textAlign: 'center',
     marginTop: 10,
   },
-  orderCard: {
-    backgroundColor: Colors.light.cardBackground || '#F1FAEE',
-    borderRadius: 15,
-    padding: 20,
-    marginRight: 15,
-    width: screenWidth * 0.6,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-  },
-  orderText: {
-    color: Colors.light.headingTitle || '#1D3557',
-    fontFamily: fonts.primary.medium || 'System',
-    fontSize: screenWidth * 0.045,
-    marginBottom: 8,
-  },
-  continueText: {
-    color: Colors.light.primaryBtn || '#E63946',
-    fontFamily: fonts.primary.regular || 'System',
-    fontSize: screenWidth * 0.04,
-    textDecorationLine: 'underline',
-  },
-  placeholderPropertyCard: {
-    backgroundColor: Colors.light.cardBackground || '#F1FAEE',
-    borderRadius: 20,
-    padding: 20,
-    width: ITEM_WIDTH,
-    height: 275,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-  },
-  placeholderText: {
-    color: Colors.light.primaryBtn || '#E63946',
-    fontFamily: fonts.primary.bold || 'System',
-    fontSize: 22,
-  },
-  ordersList: {
-    alignItems: 'center',
-    paddingLeft: 5,
+  emptyAnimation: {
+    width: 50,
+    height: 50,
   },
 });
 

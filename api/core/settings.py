@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'account',
     'properties',
-    'websocket',
+    'messaging',  
+    'analytics',
 ]
 ASGI_APPLICATION = "core.asgi.application"
 
@@ -141,6 +142,7 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
+
 
 
 # Password validation

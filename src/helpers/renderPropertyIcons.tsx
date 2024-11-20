@@ -277,9 +277,8 @@ const styles = StyleSheet.create({
   iconRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center', // Center icons
+    justifyContent: 'center', // Align icons to the left
     alignItems: 'center',     // Vertically center icons
-    padding: 5,
   },
   iconWrapper: {
     flexDirection: 'row',

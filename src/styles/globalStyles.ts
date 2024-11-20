@@ -11,6 +11,7 @@ export const globalStyles = StyleSheet.create({
   simpleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   flexRow: {
     flexDirection: 'row',

@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+// src/App.tsx
+
+import React, { useEffect, useState, useContext } from 'react';
 import { AppState } from 'react-native';
 import { IntlProvider } from '@context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -17,6 +19,10 @@ import { AuthNavigator } from './src/navigations';
 import { BottomTabNavigator } from './src/navigations/bottomtab/BottomTabNavigator'; // Assuming this is your Explore
 import { createStackNavigator } from '@react-navigation/stack';
 import useSessionTracker from './src/hooks/useSessionTracker'; // Import the custom session tracker hook
+
+// Import AuthProvider and WebSocketProvider
+import { AuthProvider, AuthContext } from '@context';
+import { WebSocketProvider } from '@context'; // Adjust the path as necessary
 
 // Initialize the Query Client
 const queryClient = new QueryClient();
@@ -55,14 +61,19 @@ function App(): React.JSX.Element {
         <PaperProvider>
           <ErrorBoundary FallbackComponent={CustomFallback}>
             <IntlProvider locale={locale}>
-              <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="Splash" component={SplashScreen} />
-                  <Stack.Screen name="Auth" component={AuthNavigator} />
-                  <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-                </Stack.Navigator>
-                <FlashMessage position="top" hideStatusBar={false} />
-              </NavigationContainer>
+              {/* Wrap NavigationContainer with AuthProvider and WebSocketProvider */}
+              <AuthProvider>
+                <WebSocketProvider>
+                  <NavigationContainer>
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="Splash" component={SplashScreen} />
+                      <Stack.Screen name="Auth" component={AuthNavigator} />
+                      <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+                    </Stack.Navigator>
+                    <FlashMessage position="top" hideStatusBar={false} />
+                  </NavigationContainer>
+                </WebSocketProvider>
+              </AuthProvider>
             </IntlProvider>
           </ErrorBoundary>
         </PaperProvider>

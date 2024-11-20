@@ -14,7 +14,7 @@ export const ExploreMaps = () => {
   const { intl } = useIntl();
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef(null);
-  const snapPoints = ['10%', '10%', '25%', '50%', '90.8%'];
+  const snapPoints = ['25%', '50%', '90.8%'];
   const [drawing, setDrawing] = useState(false); // Toggle for drawing mode
   const [resetDrawing, setResetDrawing] = useState(false); // Trigger to reset drawing
 

@@ -1,4 +1,4 @@
-// src/services/websocket/index.ts
 
-export { default as WebSocketManager } from './webSocketManager';
+export { default as LoggingWebSocketManager } from './LoggingWebSocketManager';
+export { default as MessagingWebSocketManager } from './MessagingWebSocketManager';
 export * from './logging';

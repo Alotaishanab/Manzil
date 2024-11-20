@@ -13,11 +13,12 @@ from django.http import JsonResponse
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F, Q, Subquery
+from .pagination import PropertyPagination
 from .helper import map_property
 from django.shortcuts import get_object_or_404
 from .ownership_validator import verify_property_ownership
 from django.core.exceptions import ObjectDoesNotExist
-from .user_serializers import AddPropertySerializer  # Adjust the import path as needed
+from .user_serializers import AddPropertySerializer, UserPropertySerializer  # Adjust the import path as needed
 import logging
 
 logger = logging.getLogger(__name__)
@@ -279,3 +280,22 @@ def get_user_saved_properties(request):
         return JsonResponse({"properties": result})
 
 
+# Django view function
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_properties(request):
+    user = request.user
+    
+    # Get user's properties ordered by listing date
+    properties = Property.objects.filter(user=user).order_by('-listing_date')
+    
+    # Initialize paginator
+    paginator = PropertyPagination()
+    paginated_properties = paginator.paginate_queryset(properties, request)
+    
+    # Serialize the paginated data
+    serializer = UserPropertySerializer(paginated_properties, many=True)
+    
+    # Ensure the serialized data is returned correctly
+    response_data = paginator.get_paginated_response(serializer.data)
+    return response_data

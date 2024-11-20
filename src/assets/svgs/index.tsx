@@ -113,6 +113,7 @@ export * from './MaidIcon';
 export * from './MapTabIcon';
 export * from './MastercardIcon';
 export * from './MadaIcon';
+export * from './MessagesIcon';
 // N
 
 // O

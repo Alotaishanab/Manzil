@@ -1,6 +1,6 @@
 // src/services/logging.ts
 
-import WebSocketManager from './webSocketManager';
+import LoggingWebSocketManager from './LoggingWebSocketManager';
 
 // Define interaction types (added 'search' and 'scroll')
 export type InteractionType =
@@ -39,7 +39,7 @@ export const logEvent = async ({
     property_id: propertyId,
     timestamp: new Date().toISOString(),
     extra_data: extraData,
-    guest_id: await WebSocketManager.getGuestId(), // Ensure guest_id is included
+    guest_id: await LoggingWebSocketManager.getGuestId(), // Ensure guest_id is included
   };
-  await WebSocketManager.send(event);
+  await LoggingWebSocketManager.send(event);
 };

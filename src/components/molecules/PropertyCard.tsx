@@ -1,3 +1,5 @@
+// PropertyCard.js
+
 import React, { useState, useRef } from 'react';
 import {
   Animated,
@@ -14,31 +16,21 @@ import Video from 'react-native-video';
 import Share from 'react-native-share';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { TopSpace } from '@components';
+import { BlurView } from '@react-native-community/blur'; // Import BlurView
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
 import HapticFeedback from 'react-native-haptic-feedback';
 import {
-  AreaIcon,
-  BathroomIcon,
-  BedIcon,
   HeartIcon,
   HeartOutlineIcon,
   ShareIcon,
-  LivingRoomIcon,
-  GateIcon,
-  StreetIcon,
-  FootTrafficIcon,
-  StorageIcon,
-  FloorIcon,
-  WaterIcon,
-  ElectricityIcon,
-  SewageIcon,
   PlayIcon, // Ensure PlayIcon is correctly exported from '@svgs'
 } from '@svgs';
 import { useIntl } from '@context';
 import { useSaveProperty } from '@services';
 import { useNavigation } from '@react-navigation/native';
 import { isVideo, isImage } from '../../utils/mediaUtils';
+import { renderPropertyIcons } from '@helpers'; // Adjust the path as needed
 
 const { width: screenWidth } = Dimensions.get('window');
 const ITEM_WIDTH = screenWidth * 0.8;
@@ -125,212 +117,6 @@ export const PropertyCard = ({
     return parseFloat(price).toLocaleString();
   };
 
-  const renderPropertyIcons = () => {
-    const { property_category } = item || {};
-
-    return (
-      <View style={styles.iconRow}>
-        {item?.area && (
-          <View style={styles.iconWrapper}>
-            <AreaIcon width={24} height={24} />
-            <Text style={styles.countText}>{`${parseInt(item.area).toLocaleString()} sq ft`}</Text>
-          </View>
-        )}
-
-        {/* House specific icons */}
-        {property_category === 'House' && (
-          <>
-            {item?.bedrooms && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={20} height={20} />
-                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
-              </View>
-            )}
-            {item?.bathrooms && (
-              <View style={styles.iconWrapper}>
-                <BathroomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Land specific icons */}
-        {property_category === 'Land' && (
-          <>
-            {item?.has_water && (
-              <View style={styles.iconWrapper}>
-                <WaterIcon width={28} height={28} />
-                <Text style={styles.countText}>Has Water</Text>
-              </View>
-            )}
-            {item?.has_electricity && (
-              <View style={styles.iconWrapper}>
-                <ElectricityIcon width={28} height={28} />
-                <Text style={styles.countText}>Has Electricity</Text>
-              </View>
-            )}
-            {item?.has_sewage && (
-              <View style={styles.iconWrapper}>
-                <SewageIcon width={28} height={28} />
-                <Text style={styles.countText}>Has Sewage</Text>
-              </View>
-            )}
-            {item?.number_of_streets && (
-              <View style={styles.iconWrapper}>
-                <StreetIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_streets} Streets`}</Text>
-              </View>
-            )}
-            {item?.direction && (
-              <View style={styles.iconWrapper}>
-                <Text style={styles.countText}>{`Direction: ${item.direction}`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Warehouse specific icons */}
-        {property_category === 'Warehouse' && (
-          <>
-            {item?.number_of_gates && (
-              <View style={styles.iconWrapper}>
-                <GateIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_gates} Gates`}</Text>
-              </View>
-            )}
-            {item?.storage_capacity && (
-              <View style={styles.iconWrapper}>
-                <StorageIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.storage_capacity} Capacity`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Office specific icons */}
-        {property_category === 'Office' && (
-          <>
-            {item?.floors && (
-              <View style={styles.iconWrapper}>
-                <FloorIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Chalet specific icons */}
-        {property_category === 'Chalet' && (
-          <>
-            {item?.bedrooms && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={20} height={20} />
-                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
-              </View>
-            )}
-            {item?.bathrooms && (
-              <View style={styles.iconWrapper}>
-                <BathroomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Farmhouse specific icons */}
-        {property_category === 'Farmhouse' && (
-          <>
-            {item?.bedrooms && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={20} height={20} />
-                <Text style={styles.countText}>{`${item.bedrooms} Beds`}</Text>
-              </View>
-            )}
-            {item?.bathrooms && (
-              <View style={styles.iconWrapper}>
-                <BathroomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.bathrooms} Baths`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Tower specific icons */}
-        {property_category === 'Tower' && (
-          <>
-            {item?.floors && (
-              <View style={styles.iconWrapper}>
-                <FloorIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.floors} Floors`}</Text>
-              </View>
-            )}
-            {item?.number_of_units && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Workers' Residence specific icons */}
-        {property_category === "Workers Residence" && (
-          <>
-            {item?.number_of_units && (
-              <View style={styles.iconWrapper}>
-                <BedIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.number_of_units} Units`}</Text>
-              </View>
-            )}
-            {item?.living_rooms && (
-              <View style={styles.iconWrapper}>
-                <LivingRoomIcon width={28} height={28} />
-                <Text style={styles.countText}>{`${item.living_rooms} Living Room(s)`}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Shop specific icons */}
-        {property_category === 'Shop' && (
-          <>
-            {item?.foot_traffic && (
-              <View style={styles.iconWrapper}>
-                <FootTrafficIcon width={28} height={28} />
-                <Text style={styles.countText}>{`Foot Traffic: ${item.foot_traffic}`}</Text>
-              </View>
-            )}
-          </>
-        )}
-      </View>
-    );
-  };
-
   const renderPropertyDetails = () => {
     const propertyCategory = item?.property_category || 'Home';
     const propertyType = item?.property_type?.toLowerCase() || 'sale'; // Assuming default 'sale'
@@ -363,6 +149,14 @@ export const PropertyCard = ({
 
   return (
     <View style={[styles.mainWrapper, { marginBottom }]}>
+      {/* Apply BlurView as Background */}
+      <BlurView
+        style={styles.blurView}
+        blurType="light"
+        blurAmount={20}
+        reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.2)"
+      />
+
       {/* Image and Video Carousel */}
       <View style={styles.carouselContainer}>
         {media.length > 0 ? (
@@ -478,7 +272,7 @@ export const PropertyCard = ({
           />
         ) : (
           <View style={styles.noMediaContainer}>
-            <Text>No media available</Text>
+            <Text style={styles.noMediaText}>No media available</Text>
             {/* Show favorite button even if there is no media */}
             <TouchableOpacity
               onPress={handlePress}
@@ -496,10 +290,10 @@ export const PropertyCard = ({
         )}
       </View>
 
-      {/* TouchableHighlight for the rest of the card */}
+      {/* Content over the BlurView */}
       <TouchableHighlight
         onPress={handlePropertyClick}
-        underlayColor="rgba(0, 0, 0, 0.05)"
+        underlayColor="rgba(255, 255, 255, 0.1)"
         style={styles.contentWrapper}
       >
         <View>
@@ -514,7 +308,7 @@ export const PropertyCard = ({
               {item?.address || 'Address not available'}
             </Text>
             {renderPropertyDetails()}
-            {renderPropertyIcons()}
+            {renderPropertyIcons(item)}
           </View>
 
           <View style={styles.footerWrap}>
@@ -540,7 +334,7 @@ const styles = StyleSheet.create({
   mainWrapper: {
     borderRadius: 20,
     shadowColor: 'rgba(0, 0, 0, 0.1)',
-    backgroundColor: Colors.light.background,
+    backgroundColor: 'transparent', // Transparent to allow BlurView to handle the background
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -548,6 +342,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     width: '100%',
     overflow: 'hidden',
+    position: 'relative', // Ensure absolute children are positioned relative to this container
+  },
+  blurView: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 20,
+    zIndex: 0, // Ensure it stays below media and content
   },
   carouselContainer: {
     height: 300,
@@ -586,6 +386,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: 15,
     padding: 5,
+    zIndex: 2, // Ensure it stays above BlurView
   },
   playButton: {
     position: 'absolute',
@@ -595,64 +396,59 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 2, // Ensure it stays above BlurView
+  },
+  contentWrapper: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    zIndex: 1, // Ensure content is above BlurView
   },
   priceLocationContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingBottom: 10,
   },
   priceFeaturedContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  separator: {
-    height: 16,
-    width: 1,
-    backgroundColor: Colors.light.serialNoGreen,
-    marginHorizontal: 8,
-  },
-  featuredText: {
-    color: Colors.light.serialNoGreen,
-    fontSize: 16,
-    fontFamily: fonts.primary.bold,
-  },
   priceText: {
-    color: Colors.light.headingTitle,
+    color: Colors.light.headingTitleDark, // Use a darker color for better contrast
     fontSize: 28,
     fontFamily: fonts.primary.bold,
   },
   placeText: {
-    color: Colors.light.serialNoGreen,
+    color: Colors.light.headingTitleDark, // Darker color
     fontSize: 18,
     fontFamily: fonts.primary.medium,
   },
   propertyTypeText: {
-    color: Colors.light.headingTitle,
+    color: Colors.light.headingTitleDark, // Darker color
     fontSize: 16,
     fontFamily: fonts.primary.bold,
     marginTop: 5,
   },
-  countText: {
-    marginLeft: 5,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    fontSize: 14,
-  },
   iconRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
     flexWrap: 'wrap',
+    justifyContent: 'center', // Center icons
+    alignItems: 'center',     // Vertically center icons
+    padding: 5,
   },
   iconWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 20,
+    marginHorizontal: 8,  // Adjust horizontal spacing between icons
+  },
+  countText: {
+    marginLeft: 5,
+    color: Colors.light.headingTitleDark, // Darker color
+    fontFamily: fonts.primary.regular,
+    fontSize: 14,
   },
   footerWrap: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
@@ -665,7 +461,18 @@ const styles = StyleSheet.create({
   shareButton: {
     paddingHorizontal: 5,
   },
-  // Skeleton styles
+  noMediaContainer: {
+    width: ITEM_WIDTH,
+    height: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noMediaText: {
+    color: Colors.light.headingTitleDark, // Darker color for better contrast
+    fontFamily: fonts.primary.medium,
+    fontSize: 16,
+  },
+  // Skeleton styles (if needed)
   skeletonCard: {
     width: '100%',
     height: 300,
@@ -682,19 +489,6 @@ const styles = StyleSheet.create({
     height: 20,
     marginTop: 10,
     borderRadius: 4,
-  },
-  iconContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap', // Allows wrapping icons to the next row
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  noMediaContainer: {
-    width: ITEM_WIDTH,
-    height: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 

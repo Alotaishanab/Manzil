@@ -106,3 +106,16 @@ class PropertyViewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Authentication or Guest ID is required.")
 
         return data
+
+class UserPropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = '__all__'  # This will return all fields
+        read_only_fields = (
+            'property_id', 
+            'user', 
+            'listing_date',
+            'view_count',
+            'total_view_duration',
+            'price_per_meter'  # Since this is calculated automatically
+        )

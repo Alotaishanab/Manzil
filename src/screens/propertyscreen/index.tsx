@@ -142,7 +142,6 @@ export const PropertyScreen: React.FC = () => {
             </BottomSheetScrollView>
           </BottomSheet>
 
-          <ContactButton />
 
           {isReportAdModalVisible && (
             <View style={styles.reportAdModalOverlay}>
@@ -233,14 +232,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Jost',
   },
-  contactButtonContainer: {
-    position: 'absolute',
-    left: 10,
-    right: 10,
-    alignItems: 'center',
-    zIndex: 300, // Ensure it stays above other elements
-    paddingBottom: 15,
-  },
+  
 });
 
 export default PropertyScreen;

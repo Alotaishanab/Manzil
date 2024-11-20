@@ -54,3 +54,4 @@ export * from './centerscreen';
 export * from './propertyfullscreen';
 export * from './addedproperties';
 export * from './mapscreen';
+export * from './messages';

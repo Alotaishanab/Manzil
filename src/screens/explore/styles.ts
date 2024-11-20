@@ -10,17 +10,21 @@ export const styles = StyleSheet.create({
   // FilterHeader Styles
   exploreWrap: {
     borderRadius: 25,
-    paddingHorizontal: 20,
     flex: 1,
     height: 50,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.light.inputBg,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // Adds shadow for Android
   },
   filterBtn: {
     borderWidth: 1.5,
     borderRadius: 17,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
     width: 50,
     height: 50,
     marginLeft: 10,
@@ -28,25 +32,28 @@ export const styles = StyleSheet.create({
     borderColor: Colors.light.filterLine,
     alignItems: 'center',
     zIndex: 1001, // Ensure it stays above other components
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2, // Adds shadow for Android
   },
   inputStyle: {
     flex: 1,
     height: '100%',
-    fontSize: 11,
-    lineHeight: 20,
+    fontSize: 16, // Increased font size for better readability
+    lineHeight: 22,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.regular,
+    backgroundColor: 'transparent', // Transparent to show the frosted background
   },
+  
   // Bottom Widget Styles
   bottomWidget: {
     position: 'absolute',
-    bottom: 20 + 10, // 40px offset + 50px bottom nav height (adjust as needed)
+    bottom: 30, // Adjusted for better positioning
     alignSelf: 'center',
-    // Optional: Slightly shift to the left by 10px
-    // Adjust based on your layout
-    // Alternatively, use transform for finer control
-    // transform: [{ translateX: -10 }],
-    backgroundColor: Colors.light.primaryBtn,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
     borderRadius: 30, // Increased for a more pill-shaped appearance
     flexDirection: 'row',
     alignItems: 'center',
@@ -55,31 +62,29 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 }, // Increased shadow offset for depth
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6, // Slightly increased elevation for Android
-    // Optional: Add a border for better separation
     borderWidth: 1,
-    borderColor: Colors.light.border, // Define in your Colors if needed
+    borderColor: 'rgba(255, 255, 255, 0.5)', // Light semi-transparent border for better separation
   },
   widgetButton: {
     width: 30,
     height: 30, // Increased height for better touch targets
-    borderRadius: 25,
-    backgroundColor: Colors.light.secondaryBtn, // Use a secondary color for contrast
+    borderRadius: 15, // Changed to 15 for perfect circle
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Semi-transparent background
     alignItems: 'center',
     justifyContent: 'center',
-    // Optional: Add a shadow for the button
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2, // Adds shadow for Android
   },
   separator: {
     width: 1,
     height: 30,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent separator
     marginHorizontal: 10, // Increased spacing for better visibility
   },
 
@@ -89,20 +94,27 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.light.errorBackground,
     borderRadius: 5,
     marginVertical: 10,
+    marginHorizontal: 20, // Added horizontal margin for consistency
   },
   errorText: {
     color: Colors.light.errorText,
     textAlign: 'center',
+    fontFamily: fonts.primary.regular,
   },
 
   // Agencies Section Styles
   topAgencyWrap: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
     borderRadius: 30,
     paddingTop: 20,
     paddingHorizontal: 10,
-    marginHorizontal: 0,
+    marginHorizontal: 20,
     paddingBottom: 20, // Added padding for bottom
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // Adds shadow for Android
   },
   topAgencyText: {
     fontSize: 16, // Ensure this matches the desired font size
@@ -129,12 +141,17 @@ export const styles = StyleSheet.create({
 
   // Recommended Section Styles
   recommendedSectionWrap: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
     borderRadius: 30,
     paddingHorizontal: 10,
-    marginHorizontal: 0,
+    marginHorizontal: 20,
     paddingBottom: 20, // Added padding for bottom
     marginTop: 20, // Space between Top Agencies and Recommended Section
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // Adds shadow for Android
   },
   recommendedTitle: {
     fontSize: 16, // Same as topAgencyText for consistency
@@ -156,6 +173,12 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     borderColor: Colors.light.filterLine,
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2, // Adds shadow for Android
   },
   firstFlatListContentContainerStyle: {
     paddingHorizontal: 10, // Increased padding for better spacing
@@ -198,19 +221,19 @@ export const styles = StyleSheet.create({
     borderRadius: 15, // Border radius for smooth edges
     marginRight: 15, // Margin for spacing between cards
     overflow: 'hidden', // Ensure content doesn't spill over rounded corners
-    backgroundColor: '#fff',
-    borderColor: '#ccc', // Light gray border color for distinction
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    borderColor: 'rgba(255, 255, 255, 0.5)', // Light semi-transparent border color for distinction
     borderWidth: 1, // Thickness of the border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15, // Increased shadow opacity for more depth
-    shadowRadius: 6, // Increased shadow radius for a softer shadow
+    shadowOpacity: 0.1, // Increased shadow opacity for more depth
+    shadowRadius: 4, // Increased shadow radius for a softer shadow
     elevation: 4, // Slightly increased elevation for better depth
   },
   agencyImg: {
     width: '100%', // Full width to cover the card
     height: '100%', // Full height to cover the card
-    resizeMode: 'contain', // Contain image within card dimensions
+    resizeMode: 'cover', // Changed to 'cover' for better image coverage
     position: 'absolute', // Position absolutely to ensure it covers the entire card
     top: 0, // Align the top of the image with the top of the card
     left: 0, // Align the left of the image with the left of the card
@@ -236,5 +259,43 @@ export const styles = StyleSheet.create({
     marginRight: 15,
   },
 
-  
+  // Modal Styles
+  modalContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent background
+    borderRadius: 20,
+    padding: 20,
+    zIndex: 1000,
+    elevation: 10, // Adds shadow for Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  modalCloseButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
+  },
+  modalCloseText: {
+    color: Colors.light.primaryBtn,
+    fontSize: 16,
+    fontFamily: fonts.primary.bold,
+  },
+  applyFilterButton: {
+    marginTop: 20,
+    backgroundColor: Colors.light.primaryBtn,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  applyFilterText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: fonts.primary.bold,
+  },
 });
+
+export default styles;

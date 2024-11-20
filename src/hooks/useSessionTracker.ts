@@ -1,16 +1,17 @@
-// hooks/useSessionTracker.ts
+// src/hooks/useSessionTracker.ts
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { logSessionStartService, sendHeartbeat } from '../services/session/sessionService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AsyncHelper from '../helpers/asyncHelper';
+import { AuthContext } from '../context/AuthContext';
 
 const GUEST_SESSION_KEY = 'guest_session';
 const USER_SESSION_KEY = 'user_session';
-const HEARTBEAT_INTERVAL = 0.1 * 60 * 1000; // 1 minute in milliseconds
+const HEARTBEAT_INTERVAL = 0.1 * 60 * 1000; // 6 seconds
 
 const useSessionTracker = () => {
+  const { token, userId, guestId, initializeGuestId } = useContext(AuthContext);
   const appState = useRef<AppStateStatus>(AppState.currentState);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -46,11 +47,11 @@ const useSessionTracker = () => {
       subscription.remove();
       stopHeartbeat();
     };
-  }, []);
+  }, [token, userId, guestId]);
 
   const startSessionHandler = async () => {
     try {
-      const isAuthenticated = await AsyncHelper.isAuthenticated();
+      const isAuthenticated = token !== null;
 
       if (isAuthenticated) {
         const existingUserSessionId = await AsyncStorage.getItem(
@@ -60,12 +61,15 @@ const useSessionTracker = () => {
           console.log(
             `Existing user session found with ID: ${existingUserSessionId}. No new session created.`
           );
-          const userId = await AsyncHelper.getUserId();
           startHeartbeat(existingUserSessionId, null, userId);
           return;
         }
 
-        const userId = await AsyncHelper.getUserId();
+        if (!userId) {
+          console.error('User ID is missing for authenticated session.');
+          return;
+        }
+
         const sessionId = await logSessionStartService({ user_id: userId });
         if (sessionId) {
           console.log(`User session started with session_id: ${sessionId}`);
@@ -86,12 +90,16 @@ const useSessionTracker = () => {
           console.log(
             `Existing guest session found with ID: ${existingGuestSessionId}. No new session created.`
           );
-          const guestId = await AsyncHelper.getGuestId();
           startHeartbeat(existingGuestSessionId, guestId, null);
           return;
         }
 
-        const guestId = await AsyncHelper.getGuestId();
+        if (!guestId) {
+          console.error('Guest ID is missing for guest session.');
+          await initializeGuestId();
+          return;
+        }
+
         const sessionId = await logSessionStartService({ guest_id: guestId });
         if (sessionId) {
           console.log(`Guest session started with session_id: ${sessionId}`);

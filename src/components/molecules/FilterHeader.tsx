@@ -80,12 +80,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderColor: Colors.light.filterLine,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
   },
   filterBtn: {
     borderWidth: 1,
     borderRadius: 30,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
     width: 50,
     height: 50,
     marginLeft: 10,

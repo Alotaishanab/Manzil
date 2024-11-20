@@ -22,12 +22,18 @@ export const apiUrls = {
   exploreInterestedProperties: 'properties/explore/interested/',
   getPropertyById: 'properties/property/',
   saveProperty: 'properties/',
+  getUserProperties: 'properties/user/my-properties/',
   getSavedProperties: 'properties/user/saved-properties/',
 
   // Session-related endpoints
   startSession: 'account/user/start-session/',
   sessionHeartbeat: 'account/user/session-heartbeat/',
+
+  sendMessage: 'messages/send/',
+  fetchReceivedMessages: 'messages/received/',
+  fetchSentMessages: 'messages/sent/',
 };
 
-// WebSocket URL for the QA environment
-export const getWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/log-interactions/';
+// WebSocket URLs
+export const getLogInteractionsWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/log-interactions/';
+export const getMessagesWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/messages/';

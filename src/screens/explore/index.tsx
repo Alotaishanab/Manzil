@@ -361,7 +361,7 @@ const renderRecommendedSection = () => (
   return (
     <Screen
       padding={0}
-      paddingHorizontal={10}
+      paddingHorizontal={0}
       showKeyboardAware={false}
       style={{ backgroundColor: '#F5F5F5' }} // Background color for Screen
     >

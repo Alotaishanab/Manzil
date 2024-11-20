@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export const styles = StyleSheet.create({
+
+  
   imageBgStyle: {
     marginLeft: 10,
     marginRight: 10,

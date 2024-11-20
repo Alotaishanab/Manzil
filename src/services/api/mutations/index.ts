@@ -11,3 +11,4 @@ export * from './useSaveProperty';
 export * from './useEndPropertyView';
 export * from './useTrackPropertyClick';
 export * from './useTrackPropertyView';
+export * from './useSendMessage';

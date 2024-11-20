@@ -6,35 +6,18 @@ PODS:
   - FBLazyVector (0.74.4)
   - fmt (9.1.0)
   - glog (0.3.5)
-  - Google-Maps-iOS-Utils (4.2.2):
-    - Google-Maps-iOS-Utils/Clustering (= 4.2.2)
-    - Google-Maps-iOS-Utils/Geometry (= 4.2.2)
-    - Google-Maps-iOS-Utils/GeometryUtils (= 4.2.2)
-    - Google-Maps-iOS-Utils/Heatmap (= 4.2.2)
-    - Google-Maps-iOS-Utils/QuadTree (= 4.2.2)
-    - GoogleMaps (~> 7.3)
-  - Google-Maps-iOS-Utils/Clustering (4.2.2):
-    - Google-Maps-iOS-Utils/QuadTree
-    - GoogleMaps (~> 7.3)
-  - Google-Maps-iOS-Utils/Geometry (4.2.2):
-    - GoogleMaps (~> 7.3)
-  - Google-Maps-iOS-Utils/GeometryUtils (4.2.2):
-    - GoogleMaps (~> 7.3)
-  - Google-Maps-iOS-Utils/Heatmap (4.2.2):
-    - Google-Maps-iOS-Utils/QuadTree
-    - GoogleMaps (~> 7.3)
-  - Google-Maps-iOS-Utils/QuadTree (4.2.2):
-    - GoogleMaps (~> 7.3)
-  - GoogleMaps (7.4.0):
-    - GoogleMaps/Maps (= 7.4.0)
-  - GoogleMaps/Base (7.4.0)
-  - GoogleMaps/Maps (7.4.0):
+  - Google-Maps-iOS-Utils (5.0.0):
+    - GoogleMaps (~> 8.0)
+  - GoogleMaps (8.4.0):
+    - GoogleMaps/Maps (= 8.4.0)
+  - GoogleMaps/Base (8.4.0)
+  - GoogleMaps/Maps (8.4.0):
     - GoogleMaps/Base
   - hermes-engine (0.74.4):
     - hermes-engine/Pre-built (= 0.74.4)
   - hermes-engine/Pre-built (0.74.4)
   - lottie-ios (4.5.0)
-  - lottie-react-native (7.0.0):
+  - lottie-react-native (7.1.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1028,9 +1011,9 @@ PODS:
     - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-google-maps (1.15.6):
-    - Google-Maps-iOS-Utils (= 4.2.2)
-    - GoogleMaps (= 7.4.0)
+  - react-native-google-maps (1.20.0):
+    - Google-Maps-iOS-Utils (= 5.0.0)
+    - GoogleMaps (= 8.4.0)
     - React-Core
   - react-native-image-picker (7.1.2):
     - DoubleConversion
@@ -1053,11 +1036,13 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps (1.15.6):
+  - react-native-maps (1.20.0):
     - React-Core
-  - react-native-safe-area-context (4.10.5):
+  - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-slider (4.5.2):
+  - react-native-safe-area-context (4.14.0):
+    - React-Core
+  - react-native-slider (4.5.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1080,7 +1065,7 @@ PODS:
     - Yoga
   - react-native-splash-screen (3.3.0):
     - React-Core
-  - react-native-video (6.6.2):
+  - react-native-video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1094,7 +1079,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.6.2)
+    - react-native-video/Video (= 6.7.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1102,7 +1087,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.6.2):
+  - react-native-video/Video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1354,15 +1339,15 @@ PODS:
     - React-utils (= 0.74.4)
   - RNCAsyncStorage (2.0.0):
     - React-Core
-  - RNCMaskedView (0.3.1):
+  - RNCMaskedView (0.2.9):
     - React-Core
-  - RNCPicker (2.7.7):
+  - RNCPicker (2.9.0):
     - React-Core
   - RNDateTimePicker (8.2.0):
     - React-Core
   - RNDeviceInfo (11.1.0):
     - React-Core
-  - RNGestureHandler (2.20.1):
+  - RNGestureHandler (2.20.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1383,9 +1368,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNLocalize (3.2.0):
+  - RNLocalize (3.3.0):
     - React-Core
-  - RNReactNativeHapticFeedback (2.3.1):
+  - RNReactNativeHapticFeedback (2.3.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1406,7 +1391,52 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNReanimated (3.12.1):
+  - RNReanimated (3.16.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/reanimated (= 3.16.1)
+    - RNReanimated/worklets (= 3.16.1)
+    - Yoga
+  - RNReanimated/reanimated (3.16.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/reanimated/apple (= 3.16.1)
+    - Yoga
+  - RNReanimated/reanimated/apple (3.16.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1427,7 +1457,28 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.31.1):
+  - RNReanimated/worklets (3.16.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNScreens (3.35.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1453,9 +1504,9 @@ PODS:
     - React-Core
   - RNShare (10.2.1):
     - React-Core
-  - RNSVG (15.6.0):
+  - RNSVG (15.8.0):
     - React-Core
-  - RNVectorIcons (10.1.0):
+  - RNVectorIcons (10.2.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1521,6 +1572,7 @@ DEPENDENCIES:
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-maps (from `../node_modules/react-native-maps`)
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
@@ -1650,6 +1702,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-picker"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
@@ -1742,11 +1796,11 @@ SPEC CHECKSUMS:
   FBLazyVector: 4c674c2d53de79c145d6a723910543d7b57ed74c
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
-  Google-Maps-iOS-Utils: f77eab4c4326d7e6a277f8e23a0232402731913a
-  GoogleMaps: 032f676450ba0779bd8ce16840690915f84e57ac
+  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
+  GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   hermes-engine: 6312f669c895e05f0f6029554061593711770ea6
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
-  lottie-react-native: bb8baa54345d3ef71ac4acd472340fccbb03749a
+  lottie-react-native: 810dfddcceec23b045b78d2b963d6460035cb8ea
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: d83da85890d5bb18efd2809a733865c1c5c11487
   RCTRequired: e109419eacfb10fbb79a3ecb57ebcad198593d8a
@@ -1774,13 +1828,14 @@ SPEC CHECKSUMS:
   react-native-blur: 30d91a67da86a4d4d924b0c7c36f6e01479a246b
   react-native-document-picker: c4f197741c327270453aa9840932098e0064fd52
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
-  react-native-google-maps: 7ca1d252585c9ee2bbe2a3f64e4c061801b43d64
+  react-native-google-maps: 7e82d047dbdba9d4dbc8fc7df2eaba08f274cafd
   react-native-image-picker: c3afe5472ef870d98a4b28415fc0b928161ee5f7
-  react-native-maps: 7b2c2cee95271592a92ba485eea1dec66a363a6e
-  react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
-  react-native-slider: ce295d2bf830a7990af05b0bd70ab28c133e230c
+  react-native-maps: cb754208646ef20406b41af816a88fd5318a4403
+  react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
+  react-native-safe-area-context: 4532f1a0c5d34a46b9324ccaaedcb5582a302b7d
+  react-native-slider: 646f6727b04b619ec62d6547fe90b8f561950036
   react-native-splash-screen: 4312f786b13a81b5169ef346d76d33bc0c6dc457
-  react-native-video: bca58bb00c962eb4b91389ab4b7f0944ddff1a68
+  react-native-video: d78e478668d5472aa28a2e612785f5605991da93
   React-nativeconfig: 2be4363c2c4ac2b42419577774e83e4e4fd2af9f
   React-NativeModulesApple: 453ada38f826a508e48872c7a7877c431af48bba
   React-perflogger: 9745f800ab4d12ec4325bde7bd090eafb87c5570
@@ -1805,22 +1860,22 @@ SPEC CHECKSUMS:
   React-utils: e8b0eac797c81c574b24f6515fec4015599b643c
   ReactCommon: eebffb37a90138c6db6eb8b2d952e7e5c6bc083c
   RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
-  RNCMaskedView: 090213d32d8b3bb83a4dcb7d12c18f0152591906
-  RNCPicker: b7873ba797dc586bfaf3307d737cbdc620a9ff3e
+  RNCMaskedView: 949696f25ec596bfc697fc88e6f95cf0c79669b6
+  RNCPicker: f963e01f78e546a93b98aa201501713dbda14e94
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNDeviceInfo: b899ce37a403a4dea52b7cb85e16e49c04a5b88e
-  RNGestureHandler: d965a561d5458dd1e10617602f55726e04e4aac5
-  RNLocalize: b77875884750cb6a58cd6865863fe2ba2729b72b
-  RNReactNativeHapticFeedback: 6d6363faa31a6cb23e467e02304b585ec59f0930
-  RNReanimated: f9192536fa8a312c737eaf15c905f78831193ef1
-  RNScreens: b32a9ff15bea7fcdbe5dff6477bc503f792b1208
+  RNGestureHandler: a8e61b93b4c5c44e6cd797cdaba43126ec36acaa
+  RNLocalize: 298e85ce16540a11de40c1a588ead39fc5e9a072
+  RNReactNativeHapticFeedback: 7c701396d35a0e8863d8d8f97a7273c5f8509b40
+  RNReanimated: af4e059a8fd0fb7a9cdf5ad35ead4699598a9447
+  RNScreens: 6b641f232990a9d505a6d139fd18c3c759c9d290
   RNSensors: 117ba71c7eeeea0407ea0c0bb79e3495d602049b
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
-  RNSVG: 5da7a24f31968ec74f0b091e3440080f347e279b
-  RNVectorIcons: 2a2f79274248390b80684ea3c4400bd374a15c90
+  RNSVG: 8b1a777d54096b8c2a0fd38fc9d5a454332bbb4d
+  RNVectorIcons: 845eda5c7819bd29699cafd0fc98c9d4afe28c96
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 0efb3e1bd40ba59b009f01badea863281101de78
 
-PODFILE CHECKSUM: 25d26ff2edd56082c982edf6df5e69778a578fd1
+PODFILE CHECKSUM: 701a78b5ff505914ad62bafc802fa1fa8a30b147
 
 COCOAPODS: 1.15.2

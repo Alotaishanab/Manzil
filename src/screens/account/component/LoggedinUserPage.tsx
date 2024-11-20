@@ -1,17 +1,19 @@
+// src/screens/LoggedinUserPage.tsx
+
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Colors } from '@colors';
 import { useIntl } from '@context';
 import { TopSpace } from '@components';
 import IconTitleButtonArrow from '../../../../src/components/molecules/IconTitleButtonArrow';
 import { useNavigation } from '@react-navigation/native';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder'; 
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { fonts } from '@fonts';
 import { useLogOutUser } from '@services';
 import { AsyncHelper } from '@helpers';
 import useSessionTracker from '../../../hooks/useSessionTracker';
-
+import { FavoriteIcon, LogoutIcon, MyPropertiesIcon, SubscriptionIcon } from '@svgs'; // Import necessary icons
 
 const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any) => {
   const { intl, toggleLocale } = useIntl();
@@ -83,36 +85,30 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
   const handleLogout = () => {
     logoutUser(undefined, {
       onSuccess: async () => {
-        console.log("Logout successful, resetting to guest session.");
-        
+        console.log('Logout successful, resetting to guest session.');
+
         // Clear user session data
         await AsyncHelper.removeToken();
         await AsyncHelper.removeRefreshToken();
         await AsyncHelper.getGuestId();
         await AsyncHelper.removeUserId();
-  
+
         // Start a new guest session
-        const newGuestSessionId = await startSessionHandler(); 
+        const newGuestSessionId = await startSessionHandler();
         console.log(`New guest session started with session_id: ${newGuestSessionId}`);
-        
+
         // Navigate to Explore screen
         navigation.navigate('Explore');
       },
       onError: () => {
-        console.error("Error logging out user.");
+        console.error('Error logging out user.');
       },
     });
   };
-  
-  
 
-
-
-  const handleRequests = () => {
-    navigation.navigate('Auth', { screen: 'RequestList' });
+  const handleSavedProperties = () => {
+    navigation.navigate('Auth', { screen: 'SavedProperties' });
   };
-
-
 
   const renderSkeleton = () => {
     return (
@@ -140,66 +136,66 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
         </Text>
       </View>
 
-      <View
-        style={{
-          padding: 6,
-          paddingHorizontal: 10,
-          marginHorizontal: 10,
-          marginVertical: 5,
-          borderRadius: 20,
-          backgroundColor: Colors.light.background,
-          marginTop: 4,
-        }}>
-       {/* Show skeleton if loading, else show user data */}
-       {isLoading || !userData ? (
-          renderSkeleton() // Render the skeleton loader
-        ) : (
-          <>
-            <Text style={styles.greetingText}>
-              {intl.formatMessage({ id: 'accountScreen.loggedin.hello' })}{' '}
-              {userData.name}
-            </Text>
-            <Text style={styles.emailText}>{userData.email}</Text>
-          </>
-        )}
+      {/* User Information Section */}
+      <View style={styles.userInfoContainer}>
+        {/* User Details */}
+        <View style={styles.userDetails}>
+          {isLoading || !userData ? (
+            renderSkeleton() // Render the skeleton loader
+          ) : (
+            <>
+              <Text style={styles.greetingText} numberOfLines={1} ellipsizeMode="tail">
+                {intl.formatMessage({ id: 'accountScreen.loggedin.hello' })} {userData.name}
+              </Text>
+              <Text style={styles.emailText} numberOfLines={1} ellipsizeMode="tail">
+                {userData.email}
+              </Text>
+            </>
+          )}
+        </View>
       </View>
 
-      <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
+    <View style={styles.outerContainer}>
+      {/* Quick Actions */}
+      <View style={styles.SavedContainer}>
+        {/* Saved */}
+        <TouchableOpacity style={styles.actionButton} onPress={handleSavedProperties}>
+          <FavoriteIcon width={24} height={24} fill="red" />
+          <Text style={styles.actionText}>{intl.formatMessage({ id: 'buttons.saved' })}</Text>
+        </TouchableOpacity>
+        </View>
+
+      <View style={styles.PropertiesContainer}>
+        {/* My Properties */}
+        <TouchableOpacity style={styles.actionButton} onPress={handleMyProperties}>
+          <MyPropertiesIcon width={24} height={24} fill="black" />
+          <Text style={styles.actionText}>
+            {intl.formatMessage({ id: 'accountScreen.loggedin.my-properties' })}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.SubscriptionsContainer}>    
+        {/* Subscriptions */}
+        <TouchableOpacity style={styles.actionButton} onPress={handleSubscription}>
+          <SubscriptionIcon width={24} height={24} fill="black" />
+          <Text style={styles.actionText}>
+            {intl.formatMessage({ id: 'accountScreen.loggedin.subscriptions' })}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+
+      {/* Profile Settings Section */}
+      <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
         <View style={styles.sectionView}>
           <Text style={styles.sectionTitle}>
-            {intl.formatMessage({id: 'accountScreen.loggedin.profile'})}
+            {intl.formatMessage({ id: 'accountScreen.loggedin.profile' })}
           </Text>
 
-          {/* <IconTitleButtonArrow
-            iconName={'PersonalDetailIcon'}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.personal-details',
-            })}
-          /> */}
+          {/* Removed 'My Properties' and 'Subscriptions' from menu */}
 
-          <IconTitleButtonArrow
-            iconName={'MyPropertiesIcon'}
-            handleClick={handleMyProperties}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.my-properties',
-            })}
-          />
-          <IconTitleButtonArrow
-            iconName={'MyPropertiesIcon'}
-            handleClick={handleRequests}
-            title={intl.formatMessage({
-              id: 'buttons.requests',
-            })}
-          />
-
-          <IconTitleButtonArrow
-            iconName={'SubscriptionIcon'}
-            handleClick={handleSubscription}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.subscriptions',
-            })}
-          />
-
+          {/* Other menu items */}
           <IconTitleButtonArrow
             iconName={'SubscriptionIcon'}
             handleClick={handleSubscribed}
@@ -207,7 +203,6 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
               id: 'accountScreen.loggedin.subscribed',
             })}
           />
-          {/*  */}
 
           <IconTitleButtonArrow
             handleClick={handlePaymentMethod}
@@ -239,26 +234,17 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
             })}
             handleClick={handleAnalytics}
           />
-
-          {/*  */}
-          {/* <IconTitleButtonArrow
-            handleClick={handleSavedSearches}
-            iconName={'SavedIcon'}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.saved-searches',
-            })}
-          /> */}
         </View>
       </View>
 
-      <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
+      {/* Account Settings Section */}
+      <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
         <View style={styles.sectionView}>
           <Text style={styles.sectionTitle}>
             {intl.formatMessage({
               id: 'accountScreen.loggedin.account-settings',
             })}
           </Text>
-          {/* <TopSpace top={5} /> */}
 
           <IconTitleButtonArrow
             iconName={'MailIcon'}
@@ -268,7 +254,6 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
             })}
           />
 
-          {/*  */}
           <IconTitleButtonArrow
             handleClick={handleChangePassword}
             iconName={'LockIcon'}
@@ -294,7 +279,8 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
         </View>
       </View>
 
-      <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
+      {/* Legal Section */}
+      <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
         <View style={styles.sectionView}>
           <Text style={styles.sectionTitle}>
             {intl.formatMessage({
@@ -326,9 +312,9 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
           />
         </View>
       </View>
-      {/* <TopSpace top={15} /> */}
 
-      <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
+      {/* Support Section */}
+      <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
         <View style={styles.sectionView}>
           <Text style={styles.sectionTitle}>
             {intl.formatMessage({
@@ -351,32 +337,31 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
               id: 'accountScreen.loggedin.send-us-feedback',
             })}
           />
-
-          {/* <IconTitleButtonArrow
-            iconName={'FeedbackIcon'}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.legal-documents',
-            })}
-          /> */}
         </View>
       </View>
 
-      <View style={{paddingHorizontal: 12, paddingVertical: 4}}>
+      {/* Logout Section */}
+      <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
         <View
           style={{
             borderRadius: 20,
             paddingHorizontal: 20,
-            backgroundColor: Colors.light.background,
-          }}>
-          <IconTitleButtonArrow
-            iconName={'LogoutIcon'}
-            handleClick={handleLogout}
-            title={intl.formatMessage({
-              id: 'accountScreen.loggedin.logout',
-            })}
-          />
+            backgroundColor: 'Colors.light.background',
+          }}
+        >
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <LogoutIcon width={24} height={24} fill="red" />
+  <Text style={styles.logoutText}>
+      {intl.formatMessage({
+        id: 'accountScreen.loggedin.logout',
+      })}
+    </Text>
+  </View>
+</TouchableOpacity>
+
         </View>
-        <TopSpace top={10} />
+        <TopSpace top={50} />
       </View>
     </View>
   );
@@ -391,7 +376,7 @@ const styles = StyleSheet.create({
   },
   headerView: {
     backgroundColor: Colors.light.background,
-    paddingVertical: 20,
+    paddingVertical: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -400,16 +385,79 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: fonts.tertiary.bold,
   },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 20,
+    backgroundColor: Colors.light.background,
+    marginTop: 4,
+  },
+  userDetails: {
+    flex: 1,
+    maxWidth: '100%',
+  },
   greetingText: {
     color: Colors.light.headingTitle,
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: fonts.primary.bold,
   },
   emailText: {
-    textDecorationLine: 'underline',
-    fontSize: 14,
     color: Colors.light.headingTitle,
+    fontSize: 14,
     fontFamily: fonts.primary.regular,
+  },
+  outerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  SavedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    width: '20%',
+    paddingHorizontal: 20,
+    marginHorizontal: 5,
+    marginVertical: 5,
+    borderRadius: 20,
+    backgroundColor: Colors.light.background,
+    marginTop: 4,
+  },
+  PropertiesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    width: '33%',
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 20,
+    backgroundColor: Colors.light.background,
+    marginTop: 4,
+  },
+  SubscriptionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    width: '32%',
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 20,
+    backgroundColor: Colors.light.background,
+    marginTop: 4,
+  },
+  actionButton: {
+    alignItems: 'center',
+  },
+  actionText: {
+    marginTop: 5,
+    color: 'black',
+    fontSize: 12,
+    fontFamily: fonts.primary.medium,
   },
   sectionView: {
     borderRadius: 20,
@@ -420,18 +468,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
     color: Colors.light.profile,
     fontSize: 16,
+    marginBottom: 10,
   },
   skeletonName: {
-    backgroundColor: '#E0E0E0', // Light grey placeholder
+    backgroundColor: '#E0E0E0',
     height: 22,
     width: 150,
     borderRadius: 10,
     marginBottom: 10,
   },
   skeletonEmail: {
-    backgroundColor: '#E0E0E0', // Light grey placeholder
+    backgroundColor: '#E0E0E0',
     height: 14,
     width: 200,
     borderRadius: 10,
   },
+  logoutButton: {
+    padding: 10,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: 'red',
+    fontSize: 14,
+    padding: 10,
+    fontFamily: fonts.primary.medium,
+  },
+  
 });

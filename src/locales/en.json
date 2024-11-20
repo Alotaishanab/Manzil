@@ -524,7 +524,11 @@
   "buttons.sell-all":"See all",
   "buttons.requests":"Requests",
   "buttons.explore-with-ai":"Search With AI",
+  "buttons.messages": "Messages",
 
-  "realEstate.authorityInfo": "Real Estate Authority"
+  "realEstate.authorityInfo": "Real Estate Authority",
+
+  "messagesScreen.noMessages": "You have no messages.",
+  "messagesScreen.title": "Messages"
   
 }

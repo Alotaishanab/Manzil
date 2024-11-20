@@ -1,17 +1,19 @@
+// src/colors/index.ts
+
 export const Colors = {
   light: {
-    background: '#fff',
+    background: '#fff', // White background
     secondaryBackground: '#f3f3f3',
-    headingTitle: '#000',
+    headingTitle: '#000', // Black
     unselectBtn: '#edeeee',
     black: '#23262B',
-    primaryButton: '#2f7919',
-    secondaryButton: '#6c757d', // New color for secondary buttons
+    primaryButton: '#2f7919', // Green
+    secondaryButton: '#6c757d',
     disabled: '#45ad28',
     primaryBtn: '#2e7a1a',
     serialNoGreen: '#307E20',
     inputBg: '#f9fafb',
-    greyDescription: '#cbcbcb',
+    greyDescription: '#76767C', // Updated to match snippet text
     subTitle: '#464D57',
     orText: '#c4c4c4',
     danger: 'red',
@@ -45,6 +47,9 @@ export const Colors = {
     propertyCardLine: '#eceef0',
     dark: '#222222',
     darkLine: '#F3F3F3',
+    // Added Colors
+    onPrimary: '#fff', // White text/icons on primary green
+    icon: '#2f7919', // Green color for icons
   },
   dark: {
     background: '#ffffff',
@@ -53,7 +58,7 @@ export const Colors = {
     subTitle: '#464D57',
     black: '#23262B',
     primaryButton: '#2f7919',
-    secondaryButton: '#4d4d4d', // Darker variant for secondary buttons
+    secondaryButton: '#4d4d4d',
     disabled: '#4ccc27',
     primaryBtn: '#2F7A19',
     unselectBtn: '#edeeee',
@@ -92,5 +97,6 @@ export const Colors = {
     propertyCardLine: '#eceef0',
     dark: '#222222',
     darkLine: '#F3F3F3',
+    // You might want to add similar additions here if needed
   },
 };

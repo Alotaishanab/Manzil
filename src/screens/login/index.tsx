@@ -81,7 +81,7 @@ export const Login = () => {
           await startSessionHandler();
 
           // Navigate to the Account screen
-          navigation.navigate("Account"); // Navigate directly to Account screen
+          navigation.navigate("BottomTabNavigator", { screen: "Explore" });
           console.log("Navigated to Account screen.");
 
           // Refetch profile and saved properties after navigation
