@@ -24,6 +24,7 @@ export const apiUrls = {
   saveProperty: 'properties/',
   getUserProperties: 'properties/user/my-properties/',
   getSavedProperties: 'properties/user/saved-properties/',
+  makePropertyFeatured: 'properties/user/my-properties/make-featured',
 
   // Session-related endpoints
   startSession: 'account/user/start-session/',
@@ -35,5 +36,7 @@ export const apiUrls = {
 };
 
 // WebSocket URLs
-export const getLogInteractionsWebSocketUrl = (): string => `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/log-interactions/`;
-export const getMessagesWebSocketUrl = (): string => `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/messages/`;
+export const getLogInteractionsWebSocketUrl = (): string =>
+  `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/log-interactions/`;
+export const getMessagesWebSocketUrl = (): string =>
+  `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/messages/`;
