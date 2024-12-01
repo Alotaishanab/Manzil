@@ -9,5 +9,6 @@ urlpatterns = [
     path('<int:property_id>/save/', user_views.save_property),
     path('user/saved-properties/', user_views.get_user_saved_properties),
     path('user/my-properties/', user_views.get_user_properties),
-
+    path('user/my-properties/<int:property_id>/make-featured/',
+         user_views.make_property_featured),
 ]

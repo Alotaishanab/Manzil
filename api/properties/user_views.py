@@ -18,10 +18,12 @@ from .helper import map_property
 from django.shortcuts import get_object_or_404
 from .ownership_validator import verify_property_ownership
 from django.core.exceptions import ObjectDoesNotExist
-from .user_serializers import AddPropertySerializer, UserPropertySerializer  # Adjust the import path as needed
+# Adjust the import path as needed
+from .user_serializers import AddPropertySerializer, UserPropertySerializer
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -69,7 +71,8 @@ def add_property(request):
             bedrooms=serializer.validated_data.get('bedrooms'),
             bathrooms=serializer.validated_data.get('bathrooms'),
             has_water=serializer.validated_data.get('waterAccess', False),
-            has_electricity=serializer.validated_data.get('electricityAccess', False),
+            has_electricity=serializer.validated_data.get(
+                'electricityAccess', False),
             has_sewage=serializer.validated_data.get('sewageSystem', False),
             direction=serializer.validated_data.get('direction'),
             floors=serializer.validated_data.get('floors'),
@@ -101,6 +104,7 @@ def add_property(request):
         # If the data is invalid, return errors
         logger.error(f"Add property serializer.errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 def store_property_media(request, property_instance):
     media_files = request.FILES.getlist('media')
@@ -139,14 +143,15 @@ def store_property_media(request, property_instance):
 
     property_instance.property_images = image_urls
     property_instance.property_videos = video_urls
-    property_instance.save(update_fields=['property_images', 'property_videos'])
-
+    property_instance.save(
+        update_fields=['property_images', 'property_videos'])
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def explore_properties_by_location(request):
-    serializer = user_serializers.SearchNearbyPropertiesSerializer(data=request.GET)
+    serializer = user_serializers.SearchNearbyPropertiesSerializer(
+        data=request.GET)
 
     if not serializer.is_valid():
         return JsonResponse({"error": serializer.errors}, status=400)
@@ -177,14 +182,17 @@ def explore_properties_by_location(request):
                   .order_by('distance')
                   [offset:offset + limit])
 
-    result = [map_property(property, property.distance) for property in properties]
+    result = [map_property(property, property.distance)
+              for property in properties]
 
     return JsonResponse({"properties": result})
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def explore_properties_by_interests(request):
-    serializer = user_serializers.SearchInterestedPropertiesSerializer(data=request.GET)
+    serializer = user_serializers.SearchInterestedPropertiesSerializer(
+        data=request.GET)
     if not serializer.is_valid():
         return JsonResponse({"error": serializer.errors}, status=400)
 
@@ -204,15 +212,19 @@ def explore_properties_by_interests(request):
     # Modify queries to include guest_id
     engagement_filters = Q()
     if user_id:
-        engagement_filters |= Q(views__user_id=user_id) | Q(shares__user_id=user_id) | Q(clicks__user_id=user_id) | Q(inquiries__user_id=user_id)
+        engagement_filters |= Q(views__user_id=user_id) | Q(shares__user_id=user_id) | Q(
+            clicks__user_id=user_id) | Q(inquiries__user_id=user_id)
     if guest_id:
-        engagement_filters |= Q(views__guest_id=guest_id) | Q(shares__guest_id=guest_id) | Q(clicks__guest_id=guest_id) | Q(inquiries__guest_id=guest_id)
+        engagement_filters |= Q(views__guest_id=guest_id) | Q(shares__guest_id=guest_id) | Q(
+            clicks__guest_id=guest_id) | Q(inquiries__guest_id=guest_id)
 
-    user_engagement = Property.objects.filter(engagement_filters).distinct().values('property_type', 'area', 'price')
+    user_engagement = Property.objects.filter(
+        engagement_filters).distinct().values('property_type', 'area', 'price')
 
     if not user_engagement.exists():
         # If no engagement, return all properties except those by the current user
-        properties = Property.objects.exclude(user_id=user_id).order_by('-listing_date')[offset:offset + limit]
+        properties = Property.objects.exclude(user_id=user_id).order_by(
+            '-listing_date')[offset:offset + limit]
         properties_list = [map_property(prop) for prop in properties]
         return JsonResponse({"properties": properties_list})
 
@@ -228,8 +240,6 @@ def explore_properties_by_interests(request):
     properties_list = [map_property(prop) for prop in similar_properties]
 
     return JsonResponse({"properties": properties_list})
-
-
 
 
 @api_view(["GET"])
@@ -265,7 +275,6 @@ def save_property(request, property_id):
         return Response({"error": "Property does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_saved_properties(request):
@@ -285,17 +294,43 @@ def get_user_saved_properties(request):
 @permission_classes([IsAuthenticated])
 def get_user_properties(request):
     user = request.user
-    
+
     # Get user's properties ordered by listing date
     properties = Property.objects.filter(user=user).order_by('-listing_date')
-    
+
     # Initialize paginator
     paginator = PropertyPagination()
     paginated_properties = paginator.paginate_queryset(properties, request)
-    
+
     # Serialize the paginated data
     serializer = UserPropertySerializer(paginated_properties, many=True)
-    
+
     # Ensure the serialized data is returned correctly
     response_data = paginator.get_paginated_response(serializer.data)
     return response_data
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def make_property_featured(request, property_id):
+    try:
+        property_obj = Property.objects.get(
+            property_id=property_id, user=request.user)
+        if property_obj.is_featured:
+            return Response(
+                {"error": "Property is already featured."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        property_obj.is_featured = True
+        property_obj.featured_until = now() + timedelta(days=30)
+        property_obj.save()
+        return Response(
+            {"message": "Property is now featured until {}".format(
+                property_obj.featured_until)},
+            status=status.HTTP_200_OK
+        )
+    except Property.DoesNotExist:
+        return Response(
+            {"error": "Property does not exist or is not owned by you."},
+            status=status.HTTP_404_NOT_FOUND
+        )
