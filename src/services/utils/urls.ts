@@ -1,6 +1,6 @@
 // src/services/urls.ts
-
-export const BASE_URL = 'http://127.0.0.1:8000';
+export const BASE_URL_WITHOUT_TRANSPORT = '10.0.2.2:8000';
+export const BASE_URL = `http://${BASE_URL_WITHOUT_TRANSPORT}`;
 
 // API Endpoints
 export const apiUrls = {
@@ -35,5 +35,5 @@ export const apiUrls = {
 };
 
 // WebSocket URLs
-export const getLogInteractionsWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/log-interactions/';
-export const getMessagesWebSocketUrl = (): string => 'ws://127.0.0.1:8000/ws/messages/';
+export const getLogInteractionsWebSocketUrl = (): string => `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/log-interactions/`;
+export const getMessagesWebSocketUrl = (): string => `ws://${BASE_URL_WITHOUT_TRANSPORT}/ws/messages/`;

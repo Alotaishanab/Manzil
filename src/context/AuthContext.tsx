@@ -1,5 +1,5 @@
 // src/context/AuthContext.tsx
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, {createContext, useState, useEffect, ReactNode} from 'react';
 import AsyncHelper from '../helpers/asyncHelper';
 import LoggingWebSocketManager from '../services/websocket/LoggingWebSocketManager';
 
@@ -23,7 +23,7 @@ export const AuthContext = createContext<AuthContextProps>({
   initializeGuestId: async () => {},
 });
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{children: ReactNode}> = ({children}) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [userId, setUserIdState] = useState<string | null>(null);
   const [guestId, setGuestIdState] = useState<string | null>(null);
@@ -33,10 +33,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Update WebSocket connection based on the auth state
     if (token) {
       // If token exists, pass token to WebSocket manager
-      LoggingWebSocketManager.updateAuthState(token, null);  // No guestId for authenticated users
+      LoggingWebSocketManager.updateAuthState(token, null); // No guestId for authenticated users
     } else if (guestId) {
       // If guestId exists, pass guestId to WebSocket manager
-      LoggingWebSocketManager.updateAuthState(null, guestId);  // No token for guest users
+      LoggingWebSocketManager.updateAuthState(null, guestId); // No token for guest users
     }
   }, [token, guestId]);
 
@@ -46,8 +46,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const [storedToken, storedUserId, storedGuestId] = await Promise.all([
           AsyncHelper.getToken(),
           AsyncHelper.getUserId(),
-          AsyncHelper.getGuestId()
+          AsyncHelper.getGuestId(),
         ]);
+
+        console.log(`Stored token in AuthProvider is ${storedToken}`);
 
         if (storedToken) {
           setTokenState(storedToken);
@@ -100,8 +102,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setAuthUserId,
         clearAuth,
         initializeGuestId,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

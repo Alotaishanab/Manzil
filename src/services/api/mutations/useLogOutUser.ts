@@ -3,20 +3,15 @@ import api from '../../api/api';
 import {apiUrls} from '../../utils/urls';
 import AsyncHelper from '../../../helpers/asyncHelper';
 
-
-
-
-
 const logoutUser = async () => {
+  const refresh = await AsyncHelper.getRefreshToken();
 
-    const refresh = await AsyncHelper.getRefreshToken()
+  console.log('refresh', refresh);
+  await api.post<{}>(apiUrls.logout, {refresh});
 
-    console.log('refresh', refresh)
-   await api.post<{}>(apiUrls.logout, {refresh});
-  
-  await AsyncHelper.removeToken()
-  await AsyncHelper.removeRefreshToken()
-  
+  await AsyncHelper.removeToken();
+  await AsyncHelper.removeRefreshToken();
+
   return undefined;
 };
 

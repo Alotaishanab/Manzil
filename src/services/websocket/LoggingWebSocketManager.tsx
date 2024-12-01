@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
-import { getLogInteractionsWebSocketUrl } from '../utils/urls';
+import {getLogInteractionsWebSocketUrl} from '../utils/urls';
 import NetInfo from '@react-native-community/netinfo';
-import { InteractionEvent } from './logging';
+import {InteractionEvent} from './logging';
 
 class LoggingWebSocketManager extends EventEmitter {
   private static instance: LoggingWebSocketManager;
@@ -22,7 +22,9 @@ class LoggingWebSocketManager extends EventEmitter {
     // Listen for network changes and reconnect when online
     NetInfo.addEventListener(state => {
       if (state.isConnected && !this.isConnected) {
-        console.log('Network is back online. Attempting to reconnect Log Interactions WebSocket...');
+        console.log(
+          'Network is back online. Attempting to reconnect Log Interactions WebSocket...',
+        );
         this.connect();
       }
     });
@@ -47,7 +49,10 @@ class LoggingWebSocketManager extends EventEmitter {
 
   // Update authentication state and reconnect if necessary
   public updateAuthState(token: string | null, guestId: string | null) {
-    console.log('Updating WebSocket auth state:', { token: token ? 'present' : 'null', guestId });
+    console.log('Updating WebSocket auth state:', {
+      token: token ? 'present' : 'null',
+      guestId,
+    });
 
     // Only close and reconnect if token or guestId has changed
     if (this.token !== token || this.guestId !== guestId) {
@@ -66,15 +71,23 @@ class LoggingWebSocketManager extends EventEmitter {
   // Connect to the WebSocket server
   public async connect(): Promise<void> {
     // Check if token or guestId is set, but not both
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
-        console.log('Log Interactions WebSocket is already connected or connecting.');
-        return;
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN ||
+        this.socket.readyState === WebSocket.CONNECTING)
+    ) {
+      console.log(
+        'Log Interactions WebSocket is already connected or connecting.',
+      );
+      return;
     }
 
     // If neither token nor guestId is available, don't attempt to connect
     if (!this.token && !this.guestId) {
-        console.log('No token or guestId available. Log Interactions WebSocket will not connect.');
-        return;
+      console.log(
+        'No token or guestId available. Log Interactions WebSocket will not connect.',
+      );
+      return;
     }
 
     // If both token and guestId are available, you can either prioritize token or guestId.
@@ -83,13 +96,13 @@ class LoggingWebSocketManager extends EventEmitter {
     const params = new URLSearchParams();
 
     if (this.token) {
-        // Use token if it's available
-        params.append('token', this.token);
-        console.log('Using token for WebSocket connection.');
+      // Use token if it's available
+      params.append('token', this.token);
+      console.log('Using token for WebSocket connection.');
     } else if (this.guestId) {
-        // Use guestId if no token is present
-        params.append('guest_id', this.guestId);
-        console.log('Using guest_id for WebSocket connection.');
+      // Use guestId if no token is present
+      params.append('guest_id', this.guestId);
+      console.log('Using guest_id for WebSocket connection.');
     }
 
     finalWsUrl += `?${params.toString()}`;
@@ -99,36 +112,39 @@ class LoggingWebSocketManager extends EventEmitter {
     this.socket = new WebSocket(finalWsUrl);
 
     this.socket.onopen = () => {
-        console.log('Log Interactions WebSocket connected');
-        this.isConnected = true;
-        this.flushQueue();
-        this.emit('open');
+      console.log('Log Interactions WebSocket connected');
+      this.isConnected = true;
+      this.flushQueue();
+      this.emit('open');
     };
 
-    this.socket.onmessage = (event) => {
-        console.log('Log Interactions WebSocket message received:', event.data);
-        this.emit('message', event.data);
+    this.socket.onmessage = event => {
+      console.log('Log Interactions WebSocket message received:', event.data);
+      this.emit('message', event.data);
     };
 
-    this.socket.onclose = (event) => {
-        console.log(`Log Interactions WebSocket closed: ${event.reason}`);
-        this.isConnected = false;
-        this.emit('close', event.reason);
+    this.socket.onclose = event => {
+      console.log(`Log Interactions WebSocket closed: ${event.reason}`);
+      this.isConnected = false;
+      this.emit('close', event.reason);
 
-        if (!this.isManuallyClosed) {
-            console.log(`Reconnecting Log Interactions WebSocket in ${this.reconnectInterval / 1000} seconds...`);
-            setTimeout(() => {
-                console.log('Attempting to reconnect Log Interactions WebSocket...');
-                this.connect();
-            }, this.reconnectInterval);
-        }
+      if (!this.isManuallyClosed) {
+        console.log(
+          `Reconnecting Log Interactions WebSocket in ${
+            this.reconnectInterval / 1000
+          } seconds...`,
+        );
+        setTimeout(() => {
+          console.log('Attempting to reconnect Log Interactions WebSocket...');
+          this.connect();
+        }, this.reconnectInterval);
+      }
     };
 
-    this.socket.onerror = (error) => {
-        console.error('Log Interactions WebSocket error:', error);
+    this.socket.onerror = error => {
+      console.error('Log Interactions WebSocket error:', error);
     };
-}
-
+  }
 
   // Close the WebSocket connection manually
   public close(): void {
@@ -140,7 +156,12 @@ class LoggingWebSocketManager extends EventEmitter {
 
   // Flush the message queue when the WebSocket is connected
   private flushQueue(): void {
-    while (this.messageQueue.length > 0 && this.isConnected && this.socket && this.socket.readyState === WebSocket.OPEN) {
+    while (
+      this.messageQueue.length > 0 &&
+      this.isConnected &&
+      this.socket &&
+      this.socket.readyState === WebSocket.OPEN
+    ) {
       const message = this.messageQueue.shift();
       if (message) {
         try {

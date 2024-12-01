@@ -1,22 +1,26 @@
 // api/api.ts
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
+import {BASE_URL} from '../utils/urls';
 
-const QA = 'http://127.0.0.1:8000/';
+const QA = `${BASE_URL}/`;
 
 type ApiResponse<T> = Promise<T>;
 
 class Api {
   private client: AxiosInstance;
   private isRefreshing: boolean;
-  private failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: any) => void }>;
+  private failedQueue: Array<{
+    resolve: (value: unknown) => void;
+    reject: (reason?: any) => void;
+  }>;
 
   constructor() {
     this.client = axios.create({
       baseURL: QA,
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -28,25 +32,25 @@ class Api {
   private initializeInterceptors() {
     // Request Interceptor
     this.client.interceptors.request.use(
-      async (config) => {
+      async config => {
         const token = await AsyncHelper.getToken();
         const guestId = await AsyncHelper.getGuestId();
 
         if (token) {
-          config.headers['Authorization'] = `Bearer ${token}`;
+          config.headers.Authorization = `Bearer ${token}`;
         } else if (guestId) {
           config.headers['Guest-Id'] = guestId;
         }
 
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error),
     );
 
     // Response Interceptor
     this.client.interceptors.response.use(
-      (response) => response.data, // Return response.data directly
-      async (error) => {
+      response => response.data, // Return response.data directly
+      async error => {
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -54,13 +58,13 @@ class Api {
 
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
-              this.failedQueue.push({ resolve, reject });
+              this.failedQueue.push({resolve, reject});
             })
-              .then((token) => {
-                originalRequest.headers['Authorization'] = `Bearer ${token}`;
+              .then(token => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
                 return this.client(originalRequest);
               })
-              .catch((err) => Promise.reject(err));
+              .catch(err => Promise.reject(err));
           }
 
           this.isRefreshing = true;
@@ -72,12 +76,12 @@ class Api {
           }
 
           return this.refreshToken(refreshToken)
-            .then((newToken) => {
-              originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+            .then(newToken => {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
               this.processQueue(null, newToken);
               return this.client(originalRequest);
             })
-            .catch((err) => {
+            .catch(err => {
               this.processQueue(err, null);
               this.logout();
               return Promise.reject(err);
@@ -92,12 +96,12 @@ class Api {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   private processQueue(error: Error | null, token: string | null = null) {
-    this.failedQueue.forEach((prom) => {
+    this.failedQueue.forEach(prom => {
       if (error) {
         prom.reject(error);
       } else {
@@ -109,9 +113,9 @@ class Api {
 
   private async refreshToken(refreshToken: string): Promise<string> {
     try {
-      const response = await this.client.post<{ accessToken: string }>(
-        `auth/refresh-token`,
-        { refreshToken }
+      const response = await this.client.post<{accessToken: string}>(
+        'auth/refresh-token',
+        {refreshToken},
       );
       const newAccessToken = response.accessToken;
 
@@ -134,7 +138,7 @@ class Api {
   }
 
   async get<T>(route: string, sendAuthToken = true): ApiResponse<T> {
-    const config: AxiosRequestConfig = { headers: {} };
+    const config: AxiosRequestConfig = {headers: {}};
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
@@ -145,9 +149,9 @@ class Api {
     route: string,
     params: any,
     sendAuthToken = true,
-    multipart = false
+    multipart = false,
   ): ApiResponse<T> {
-    const config: AxiosRequestConfig = { headers: {} };
+    const config: AxiosRequestConfig = {headers: {}};
     if (multipart) {
       // Do NOT set 'Content-Type'; let Axios handle it
     } else {
@@ -162,7 +166,7 @@ class Api {
   private async addAuthToken(config: AxiosRequestConfig) {
     const token = await AsyncHelper.getToken();
     if (token && config.headers) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
   }
 }

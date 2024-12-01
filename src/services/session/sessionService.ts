@@ -1,7 +1,7 @@
 // services/session/sessionService.ts
 
 import api from '../api/api';
-import { apiUrls } from '../utils/urls';
+import {apiUrls} from '../utils/urls';
 import AsyncHelper from '../../helpers/asyncHelper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -28,13 +28,13 @@ interface SessionStartResponse {
  * @returns The session_id if successful, otherwise null.
  */
 export const logSessionStartService = async (
-  payload: SessionStartPayload
+  payload: SessionStartPayload,
 ): Promise<string | null> => {
   try {
     const response = await api.post<SessionStartResponse>(
       apiUrls.startSession,
       payload,
-      { headers: { sendAuthToken: false } } // Do not send auth token for session start
+      false, // Do not send auth token for session start
     );
     console.log('logSessionStartService response:', response.data); // Log only the data part
 
@@ -55,14 +55,14 @@ export const logSessionStartService = async (
 export const sendHeartbeat = async (
   sessionId: string,
   guestId?: string | null,
-  userId?: string | null
+  userId?: string | null,
 ) => {
   try {
     const accessToken = await AsyncHelper.getToken(); // Retrieve the access token
     const storedUserId = userId || (await AsyncHelper.getUserId()); // Retrieve userId if not provided
 
     // Prepare the payload based on session type
-    const payload: any = { session_id: sessionId };
+    const payload: any = {session_id: sessionId};
     if (storedUserId) {
       payload.user_id = storedUserId;
     } else if (guestId) {
@@ -71,11 +71,13 @@ export const sendHeartbeat = async (
 
     // Log the relevant details with proper template strings
     console.log(
-      `Sending heartbeat for ${storedUserId ? 'User' : 'Guest'} session, ID: ${sessionId}`
+      `Sending heartbeat for ${
+        storedUserId ? 'User' : 'Guest'
+      } session, ID: ${sessionId}`,
     );
     console.log(
       'Heartbeat payload details:',
-      storedUserId ? `User ID: ${storedUserId}` : `Guest ID: ${guestId}`
+      storedUserId ? `User ID: ${storedUserId}` : `Guest ID: ${guestId}`,
     );
     console.log('Auth Token:', accessToken ? '[Token Present]' : '[No Token]');
     console.log('Heartbeat payload:', JSON.stringify(payload, null, 2));
@@ -89,11 +91,7 @@ export const sendHeartbeat = async (
       : `${apiUrls.sessionHeartbeat}/`;
 
     // Send heartbeat with appropriate Authorization header handled by interceptors
-    const response = await api.post(
-      heartbeatUrl,
-      payload,
-      { headers: { sendAuthToken } }
-    );
+    const response = await api.post(heartbeatUrl, payload, sendAuthToken);
 
     console.log('Heartbeat response:', response.data); // Log only the data part
   } catch (error) {
@@ -111,11 +109,7 @@ export const performLogout = async (): Promise<void> => {
     const userSessionId = await AsyncStorage.getItem('user_session');
     if (userSessionId) {
       // End user session on the backend
-      await api.post(
-        apiUrls.endSession,
-        { session_id: userSessionId },
-        { headers: { sendAuthToken: true } }
-      );
+      await api.post(apiUrls.endSession, {session_id: userSessionId});
       console.log('User session ended on the backend.');
     }
 

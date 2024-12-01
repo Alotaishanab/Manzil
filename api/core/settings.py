@@ -32,8 +32,8 @@ SECRET_KEY = 'django-insecure-0-ix1ad7uqk_g*&pqvj9-!-t)qxr(9y+2a1jy$*ic$h^-1y6x@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '10.0.2.2', '127.0.0.1', '192.168.1.221', '192.168.1.103']
-
+ALLOWED_HOSTS = ['localhost', '10.0.2.2',
+                 '127.0.0.1', '192.168.1.221', '192.168.1.103']
 
 
 # Application definition
@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'account',
     'properties',
-    'messaging',  
+    'messaging',
     'analytics',
 ]
 ASGI_APPLICATION = "core.asgi.application"
@@ -144,7 +144,6 @@ DATABASES = {
 }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -191,5 +190,5 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 
 # Define GEOS and GDAL library paths
-GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.9.3_2/lib/libgdal.dylib'
-GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
+# GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.9.3_2/lib/libgdal.dylib'
+# GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'

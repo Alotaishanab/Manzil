@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import React, {useState} from 'react';
+import {Alert, Pressable, Text, TouchableOpacity, View} from 'react-native';
 import {
   CustomButton,
   CustomTextInput,
@@ -7,42 +7,36 @@ import {
   Screen,
   TopSpace,
 } from '@components';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useIntl } from '@context';
-import { useValidations } from '../../../src/validations/useValidations';
-import { useForm } from 'react-hook-form';
-import { globalStyles } from '../../../src/styles/globalStyles';
-import { useNavigation } from '@react-navigation/native';
-import { showCustomFlashMessage } from '../../../src/helpers/showCustomFlashMessage';
-import { useLoginUser, useGetProfile, useGetSavedProperties } from '@services'; // Added useGetSavedProperties
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useIntl} from '@context';
+import {useValidations} from '../../../src/validations/useValidations';
+import {useForm} from 'react-hook-form';
+import {globalStyles} from '../../../src/styles/globalStyles';
+import {useNavigation} from '@react-navigation/native';
+import {useLoginUser, useGetProfile, useGetSavedProperties} from '@services'; // Added useGetSavedProperties
 import AsyncHelper from '../../../src/helpers/asyncHelper';
-import { styles } from './styles';
+import {styles} from './styles';
 import useSessionTracker from '../../hooks/useSessionTracker';
 
-
 export const Login = () => {
-  const { intl } = useIntl();
-  const { mutate: login } = useLoginUser();
+  const {intl} = useIntl();
+  const {mutate: login} = useLoginUser();
   const navigation: any = useNavigation();
-  const { loginSchema } = useValidations();
-  const { startSessionHandler } = useSessionTracker();
+  const {loginSchema} = useValidations();
+  const {startSessionHandler} = useSessionTracker();
 
   // Using react-query to get the profile and saved properties after login
-  const { refetch: refetchProfile } = useGetProfile({ enabled: false }); // Disable initial fetch
-  const { refetch: refetchSavedProperties } = useGetSavedProperties({ enabled: false }); // Add refetch for saved properties
+  const {refetch: refetchProfile} = useGetProfile({enabled: false}); // Disable initial fetch
+  const {refetch: refetchSavedProperties} = useGetSavedProperties(); // Add refetch for saved properties
 
   type FormData = {
     email: string;
     password: string;
   };
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isValid },
-  } = useForm<FormData>({
+  const {control, handleSubmit} = useForm<FormData>({
     defaultValues: {
-      email: 'Alotaishanab@gmail.com',
+      email: 'zulqarnain.fastian@gmail.com',
       password: 'Password@123',
     },
     mode: 'onSubmit',
@@ -51,15 +45,20 @@ export const Login = () => {
 
   const handleLogin = (data: FormData) => {
     login(data, {
-      onSuccess: async (response) => {
+      onSuccess: async response => {
         try {
+          console.log(`Login endpoint response is ${response}`);
+
           if (!response || !response.user || !response.token) {
-            console.error("Login response is incomplete:", response);
-            Alert.alert("Login Failed", "Incomplete login response from server.");
+            console.error('Login response is incomplete:', response);
+            Alert.alert(
+              'Login Failed',
+              'Incomplete login response from server.',
+            );
             return;
           }
 
-          console.log("Login successful, storing tokens and user ID...");
+          console.log('Login successful, storing tokens and user ID...');
 
           // Remove guest ID on successful login
           await AsyncHelper.removeGuestId();
@@ -77,40 +76,35 @@ export const Login = () => {
           console.log('Stored Access Token:', storedToken);
 
           // Start session and handle navigation
-          console.log("Starting session...");
+          console.log('Starting session...');
           await startSessionHandler();
 
           // Navigate to the Account screen
-          navigation.navigate("BottomTabNavigator", { screen: "Explore" });
-          console.log("Navigated to Account screen.");
+          navigation.navigate('BottomTabNavigator', {screen: 'Explore'});
+          console.log('Navigated to Account screen.');
 
           // Refetch profile and saved properties after navigation
-          console.log("Refetching profile...");
+          console.log('Refetching profile...');
           await refetchProfile(); // Refetch profile
-          console.log("Profile refetched successfully");
+          console.log('Profile refetched successfully');
 
-          console.log("Refetching saved properties...");
+          console.log('Refetching saved properties...');
           await refetchSavedProperties(); // Refetch saved properties
-          console.log("Saved properties refetched successfully");
-
+          console.log('Saved properties refetched successfully');
         } catch (error) {
-          console.error("Error during login handling:", error);
-          Alert.alert("Login Error", "An unexpected error occurred during login.");
+          console.error('Error during login handling:', error);
+          Alert.alert(
+            'Login Error',
+            'An unexpected error occurred during login.',
+          );
         }
       },
-      onError: (error) => {
-        console.error("Login error:", error);
-        Alert.alert("Login Failed", "Invalid email or password.");
+      onError: error => {
+        console.error('Login error:', error);
+        Alert.alert('Login Failed', 'Invalid email or password.');
       },
     });
   };
-  
-
-  
-  
-  
-  
-  
 
   const [hidePassword, setHidePassword] = useState(true);
   const togglePassword = () => {
@@ -129,11 +123,13 @@ export const Login = () => {
 
   return (
     <Screen showKeyboardAware={true}>
-      <HeaderBackButtonTitle text={intl.formatMessage({ id: 'signinScreen.header' })} />
+      <HeaderBackButtonTitle
+        text={intl.formatMessage({id: 'signinScreen.header'})}
+      />
       <TopSpace top={50} />
 
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({ id: 'signinScreen.email-address' })}
+        {intl.formatMessage({id: 'signinScreen.email-address'})}
       </Text>
 
       <CustomTextInput
@@ -152,7 +148,7 @@ export const Login = () => {
       <TopSpace top={30} />
 
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({ id: 'signinScreen.password' })}
+        {intl.formatMessage({id: 'signinScreen.password'})}
       </Text>
 
       <CustomTextInput
@@ -176,7 +172,7 @@ export const Login = () => {
         disabled={false}
         borderRadius={30}
         handleClick={handleSubmit(handleLogin)}
-        title={intl.formatMessage({ id: 'buttons.sign-in' })}
+        title={intl.formatMessage({id: 'buttons.sign-in'})}
         showRightIconButton={true}
       />
 
@@ -184,14 +180,14 @@ export const Login = () => {
 
       <TouchableOpacity onPress={handleForgot} style={globalStyles.centeredBtn}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({ id: 'buttons.forgot-password?' })}
+          {intl.formatMessage({id: 'buttons.forgot-password?'})}
         </Text>
       </TouchableOpacity>
 
       <TopSpace top={10} />
 
       <Text style={styles.orText}>
-        {intl.formatMessage({ id: 'signinScreen.or' })}
+        {intl.formatMessage({id: 'signinScreen.or'})}
       </Text>
 
       <TopSpace top={10} />
@@ -199,11 +195,11 @@ export const Login = () => {
       <View
         style={[
           globalStyles.simpleRow,
+          // eslint-disable-next-line react-native/no-inline-styles
           {
             marginVertical: 20,
           },
-        ]}
-      >
+        ]}>
         <CustomButton
           iconName="GoogleIcon"
           showSocialButton={true}
@@ -223,13 +219,13 @@ export const Login = () => {
 
       <TopSpace top={50} />
 
-      <View style={[globalStyles.simpleRow, { justifyContent: 'center' }]}>
+      <View style={[globalStyles.simpleRow, {justifyContent: 'center'}]}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({ id: 'signinScreen.no-account' })}
+          {intl.formatMessage({id: 'signinScreen.no-account'})}
         </Text>
         <Pressable onPress={handleRegister}>
           <Text style={styles.forgotPasswordText}>
-            {intl.formatMessage({ id: 'buttons.register' })}
+            {intl.formatMessage({id: 'buttons.register'})}
           </Text>
         </Pressable>
       </View>
