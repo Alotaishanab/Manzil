@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import timezone, timedelta
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.views import APIView
@@ -20,6 +20,7 @@ from .ownership_validator import verify_property_ownership
 from django.core.exceptions import ObjectDoesNotExist
 # Adjust the import path as needed
 from .user_serializers import AddPropertySerializer, UserPropertySerializer
+from django.utils.timezone import now
 import logging
 
 logger = logging.getLogger(__name__)
@@ -314,6 +315,8 @@ def get_user_properties(request):
 @permission_classes([IsAuthenticated])
 def make_property_featured(request, property_id):
     try:
+        print("property_id", property_id)
+        print("request.user", request.user)
         property_obj = Property.objects.get(
             property_id=property_id, user=request.user)
         if property_obj.is_featured:

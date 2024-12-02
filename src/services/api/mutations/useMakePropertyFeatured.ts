@@ -16,7 +16,7 @@ const makePropertyFeatured = async ({
 }: MakePropertyFeaturedRequest): Promise<MakePropertyFeaturedResponse> => {
   try {
     const response = await api.post<MakePropertyFeaturedResponse>(
-      `${apiUrls.makePropertyFeatured}/${property_id}/make-featured`,
+      `${apiUrls.makePropertyFeatured}/${property_id}/make-featured/`,
       {},
     );
     //@ts-ignore

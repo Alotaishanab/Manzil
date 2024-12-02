@@ -24,7 +24,7 @@ export const apiUrls = {
   saveProperty: 'properties/',
   getUserProperties: 'properties/user/my-properties/',
   getSavedProperties: 'properties/user/saved-properties/',
-  makePropertyFeatured: 'properties/user/my-properties/make-featured',
+  makePropertyFeatured: 'properties/user/my-properties',
 
   // Session-related endpoints
   startSession: 'account/user/start-session/',
