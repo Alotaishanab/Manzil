@@ -92,6 +92,9 @@ class SearchInterestedPropertiesSerializer(serializers.Serializer):
     limit = serializers.IntegerField(default=20)
     offset = serializers.IntegerField(default=0)
 
+class PropertiesMapSerializer(serializers.Serializer):
+    limit = serializers.IntegerField(default=20)
+    offset = serializers.IntegerField(default=0)
 
 class PropertyViewSerializer(serializers.ModelSerializer):
     class Meta:

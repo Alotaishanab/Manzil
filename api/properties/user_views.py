@@ -334,3 +334,27 @@ def make_property_featured(request, property_id):
             {"error": "Property does not exist or is not owned by you."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_properties_map_coordinates(request):
+    serializer = user_serializers.PropertiesMapSerializer(
+        data=request.GET)
+
+    if not serializer.is_valid():
+        return JsonResponse({"error": serializer.errors}, status=400)
+
+    limit = serializer.validated_data.get('limit', 20)
+    offset = serializer.validated_data.get('offset', 0)
+
+    properties = (Property.objects
+                  # For authenticated users
+                  .exclude(user_id=request.user.user_id)
+                  # .filter(property_type__in=['for_sale', 'long_term_rent', 'short_term_rent'])
+                  [offset:offset + limit])
+
+    result = [map_property(property)
+              for property in properties]
+
+    return JsonResponse({"properties": result})

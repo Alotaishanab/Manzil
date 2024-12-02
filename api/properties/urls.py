@@ -11,4 +11,6 @@ urlpatterns = [
     path('user/my-properties/', user_views.get_user_properties),
     path('user/my-properties/<int:property_id>/make-featured/',
          user_views.make_property_featured),
+    path('map-coordinates/',
+         user_views.get_properties_map_coordinates),
 ]
