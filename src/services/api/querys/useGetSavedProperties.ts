@@ -1,6 +1,9 @@
-import {useQuery} from '@tanstack/react-query';
+// src/services/api/querys/useGetSavedProperties.ts
+import { useQuery } from '@tanstack/react-query';
+import { useContext } from 'react';
 import api from '../api';
-import {apiUrls} from '../../utils/urls';
+import { apiUrls } from '../../utils/urls';
+import { AuthContext } from '../../../context/AuthContext'; // adjust the path as needed
 
 export interface SavedProperty {
   property_id: number;
@@ -20,16 +23,19 @@ interface SavedPropertiesResponse {
 const getSavedProperties = async (): Promise<SavedPropertiesResponse> => {
   const response = await api.get<SavedPropertiesResponse>(
     apiUrls.getSavedProperties,
+    true // send auth token
   );
-  //@ts-ignore
   return response;
 };
 
 // React Query hook to fetch the saved properties for the user
 export const useGetSavedProperties = () => {
+  const { token } = useContext(AuthContext);
+  
   return useQuery<SavedPropertiesResponse, Error>({
     queryKey: ['savedProperties'],
     queryFn: getSavedProperties,
     staleTime: 1000 * 60 * 5, // Cache the data for 5 minutes
+    enabled: Boolean(token), // Only run this query if a token exists.
   });
 };

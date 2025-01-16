@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
-import {Alert, Pressable, Text, TouchableOpacity, View} from 'react-native';
+// src/screens/account/login/index.tsx
+import React, { useState, useContext } from 'react';
+import { Alert, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import {
   CustomButton,
   CustomTextInput,
@@ -7,99 +8,94 @@ import {
   Screen,
   TopSpace,
 } from '@components';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {useIntl} from '@context';
-import {useValidations} from '../../../src/validations/useValidations';
-import {useForm} from 'react-hook-form';
-import {globalStyles} from '../../../src/styles/globalStyles';
-import {useNavigation} from '@react-navigation/native';
-import {useLoginUser, useGetProfile, useGetSavedProperties} from '@services'; // Added useGetSavedProperties
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useIntl } from '@context';
+import { useValidations } from '../../../src/validations/useValidations';
+import { useForm } from 'react-hook-form';
+import { globalStyles } from '../../../src/styles/globalStyles';
+import { useNavigation } from '@react-navigation/native';
+import { useLoginUser, useGetProfile, useGetSavedProperties } from '@services';
 import AsyncHelper from '../../../src/helpers/asyncHelper';
-import {styles} from './styles';
-import useSessionTracker from '../../hooks/useSessionTracker';
+import { styles } from './styles';
+import useSessionManager from '../../../src/hooks/useSessionManager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../../src/context/AuthContext'; // Ensure the path is correct
 
 export const Login = () => {
-  const {intl} = useIntl();
-  const {mutate: login} = useLoginUser();
+  const { intl } = useIntl();
   const navigation: any = useNavigation();
-  const {loginSchema} = useValidations();
-  const {startSessionHandler} = useSessionTracker();
+  const { loginSchema } = useValidations();
 
-  // Using react-query to get the profile and saved properties after login
-  const {refetch: refetchProfile} = useGetProfile({enabled: false}); // Disable initial fetch
-  const {refetch: refetchSavedProperties} = useGetSavedProperties(); // Add refetch for saved properties
+  // If you have a login mutation
+  const { mutate: login } = useLoginUser();
 
-  type FormData = {
-    email: string;
-    password: string;
-  };
+  // Extract the session manager helper
+  const { stopAndClearSession } = useSessionManager();
+  const { clearGuestId } = useContext(AuthContext);
 
-  const {control, handleSubmit} = useForm<FormData>({
+  // react-query for profile + saved props
+  const { refetch: refetchProfile } = useGetProfile({ enabled: false });
+  const { refetch: refetchSavedProperties } = useGetSavedProperties();
+
+  type FormData = { email: string; password: string };
+  const { control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       email: 'zulqarnain.fastian@gmail.com',
       password: 'Password@123',
     },
-    mode: 'onSubmit',
     resolver: zodResolver(loginSchema),
   });
 
   const handleLogin = (data: FormData) => {
     login(data, {
-      onSuccess: async response => {
+      onSuccess: async (response) => {
         try {
-          console.log(`Login endpoint response is ${response}`);
+          console.log('Login endpoint response is', response);
 
           if (!response || !response.user || !response.token) {
             console.error('Login response is incomplete:', response);
-            Alert.alert(
-              'Login Failed',
-              'Incomplete login response from server.',
-            );
+            Alert.alert('Login Failed', 'Incomplete login response from server.');
             return;
           }
-
           console.log('Login successful, storing tokens and user ID...');
 
-          // Remove guest ID on successful login
-          await AsyncHelper.removeGuestId();
+          // 1) Kill old guest session & heartbeat
+          await stopAndClearSession();
 
-          // Save user ID, access token, and refresh token
-          await AsyncHelper.setUserId(response.user.id.toString()); // Ensure 'id' is a string
+          // 2) Remove local guest session data
+          await clearGuestId();
+          await AsyncStorage.removeItem('guest_session');
+
+          // 3) Store user ID + tokens
+          await AsyncHelper.setUserId(response.user.id.toString());
           await AsyncHelper.setToken(response.token.access);
           await AsyncHelper.setRefreshToken(response.token.refresh);
 
-          // Verify userId is set
+          // confirm
           const storedUserId = await AsyncHelper.getUserId();
-          console.log('Stored user ID after login:', storedUserId);
-
           const storedToken = await AsyncHelper.getToken();
+          console.log('Stored user ID after login:', storedUserId);
           console.log('Stored Access Token:', storedToken);
 
-          // Start session and handle navigation
-          console.log('Starting session...');
-          await startSessionHandler();
-
-          // Navigate to the Account screen
-          navigation.navigate('BottomTabNavigator', {screen: 'Explore'});
+          // 4) navigate
+          navigation.navigate('BottomTabNavigator', { screen: 'Explore' });
           console.log('Navigated to Account screen.');
 
-          // Refetch profile and saved properties after navigation
+          // 5) refetch profile + saved
           console.log('Refetching profile...');
-          await refetchProfile(); // Refetch profile
+          await refetchProfile();
           console.log('Profile refetched successfully');
 
           console.log('Refetching saved properties...');
-          await refetchSavedProperties(); // Refetch saved properties
+          await refetchSavedProperties();
           console.log('Saved properties refetched successfully');
+
         } catch (error) {
           console.error('Error during login handling:', error);
-          Alert.alert(
-            'Login Error',
-            'An unexpected error occurred during login.',
-          );
+          Alert.alert('Login Error', 'An unexpected error occurred during login.');
         }
       },
-      onError: error => {
+      onError: (error) => {
         console.error('Login error:', error);
         Alert.alert('Login Failed', 'Invalid email or password.');
       },
@@ -124,12 +120,12 @@ export const Login = () => {
   return (
     <Screen showKeyboardAware={true}>
       <HeaderBackButtonTitle
-        text={intl.formatMessage({id: 'signinScreen.header'})}
+        text={intl.formatMessage({ id: 'signinScreen.header' })}
       />
       <TopSpace top={50} />
 
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({id: 'signinScreen.email-address'})}
+        {intl.formatMessage({ id: 'signinScreen.email-address' })}
       </Text>
 
       <CustomTextInput
@@ -148,7 +144,7 @@ export const Login = () => {
       <TopSpace top={30} />
 
       <Text style={styles.inputTitleStyle}>
-        {intl.formatMessage({id: 'signinScreen.password'})}
+        {intl.formatMessage({ id: 'signinScreen.password' })}
       </Text>
 
       <CustomTextInput
@@ -172,7 +168,7 @@ export const Login = () => {
         disabled={false}
         borderRadius={30}
         handleClick={handleSubmit(handleLogin)}
-        title={intl.formatMessage({id: 'buttons.sign-in'})}
+        title={intl.formatMessage({ id: 'buttons.sign-in' })}
         showRightIconButton={true}
       />
 
@@ -180,26 +176,19 @@ export const Login = () => {
 
       <TouchableOpacity onPress={handleForgot} style={globalStyles.centeredBtn}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({id: 'buttons.forgot-password?'})}
+          {intl.formatMessage({ id: 'buttons.forgot-password?' })}
         </Text>
       </TouchableOpacity>
 
       <TopSpace top={10} />
 
       <Text style={styles.orText}>
-        {intl.formatMessage({id: 'signinScreen.or'})}
+        {intl.formatMessage({ id: 'signinScreen.or' })}
       </Text>
 
       <TopSpace top={10} />
 
-      <View
-        style={[
-          globalStyles.simpleRow,
-          // eslint-disable-next-line react-native/no-inline-styles
-          {
-            marginVertical: 20,
-          },
-        ]}>
+      <View style={[globalStyles.simpleRow, { marginVertical: 20 }]}>
         <CustomButton
           iconName="GoogleIcon"
           showSocialButton={true}
@@ -219,13 +208,13 @@ export const Login = () => {
 
       <TopSpace top={50} />
 
-      <View style={[globalStyles.simpleRow, {justifyContent: 'center'}]}>
+      <View style={[globalStyles.simpleRow, { justifyContent: 'center' }]}>
         <Text style={styles.forgotPasswordText}>
-          {intl.formatMessage({id: 'signinScreen.no-account'})}
+          {intl.formatMessage({ id: 'signinScreen.no-account' })}
         </Text>
         <Pressable onPress={handleRegister}>
           <Text style={styles.forgotPasswordText}>
-            {intl.formatMessage({id: 'buttons.register'})}
+            {intl.formatMessage({ id: 'buttons.register' })}
           </Text>
         </Pressable>
       </View>

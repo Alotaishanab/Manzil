@@ -1,5 +1,5 @@
 // src/services/urls.ts
-export const BASE_URL_WITHOUT_TRANSPORT = '10.0.2.2:8000';
+export const BASE_URL_WITHOUT_TRANSPORT = '127.0.0.1:8000';
 export const BASE_URL = `http://${BASE_URL_WITHOUT_TRANSPORT}`;
 
 // API Endpoints

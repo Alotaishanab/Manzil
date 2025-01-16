@@ -51,9 +51,9 @@ export const styles = StyleSheet.create({
   // Bottom Widget Styles
   bottomWidget: {
     position: 'absolute',
-    bottom: 30, // Adjusted for better positioning
+    bottom: 40, // Adjusted for better positioning
     alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    backgroundColor: 'rgba(0, 128, 0, 0.3)', // Semi-transparent background for frosted glass effect
     borderRadius: 30, // Increased for a more pill-shaped appearance
     flexDirection: 'row',
     alignItems: 'center',
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     width: 30,
     height: 30, // Increased height for better touch targets
     borderRadius: 15, // Changed to 15 for perfect circle
-    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(255, 255, 200, 0.5)', // Semi-transparent background
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

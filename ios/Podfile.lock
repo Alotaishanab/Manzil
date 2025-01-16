@@ -1368,6 +1368,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNKeychain (9.2.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNLocalize (3.3.0):
     - React-Core
   - RNReactNativeHapticFeedback (2.3.3):
@@ -1606,6 +1627,7 @@ DEPENDENCIES:
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -1770,6 +1792,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNKeychain:
+    :path: "../node_modules/react-native-keychain"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
   RNReactNativeHapticFeedback:
@@ -1865,6 +1889,7 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNDeviceInfo: b899ce37a403a4dea52b7cb85e16e49c04a5b88e
   RNGestureHandler: a8e61b93b4c5c44e6cd797cdaba43126ec36acaa
+  RNKeychain: 4933ddd364f040c17a1a401648fc91eba0be8867
   RNLocalize: 298e85ce16540a11de40c1a588ead39fc5e9a072
   RNReactNativeHapticFeedback: 7c701396d35a0e8863d8d8f97a7273c5f8509b40
   RNReanimated: af4e059a8fd0fb7a9cdf5ad35ead4699598a9447

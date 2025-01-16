@@ -15,25 +15,31 @@ from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 import jwt
 
-# Configure logging
 logger = logging.getLogger('websocket')
 
 class InteractionLoggingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         user = self.scope["user"]
-        if user.is_authenticated:
+        auth_type = self.scope.get("auth_type")
+        guest_id = self.scope.get("guest_id")
+        
+        # Allow connection if user is authenticated OR if we have a guest_id.
+        if user.is_authenticated or (auth_type == "guest" and guest_id):
             await self.accept()
-            logger.info(f"WebSocket connection established for user: {user.email}")
+            if user.is_authenticated:
+                logger.info(f"WebSocket connection established for user: {user.email}")
+            else:
+                logger.info(f"WebSocket connection established for guest with guest_id: {guest_id}")
         else:
             await self.close()
             logger.warning("WebSocket connection rejected due to invalid authentication.")
 
     async def disconnect(self, close_code):
-        user = self.scope.get('user', None)
+        user = self.scope.get("user", None)
         if user and user.is_authenticated:
             logger.info(f"WebSocket disconnected for user: {user.email} with code {close_code}")
         else:
-            logger.info(f"WebSocket disconnected for anonymous user with code {close_code}")
+            logger.info(f"WebSocket disconnected for guest or anonymous connection with code {close_code}")
 
     async def receive(self, text_data):
         try:
@@ -43,6 +49,7 @@ class InteractionLoggingConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"error": "Invalid JSON"}))
             logger.error("Invalid JSON received")
             return
+
 
         interaction_type = data.get('interaction_type')
         property_id = data.get('property_id')

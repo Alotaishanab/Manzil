@@ -1,3 +1,3 @@
 export * from './mutations';
 export * from './querys';
-export * from './api';
+export { default as api } from './api';

@@ -1,8 +1,7 @@
-// api/api.ts
-
-import axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
+// src/api/api.ts
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
-import {BASE_URL} from '../utils/urls';
+import { BASE_URL } from '../utils/urls';
 
 const QA = `${BASE_URL}/`;
 
@@ -41,7 +40,6 @@ class Api {
         } else if (guestId) {
           config.headers['Guest-Id'] = guestId;
         }
-
         return config;
       },
       error => Promise.reject(error),
@@ -55,10 +53,9 @@ class Api {
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
-              this.failedQueue.push({resolve, reject});
+              this.failedQueue.push({ resolve, reject });
             })
               .then(token => {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -66,15 +63,12 @@ class Api {
               })
               .catch(err => Promise.reject(err));
           }
-
           this.isRefreshing = true;
           const refreshToken = await AsyncHelper.getRefreshToken();
-
           if (!refreshToken) {
             await this.logout();
             return Promise.reject(error);
           }
-
           return this.refreshToken(refreshToken)
             .then(newToken => {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -90,11 +84,9 @@ class Api {
               this.isRefreshing = false;
             });
         }
-
         if (error.response?.status === 404) {
           console.error('API Endpoint not found:', originalRequest.url);
         }
-
         return Promise.reject(error);
       },
     );
@@ -113,16 +105,14 @@ class Api {
 
   private async refreshToken(refreshToken: string): Promise<string> {
     try {
-      const response = await this.client.post<{accessToken: string}>(
-        'auth/refresh-token',
-        {refreshToken},
+      const response = await this.client.post<{ accessToken: string }>(
+        'account/user/refresh-token/',
+        { refreshToken },
       );
       const newAccessToken = response.accessToken;
-
       if (newAccessToken) {
         await AsyncHelper.setToken(newAccessToken);
       }
-
       return newAccessToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -138,7 +128,7 @@ class Api {
   }
 
   async get<T>(route: string, sendAuthToken = true): ApiResponse<T> {
-    const config: AxiosRequestConfig = {headers: {}};
+    const config: AxiosRequestConfig = { headers: {} };
     if (sendAuthToken) {
       await this.addAuthToken(config);
     }
@@ -151,10 +141,8 @@ class Api {
     sendAuthToken = true,
     multipart = false,
   ): ApiResponse<T> {
-    const config: AxiosRequestConfig = {headers: {}};
-    if (multipart) {
-      // Do NOT set 'Content-Type'; let Axios handle it
-    } else {
+    const config: AxiosRequestConfig = { headers: {} };
+    if (!multipart) {
       config.headers['Content-Type'] = 'application/json';
     }
     if (sendAuthToken) {

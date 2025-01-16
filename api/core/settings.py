@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'account',
     'properties',
     'messaging',
+    'channels',
     'analytics',
 ]
 ASGI_APPLICATION = "core.asgi.application"
@@ -144,6 +145,9 @@ DATABASES = {
 }
 
 
+# Channels
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -190,5 +194,5 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 
 # Define GEOS and GDAL library paths
-# GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.9.3_2/lib/libgdal.dylib'
-# GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
+GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.10.0_3/lib/libgdal.dylib'
+GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'

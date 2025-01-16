@@ -12,13 +12,13 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { fonts } from '@fonts';
 import { useLogOutUser } from '@services';
 import { AsyncHelper } from '@helpers';
-import useSessionTracker from '../../../hooks/useSessionTracker';
+import useSessionManager from '../../../hooks/useSessionManager';
 import { FavoriteIcon, LogoutIcon, MyPropertiesIcon, SubscriptionIcon } from '@svgs'; // Import necessary icons
 
 const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any) => {
   const { intl, toggleLocale } = useIntl();
   const { mutate: logoutUser } = useLogOutUser();
-  const { startSessionHandler } = useSessionTracker();
+  const { endSessionAndRevertToGuest } = useSessionManager(); 
 
   const navigation: any = useNavigation();
 
@@ -87,17 +87,11 @@ const LoggedinUserPage = ({ userData, toggleDeleteAccountModal, isLoading }: any
       onSuccess: async () => {
         console.log('Logout successful, resetting to guest session.');
 
-        // Clear user session data
-        await AsyncHelper.removeToken();
-        await AsyncHelper.removeRefreshToken();
-        await AsyncHelper.getGuestId();
-        await AsyncHelper.removeUserId();
+        // 1) Let session manager revert to guest
+        //    This stops heartbeat, clears user session, calls clearAuth, re-initializes guest.
+        await endSessionAndRevertToGuest();
 
-        // Start a new guest session
-        const newGuestSessionId = await startSessionHandler();
-        console.log(`New guest session started with session_id: ${newGuestSessionId}`);
-
-        // Navigate to Explore screen
+        // 2) Navigate away
         navigation.navigate('Explore');
       },
       onError: () => {

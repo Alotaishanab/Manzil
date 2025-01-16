@@ -10,21 +10,16 @@ from django.contrib.auth import get_user_model
 from urllib.parse import parse_qs
 
 logger = logging.getLogger('websocket')
-
 User = get_user_model()
 
 @database_sync_to_async
 def get_user(token):
     try:
-        # Decode the token using the secret key and algorithm
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         user_id = payload.get('user_id')
-        
         if not user_id:
             logger.warning("Token does not contain 'user_id'.")
             return AnonymousUser()
-        
-        # Try fetching the user from the database
         user = User.objects.get(user_id=user_id)
         logger.info(f"Authenticated user: {user.email}")
         return user
@@ -38,11 +33,10 @@ def get_user(token):
         logger.warning(f"User with user_id {user_id} does not exist.")
         return AnonymousUser()
 
-
 @database_sync_to_async
 def get_guest_user(guest_id):
-    # You can add any logic you need here to handle guest users if applicable.
-    # For simplicity, we'll assume all guest_ids are valid and return an AnonymousUser.
+    # In a real-world scenario, you might validate the guest_id format
+    # or perform additional logic. Here we just log and return AnonymousUser.
     logger.info(f"Authenticated as guest with guest_id: {guest_id}")
     return AnonymousUser()
 
@@ -57,12 +51,16 @@ class TokenAuthMiddleware(BaseMiddleware):
             logger.info("Token found in query parameters.")
             user = await get_user(token)
             scope["user"] = user
+            # Optionally attach token info if needed
+            scope["auth_type"] = "user"
         elif guest_id:
             logger.info("Guest ID found in query parameters.")
-            user = await get_guest_user(guest_id)
-            scope["user"] = user
+            # Attach the guest ID and a flag to allow guest connections in your consumer.
+            scope["user"] = AnonymousUser()
+            scope["guest_id"] = guest_id
+            scope["auth_type"] = "guest"
         else:
             logger.warning("No token or guest ID provided in query parameters.")
             scope["user"] = AnonymousUser()
-
+        
         return await super().__call__(scope, receive, send)
