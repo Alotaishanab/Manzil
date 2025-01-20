@@ -55,3 +55,4 @@ export * from './propertyfullscreen';
 export * from './addedproperties';
 export * from './mapscreen';
 export * from './messages';
+export * from './chat';

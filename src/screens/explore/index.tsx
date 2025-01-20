@@ -1,11 +1,15 @@
 // src/screens/Explore.tsx
-
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
   PropertyCard,
-  Screen,
   TopSpace,
   CardSkeleton,
   Ads,
@@ -22,15 +26,15 @@ import {
   RefreshControl,
   TextInput,
   ActivityIndicator,
+  StyleSheet,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@colors';
-import { styles } from './styles';
 import { globalStyles } from '../../../src/styles/globalStyles';
 import { ArrowForIcon } from '@svgs';
 import { ag1, ag2, ag5, ag6, ag7 } from '@assets';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { refreshAnimation } from '@assets';
-import LottieView from 'lottie-react-native';
 import Haptic from 'react-native-haptic-feedback';
 import { SimilarProperties } from '@screens';
 import {
@@ -44,20 +48,16 @@ export const Explore = () => {
   const navigation: any = useNavigation();
   const { intl } = useIntl();
 
-
   useEffect(() => {
     const setFirstTimeIfNeeded = async () => {
       const isFirstTime = await AsyncHelper.isFirstTime();
       if (isFirstTime) {
-        await AsyncHelper.setFirstTimeFlag(); // Set the flag to indicate it's no longer the first time
-        console.log("First time flag set. This message should only appear once.");
+        await AsyncHelper.setFirstTimeFlag();
       }
     };
-
-    setFirstTimeIfNeeded(); // Run the check on component mount
+    setFirstTimeIfNeeded();
   }, []);
 
-  // Define sampleAdsData before using it in renderItem
   const sampleAdsData = useMemo(
     () => [
       {
@@ -95,12 +95,11 @@ export const Explore = () => {
         description: 'Discover spacious villas perfect for families.',
         onPress: () => console.log('Ad 5 clicked'),
       },
-      // Add more ads as needed
     ],
     []
   );
 
-  const [location, setLocation] = useState<UserLocation>({
+  const [location] = useState<UserLocation>({
     latitude: 37.76816965856596,
     longitude: -122.4264693260193,
   });
@@ -109,47 +108,33 @@ export const Explore = () => {
   const [favorites, setFavorites] = useState<{ [key: number]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Removed adsVisible state
-  const [showBottomWidget, setShowBottomWidget] = useState<boolean>(false); // Tracks Bottom Widget visibility
+  const [showBottomWidget, setShowBottomWidget] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
-  // State for FilterModal
-  const [isFilterVisible, setIsFilterVisible] = useState<boolean>(false);
-
-  const {
-    data: nearByData,
-    isLoading: nearByLoading,
-    error: nearByError,
-  } = useGetNearbyProperties(location);
+  const { data: nearByData, isLoading: nearByLoading, error: nearByError } =
+    useGetNearbyProperties(location);
   const {
     data: interestedData,
     isLoading: interestedLoading,
     error: interestedError,
   } = useGetInterestedProperties();
 
-  // Ref for the search TextInput
   const searchInputRef = useRef<TextInput>(null);
 
-  // Handle pull to refresh
-  // Handle pull to refresh
-const onRefresh = useCallback(() => {
-  // Trigger haptic feedback
-  Haptic.trigger("impactMedium", {
-    enableVibrateFallback: true,
-    ignoreAndroidSystemSettings: false,
-  });
-
-  setRefreshing(true);
-  // Optionally, trigger refetch here if your hooks support it
-  setTimeout(() => {
-    setRefreshing(false);
-  }, 2000);
-}, []);
-
+  const onRefresh = useCallback(() => {
+    Haptic.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   useEffect(() => {
     if (!nearByLoading && !interestedLoading) {
       setIsLoading(false);
-      // Handle errors
       if (nearByError || interestedError) {
         setError('Failed to load properties.');
       } else {
@@ -161,28 +146,26 @@ const onRefresh = useCallback(() => {
   }, [nearByLoading, interestedLoading, nearByError, interestedError]);
 
   const handleFavoriteClick = (propertyId: number) => {
-    setFavorites((prevFavorites) => ({
-      ...prevFavorites,
-      [propertyId]: !prevFavorites[propertyId],
+    setFavorites((prev) => ({
+      ...prev,
+      [propertyId]: !prev[propertyId],
     }));
   };
 
-  // Combine Nearby and Interested properties
   const combinedProperties = useMemo(() => {
     const nearby = nearByData?.properties || [];
     const interested = interestedData?.properties || [];
     return [...nearby, ...interested];
   }, [nearByData, interestedData]);
 
-  // Render skeletons when loading
-  const renderSkeletons = () => {
-    const skeletons = Array.from({ length: 5 }, (_, index) => (
-      <CardSkeleton key={`skeleton-${index}`} />
-    ));
-    return <View>{skeletons}</View>;
-  };
+  const renderSkeletons = () => (
+    <View>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <CardSkeleton key={i} />
+      ))}
+    </View>
+  );
 
-  // Define your agencies with images and names
   const agencies = useMemo(
     () => [
       { id: 'ag5', image: ag5, name: 'Agency Five' },
@@ -191,7 +174,7 @@ const onRefresh = useCallback(() => {
       { id: 'ag2', image: ag2, name: 'Agency Two' },
       { id: 'ag1', image: ag1, name: 'Agency One' },
     ],
-    [ag1, ag2, ag5, ag6, ag7]
+    []
   );
 
   const renderItem = ({ item }: { item: any }) => {
@@ -201,11 +184,13 @@ const onRefresh = useCallback(() => {
           <PropertyCard
             item={item.data}
             isFavorite={favorites[item.data.property_id]}
-            handleFavoriteClick={() => handleFavoriteClick(item.data.property_id)}
+            handleFavoriteClick={() =>
+              handleFavoriteClick(item.data.property_id)
+            }
           />
         );
       case 'ads':
-        return <Ads ads={sampleAdsData} isVisible={true} />;
+        return <Ads ads={sampleAdsData} isVisible />;
       case 'survey':
         return (
           <Survey
@@ -223,19 +208,14 @@ const onRefresh = useCallback(() => {
     <View style={styles.topAgencyWrap}>
       <View style={globalStyles.rowSpaceBetween}>
         <Text style={styles.topAgencyText}>
-          {intl.formatMessage({
-            id: 'explore.top-agencies',
-          })}
+          {intl.formatMessage({ id: 'explore.top-agencies' })}
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('Auth', { screen: 'AllAgencies' })}
           style={globalStyles.simpleRow}
-          accessibilityLabel="View all agencies"
         >
           <Text style={styles.sellAll}>
-            {intl.formatMessage({
-              id: 'buttons.sell-all',
-            })}
+            {intl.formatMessage({ id: 'buttons.sell-all' })}
             {'  '}
           </Text>
           <ArrowForIcon width={20} height={20} />
@@ -250,12 +230,12 @@ const onRefresh = useCallback(() => {
           <AgencyItem
             image={item.image}
             name={item.name}
-            onPress={() => {
-              // Handle agency press, e.g., navigate to agency details
-              console.log(`${item.name} pressed`);
-              navigation.navigate('Auth', { screen: 'AgencyDetails', params: { agencyId: item.id } });
-            }}
-            accessibilityLabel={`View details for ${item.name}`}
+            onPress={() =>
+              navigation.navigate('Auth', {
+                screen: 'AgencyDetails',
+                params: { agencyId: item.id },
+              })
+            }
           />
         )}
         showsHorizontalScrollIndicator={false}
@@ -264,155 +244,222 @@ const onRefresh = useCallback(() => {
     </View>
   );
 
-
-// src/screens/Explore.tsx
-
-const renderRecommendedSection = () => (
-  <View style={styles.recommendedSectionWrap}>
-    <View style={globalStyles.rowSpaceBetween}>
-      <Text style={styles.recommendedTitle}>
-        {intl.formatMessage({
-          id: 'explore.recommended-for-you', // Ensure this ID exists in your internationalization files
-        })}
-      </Text>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Auth', { screen: 'propertyfullscreen' })}
-        style={globalStyles.simpleRow}
-        accessibilityLabel="Search more with AI"
-      >
-        <Text style={styles.searchWithAiText}>
-          {intl.formatMessage({
-            id: 'buttons.explore-with-ai', // Ensure this ID exists in your localization files
-          })}
+  const renderRecommendedSection = () => (
+    <View style={styles.recommendedSectionWrap}>
+      <View style={globalStyles.rowSpaceBetween}>
+        <Text style={styles.recommendedTitle}>
+          {intl.formatMessage({ id: 'explore.recommended-for-you' })}
         </Text>
-        <ArrowForIcon width={20} height={20} />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('Auth', { screen: 'propertyfullscreen' })
+          }
+          style={globalStyles.simpleRow}
+        >
+          <Text style={styles.searchWithAiText}>
+            {intl.formatMessage({ id: 'buttons.explore-with-ai' })}
+          </Text>
+          <ArrowForIcon width={20} height={20} />
+        </TouchableOpacity>
+      </View>
+      <TopSpace top={10} />
+      <SimilarProperties />
     </View>
-    <TopSpace top={10} />
-    <SimilarProperties /> 
-  </View>
-);
-
+  );
 
   const combinedData = useMemo(() => {
     const data: any[] = [];
     combinedProperties.forEach((property, index) => {
       data.push({ type: 'property', data: property });
-
-      // Insert an ad after the first property and a survey after the third
-      if (index === 0) {
-        data.push({ type: 'ads' });
-      } else if (index === 2) {
-        data.push({ type: 'survey' });
-      }
+      if (index === 0) data.push({ type: 'ads' });
+      else if (index === 2) data.push({ type: 'survey' });
     });
     return data;
   }, [combinedProperties]);
 
-  // Toggle function for the FilterModal
-  const toggleFilterModal = () => {
-    setIsFilterVisible(!isFilterVisible);
-  };
-
-  // Function to apply filters (implement filter logic as needed)
+  const toggleFilterModal = () => setIsFilterVisible(!isFilterVisible);
   const handleApplyFilters = () => {
-    // Implement filter logic
     console.log('Filters applied');
     toggleFilterModal();
   };
-
-  // Function to focus the search input
   const focusSearchInput = () => {
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
+    if (searchInputRef.current) searchInputRef.current.focus();
   };
 
-  // onScroll handler to track scroll position and control bottom widget visibility
-  const onScroll = useCallback((event) => {
-    const scrollY = event.nativeEvent.contentOffset.y;
-    const headerHeight = 300; // Adjust based on actual header height
-    if (scrollY > headerHeight && !showBottomWidget) {
-      setShowBottomWidget(true);
-    } else if (scrollY <= headerHeight && showBottomWidget) {
-      setShowBottomWidget(false);
-    }
-  }, [showBottomWidget]);
-
-  const renderHeaderComponent = () => (
-    <>
-      <FilterHeader
-        isFilterVisible={isFilterVisible}
-        toggleFilterModal={toggleFilterModal}
-        onApplyFilters={handleApplyFilters}
-        textInputRef={searchInputRef}
-      />
-      {refreshing && (
-  <View style={{ alignItems: 'center', marginBottom: 0 }}>
-    <ActivityIndicator size="small" color={Colors.light.primary} />
-  </View>
-)}
-
-      {renderAgencies()}
-      {renderRecommendedSection()} 
-    </>
+  const onScroll = useCallback(
+    (event) => {
+      const scrollY = event.nativeEvent.contentOffset.y;
+      const headerHeight = 250;
+      if (scrollY > headerHeight && !showBottomWidget) setShowBottomWidget(true);
+      else if (scrollY <= headerHeight && showBottomWidget)
+        setShowBottomWidget(false);
+    },
+    [showBottomWidget]
   );
 
   return (
-    <Screen
-      padding={0}
-      paddingHorizontal={0}
-      showKeyboardAware={false}
-      style={{ backgroundColor: '#F5F5F5' }} // Background color for Screen
-    >
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <FlatList
+        data={isLoading ? [] : combinedData}
+        keyExtractor={(item, index) => `item-${index}`}
+        renderItem={renderItem}
+        ListEmptyComponent={isLoading ? renderSkeletons() : null}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.light.primary}
+            colors={[Colors.light.primary]}
+          />
+        }
+        ListHeaderComponent={
+          <>
+            {/* Green header container with header text and search/filter bar */}
+            <View style={styles.greenHeader}>
+              <Text style={styles.greetingTitle}>Hello, Welcome Home!</Text>
+              <Text style={styles.greetingSubtitle}>
+                Discover your perfect place with Manzil.
+              </Text>
+              <FilterHeader
+                isFilterVisible={isFilterVisible}
+                toggleFilterModal={toggleFilterModal}
+                onApplyFilters={handleApplyFilters}
+                textInputRef={searchInputRef}
+                // Remove containerStyle if not used by FilterHeader; or pass it here if needed.
+              />
+            </View>
+            {renderAgencies()}
+            {renderRecommendedSection()}
+          </>
+        }
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={styles.list}
+      />
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
-      <FlatList
-        data={isLoading ? [] : combinedData} // Show empty list if loading
-        keyExtractor={(item, index) => `item-${index}`}
-        renderItem={renderItem}
-        ListEmptyComponent={isLoading ? renderSkeletons() : null} // Render skeletons if loading
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 120,
-          backgroundColor: Colors.light.background,
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="transparent"
-            colors={['transparent']}
-          />
-        }
-        ListHeaderComponent={renderHeaderComponent}
-        onScroll={onScroll}
-        scrollEventThrottle={16} // To ensure onScroll is called frequently
-      />
       {showBottomWidget && (
-        <View style={styles.bottomWidget}>
-          <TouchableOpacity
-            style={styles.widgetButton}
-            onPress={focusSearchInput}
-            accessibilityLabel="Focus on search input"
-          >
-            <Icon name="magnify" size={20} color="#fff" />
-          </TouchableOpacity>
-          <View style={styles.separator} />
-          <TouchableOpacity
-            style={styles.widgetButton}
-            onPress={toggleFilterModal}
-            accessibilityLabel="Open filter options"
-          >
-            <Icon name="filter-variant" size={20} color="#fff" />
-          </TouchableOpacity>
+        <View style={styles.bottomWidgetContainer}>
+          <View style={styles.bottomWidget}>
+            <TouchableOpacity style={styles.widgetButton} onPress={focusSearchInput}>
+              <Icon name="magnify" size={20} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.separator} />
+            <TouchableOpacity style={styles.widgetButton} onPress={toggleFilterModal}>
+              <Icon name="filter-variant" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
-    </Screen>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    // You can either keep the SafeAreaView background as green
+    // or set it to a neutral color so that only the header area is green.
+    backgroundColor: Colors.light.primaryButton,
+  },
+  greenHeader: {
+    backgroundColor: Colors.light.primaryButton,
+    padding: 20,
+  },
+  greetingTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  greetingSubtitle: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 15,
+  },
+  flatListContent: {
+    paddingBottom: 120,
+    // Here we set the background for the scrollable content.
+    backgroundColor: Colors.light.background,
+  },
+  list: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+  },
+  topAgencyWrap: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  topAgencyText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.light.text,
+  },
+  sellAll: {
+    fontSize: 16,
+    color: Colors.light.primary,
+  },
+  agenciesList: {
+    paddingVertical: 10,
+  },
+  recommendedSectionWrap: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  recommendedTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.light.text,
+  },
+  searchWithAiText: {
+    fontSize: 16,
+    color: Colors.light.primary,
+  },
+  errorContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: Colors.light.errorBackground,
+    borderRadius: 8,
+    padding: 10,
+  },
+  errorText: {
+    color: Colors.light.errorText,
+    textAlign: 'center',
+  },
+  bottomWidgetContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'android' ? 20 : 0,
+    left: 20,
+    right: 20,
+  },
+  bottomWidget: {
+    flexDirection: 'row',
+    backgroundColor: '#4CAF50',
+    borderRadius: 30,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  widgetButton: {
+    padding: 10,
+  },
+  separator: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#fff',
+  },
+});
 
 export default Explore;

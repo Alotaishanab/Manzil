@@ -1,40 +1,42 @@
-// src/api/api.ts
+// src/services/api/api.ts
+
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import AsyncHelper from '../../helpers/asyncHelper';
 import { BASE_URL } from '../utils/urls';
+// We import the type for logout
+import type { AuthLogoutHandler } from '../../context/AuthContext';
 
 const QA = `${BASE_URL}/`;
 
-type ApiResponse<T> = Promise<T>;
+/** A function pointer we store for when we must forcibly log out user. */
+let authLogoutHandler: AuthLogoutHandler | null = null;
+
+export function setAuthLogoutHandler(fn: AuthLogoutHandler) {
+  authLogoutHandler = fn;
+}
 
 class Api {
   private client: AxiosInstance;
-  private isRefreshing: boolean;
+  private isRefreshing = false;
   private failedQueue: Array<{
     resolve: (value: unknown) => void;
     reject: (reason?: any) => void;
-  }>;
+  }> = [];
 
   constructor() {
     this.client = axios.create({
       baseURL: QA,
-      headers: {
-        Accept: 'application/json',
-      },
+      headers: { Accept: 'application/json' },
     });
-
-    this.isRefreshing = false;
-    this.failedQueue = [];
     this.initializeInterceptors();
   }
 
   private initializeInterceptors() {
-    // Request Interceptor
+    // 1) Request Interceptor
     this.client.interceptors.request.use(
-      async config => {
+      async (config) => {
         const token = await AsyncHelper.getToken();
         const guestId = await AsyncHelper.getGuestId();
-
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         } else if (guestId) {
@@ -42,121 +44,127 @@ class Api {
         }
         return config;
       },
-      error => Promise.reject(error),
+      (error) => Promise.reject(error),
     );
 
-    // Response Interceptor
+    // 2) Response Interceptor
     this.client.interceptors.response.use(
-      response => response.data, // Return response.data directly
-      async error => {
-        const originalRequest = error.config;
+      (response) => response.data,
+      async (error) => {
+        const status = error?.response?.status;
+        const originalRequest = error.config || {};
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // If 401 or 403 => attempt one refresh
+        if ((status === 401 || status === 403) && !originalRequest._retry) {
           originalRequest._retry = true;
+
+          // If we're already refreshing => queue up
           if (this.isRefreshing) {
-            return new Promise((resolve, reject) => {
-              this.failedQueue.push({ resolve, reject });
-            })
-              .then(token => {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+            try {
+              const newToken = await new Promise<string | null>((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject });
+              });
+              if (newToken) {
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return this.client(originalRequest);
-              })
-              .catch(err => Promise.reject(err));
+              } else {
+                throw new Error('No new token from queue');
+              }
+            } catch (queueErr) {
+              return Promise.reject(queueErr);
+            }
           }
+
           this.isRefreshing = true;
-          const refreshToken = await AsyncHelper.getRefreshToken();
-          if (!refreshToken) {
-            await this.logout();
-            return Promise.reject(error);
-          }
-          return this.refreshToken(refreshToken)
-            .then(newToken => {
+          try {
+            const newToken = await this.handleRefresh();
+            // If refresh succeeded => re-send
+            if (newToken) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               this.processQueue(null, newToken);
               return this.client(originalRequest);
-            })
-            .catch(err => {
-              this.processQueue(err, null);
-              this.logout();
-              return Promise.reject(err);
-            })
-            .finally(() => {
-              this.isRefreshing = false;
-            });
+            }
+          } catch (refreshErr) {
+            this.processQueue(refreshErr as Error, null);
+            // Fall through => logout
+          } finally {
+            this.isRefreshing = false;
+          }
+          // If we get here => refresh failed => logout
+          if (authLogoutHandler) {
+            authLogoutHandler(); // This calls clearAuth in your context
+          }
+          return Promise.reject(error);
         }
-        if (error.response?.status === 404) {
-          console.error('API Endpoint not found:', originalRequest.url);
-        }
+
         return Promise.reject(error);
       },
     );
   }
 
-  private processQueue(error: Error | null, token: string | null = null) {
-    this.failedQueue.forEach(prom => {
+  // Where we call the refresh endpoint, once
+  private async handleRefresh(): Promise<string | null> {
+    try {
+      const refreshToken = await AsyncHelper.getRefreshToken();
+      if (!refreshToken) {
+        console.log('[Api] No refreshToken => cannot refresh => returning null');
+        return null;
+      }
+      console.log('[Api] Attempting single refresh...');
+      const response = await axios.post<{ accessToken: string }>(
+        `${QA}account/user/refresh-token/`,
+        { refreshToken },
+        { headers: { Accept: 'application/json' } },
+      );
+      const newToken = response.data?.accessToken;
+      if (!newToken) {
+        console.warn('[Api] No new accessToken from refresh => returning null');
+        return null;
+      }
+      await AsyncHelper.setToken(newToken);
+      console.log('[Api] Refresh success => stored new token in AsyncHelper');
+      return newToken;
+    } catch (err) {
+      console.error('[Api] Refresh error => returning null', err);
+      return null;
+    }
+  }
+
+  private processQueue(error: Error | null, newToken: string | null) {
+    this.failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error);
       } else {
-        prom.resolve(token);
+        prom.resolve(newToken);
       }
     });
     this.failedQueue = [];
   }
 
-  private async refreshToken(refreshToken: string): Promise<string> {
-    try {
-      const response = await this.client.post<{ accessToken: string }>(
-        'account/user/refresh-token/',
-        { refreshToken },
-      );
-      const newAccessToken = response.accessToken;
-      if (newAccessToken) {
-        await AsyncHelper.setToken(newAccessToken);
-      }
-      return newAccessToken;
-    } catch (error) {
-      console.error('Error refreshing token:', error);
-      throw error;
-    }
+  // Example GET / POST / PUT / DELETE
+  async get<T>(route: string): Promise<T> {
+    return this.client.get<T>(route);
   }
 
-  private async logout() {
-    await AsyncHelper.removeToken();
-    await AsyncHelper.removeRefreshToken();
-    await AsyncHelper.removeGuestId();
-    console.log('Logged out due to failed refresh token.');
-  }
-
-  async get<T>(route: string, sendAuthToken = true): ApiResponse<T> {
-    const config: AxiosRequestConfig = { headers: {} };
-    if (sendAuthToken) {
-      await this.addAuthToken(config);
-    }
-    return this.client.get<T>(route, config);
-  }
-
-  async post<T>(
-    route: string,
-    params: any,
-    sendAuthToken = true,
-    multipart = false,
-  ): ApiResponse<T> {
-    const config: AxiosRequestConfig = { headers: {} };
-    if (!multipart) {
-      config.headers['Content-Type'] = 'application/json';
-    }
-    if (sendAuthToken) {
-      await this.addAuthToken(config);
-    }
+  async post<T>(route: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
     return this.client.post<T>(route, params, config);
   }
 
-  private async addAuthToken(config: AxiosRequestConfig) {
-    const token = await AsyncHelper.getToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  // -------------------------
+  // Newly added .put() method
+  // -------------------------
+  async put<T>(route: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.put<T>(route, data, config);
+  }
+
+  // ----------------------------
+  // Newly added .delete() method
+  // ----------------------------
+  async delete<T>(route: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.delete<T>(route, config);
   }
 }
 
-export default new Api();
+// Export the instance
+const apiInstance = new Api();
+export default apiInstance;

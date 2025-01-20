@@ -1,6 +1,7 @@
-import {useMutation} from '@tanstack/react-query';
+// src/services/mutations/saveProperty.ts
+import { useMutation } from '@tanstack/react-query';
 import api from '../../api/api';
-import {apiUrls} from '../../utils/urls';
+import { apiUrls } from '../../utils/urls'; // <-- Import your apiUrls here
 
 export interface SavePropertyResponse {
   message: string;
@@ -15,14 +16,14 @@ const saveProperty = async ({
   property_id,
 }: SavePropertyRequest): Promise<SavePropertyResponse> => {
   try {
-    const response = await api.post<SavePropertyResponse>(
-      `${apiUrls.saveProperty}/${property_id}/save`,
-      {},
-    );
-    //@ts-ignore
+    // 1) Replace the ':id' placeholder with the actual property_id
+    const endpoint = apiUrls.saveProperty.replace(':id', property_id.toString());
+
+    // 2) Send the POST request to that URL
+    const response = await api.post<SavePropertyResponse>(endpoint, {});
     return response;
   } catch (error) {
-    console.error('Error saving property', error);
+    console.error('Error saving property:', error);
     throw error;
   }
 };

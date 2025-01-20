@@ -1,3 +1,4 @@
+// src/screens/PropertyScreen.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -7,7 +8,6 @@ import {
   Dimensions,
   Alert,
   View,
-  ActivityIndicator,
   Text,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +20,7 @@ import TopIcons from './components/TopIcons';
 import { GenericModal, ReportAdModal } from '@components';
 import ModalContent from './components/ModalContent';
 import ContactButton from './components/ContactButton';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
@@ -29,8 +30,8 @@ export const PropertyScreen: React.FC = () => {
   const route = useRoute();
   const { propertyId } = route.params;
 
-  const bottomSheetRef = useRef(null);
-  const scrollViewRef = useRef(null);
+  const bottomSheetRef = useRef<any>(null);
+  const scrollViewRef = useRef<any>(null);
   const scrollOffsetY = useRef({ current: 0 });
 
   const snapPoints = ['33%', '83%'];
@@ -45,9 +46,8 @@ export const PropertyScreen: React.FC = () => {
       console.log("Error fetching property:", error);
       Alert.alert("Error", "Failed to load property details.");
     }
-
     if (property) {
-      console.log("Fetched Property Data:", property); // Log the property data
+      console.log("Fetched Property Data:", property);
     }
   }, [property, error]);
 
@@ -63,34 +63,39 @@ export const PropertyScreen: React.FC = () => {
     setReportAdModalVisible(!isReportAdModalVisible);
   };
 
-  const handleBottomSheetChange = (index) => {
-  setIsBottomSheetExpanded(index === 1);
-  
-  if (index === 0 && scrollViewRef.current) {
-    // Ensure the scroll position resets after the modal animation completes
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({ y: 0, animated: true });
-      }
-    }, 300); // Adjust delay if needed to ensure the animation completes
-  }
-  
-  HapticFeedback.trigger('impactLight');
-};
-
+  const handleBottomSheetChange = (index: number) => {
+    setIsBottomSheetExpanded(index === 1);
+    if (index === 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: 0, animated: true });
+        }
+      }, 300);
+    }
+    HapticFeedback.trigger('impactLight');
+  };
 
   const category = property?.category || "Apartment";
   const type = property?.type || "Sell";
   const displayType = type === 'Sell' ? 'For Sale' : type === 'Rent' ? 'For Rent' : type;
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <SkeletonPlaceholder>
+          <SkeletonPlaceholder.Item width={screenWidth} height={screenHeight * 0.5} />
+          <SkeletonPlaceholder.Item marginTop={20} width={screenWidth * 0.9} height={20} borderRadius={4} alignSelf="center" />
+          <SkeletonPlaceholder.Item marginTop={10} width={screenWidth * 0.8} height={20} borderRadius={4} alignSelf="center" />
+          <SkeletonPlaceholder.Item marginTop={10} width={screenWidth * 0.7} height={20} borderRadius={4} alignSelf="center" />
+        </SkeletonPlaceholder>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : property ? (
+      {property ? (
         <>
-
-        
           <TouchableOpacity
             style={[styles.closeButton, { top: insets.top + 15 }]}
             onPress={() => navigation.goBack()}
@@ -105,13 +110,12 @@ export const PropertyScreen: React.FC = () => {
             onReportPress={toggleReportAdModal}
           />
 
-<ImageGallery
-  images={property.property_images} // Pass actual image URLs
-  expandedHeight={screenHeight * 0.8}
-  onPlaceholderClick={(index) => console.log(`Clicked on image ${index}`)}
-/>
+          <ImageGallery
+            images={property.property_images}
+            expandedHeight={screenHeight * 0.8}
+            onPlaceholderClick={(index) => console.log(`Clicked on image ${index}`)}
+          />
 
-        
           <BottomSheet
             ref={bottomSheetRef}
             index={0}
@@ -129,7 +133,7 @@ export const PropertyScreen: React.FC = () => {
             <BottomSheetScrollView
               ref={scrollViewRef}
               style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
-              scrollEnabled={isBottomSheetExpanded} // Disable scrolling when collapsed
+              scrollEnabled={isBottomSheetExpanded}
             >
               <ModalContent
                 property={property}
@@ -141,7 +145,6 @@ export const PropertyScreen: React.FC = () => {
               />
             </BottomSheetScrollView>
           </BottomSheet>
-
 
           {isReportAdModalVisible && (
             <View style={styles.reportAdModalOverlay}>
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Jost',
   },
-  
+  // You can add additional styles for the skeleton items if needed.
 });
 
 export default PropertyScreen;

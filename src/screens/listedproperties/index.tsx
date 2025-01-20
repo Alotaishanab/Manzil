@@ -8,7 +8,14 @@ import {
 } from '@components';
 import { useIntl } from '@context';
 import { globalStyles } from '@globalStyles';
-import { FlatList, Platform, SafeAreaView, View, Text, StyleSheet } from 'react-native';
+import {
+  FlatList,
+  Platform,
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import { useGetUserProperties, Property } from '@services';
 import { AsyncHelper } from '@helpers';
 import { Colors } from '@colors';
@@ -46,6 +53,7 @@ export const ListedProperties = () => {
     fetchUserId();
   }, []);
 
+  //  ---- Fetch user properties with infinite query ----
   const {
     data,
     fetchNextPage,
@@ -57,29 +65,34 @@ export const ListedProperties = () => {
     refetch,
   } = useGetUserProperties({
     page_size: 10,
-    ...((selectedBtn === 'featured' || selectedBtn === 'not-featured') && {
-      is_featured: selectedBtn === 'featured',
-    }),
+    // If user selected "featured" or "not-featured", pass is_featured
+    ...(selectedBtn === 'featured' || selectedBtn === 'not-featured'
+      ? { is_featured: selectedBtn === 'featured' }
+      : {}),
   });
 
+  // Flatten data => all pages => "properties"
+  const allProperties = React.useMemo(() => {
+    // SWITCH from 'page => page.results' to 'page => page.properties'
+    return data?.pages.flatMap((page) => page.properties) || [];
+  }, [data?.pages]);
+
+  // Apply local filter
   const properties = React.useMemo(() => {
-    const allProperties = data?.pages.flatMap(page => page.results) || [];
-    
     switch (selectedBtn) {
       case 'featured':
-        return allProperties.filter(prop => prop.is_featured);
+        return allProperties.filter((prop) => prop.is_featured);
       case 'not-featured':
-        return allProperties.filter(prop => !prop.is_featured);
+        return allProperties.filter((prop) => !prop.is_featured);
       default:
         return allProperties;
     }
-  }, [data?.pages, selectedBtn]);
+  }, [allProperties, selectedBtn]);
 
   const handleTabChange = (option: string) => {
-    const newFilter: FilterType = 
-      option === tabs.featured ? 'featured' :
-      option === tabs.notFeatured ? 'not-featured' : 'all';
-    
+    let newFilter: FilterType = 'all';
+    if (option === tabs.featured) newFilter = 'featured';
+    else if (option === tabs.notFeatured) newFilter = 'not-featured';
     setSelectedBtn(newFilter);
   };
 
@@ -95,7 +108,6 @@ export const ListedProperties = () => {
 
   const renderFooter = () => {
     if (!isFetchingNextPage) return <View style={{ marginBottom: 0 }} />;
-    
     return (
       <View style={styles.footerLoadingContainer}>
         <CardSkeleton />
@@ -113,7 +125,6 @@ export const ListedProperties = () => {
         </>
       );
     }
-
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>
@@ -123,6 +134,7 @@ export const ListedProperties = () => {
     );
   };
 
+  // If we haven't retrieved userID yet, show skeleton
   if (userId === null) {
     return (
       <View style={styles.loadingContainer}>
@@ -131,19 +143,14 @@ export const ListedProperties = () => {
     );
   }
 
+  // If there's an error from the query
   if (isError && error instanceof Error) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
-          {intl.formatMessage(
-            { id: 'common.error' },
-            { message: error.message }
-          )}
+          {intl.formatMessage({ id: 'common.error' }, { message: error.message })}
         </Text>
-        <Text 
-          style={styles.retryText}
-          onPress={() => refetch()}
-        >
+        <Text style={styles.retryText} onPress={() => refetch()}>
           {intl.formatMessage({ id: 'common.tapToRetry' })}
         </Text>
       </View>
@@ -157,30 +164,32 @@ export const ListedProperties = () => {
           text={intl.formatMessage({ id: 'listedPropertyScreen.header' })}
         />
         <TopSpace top={10} />
-        
+
         <TabButtons
           options={[tabs.featured, tabs.notFeatured, tabs.all]}
           onSelect={handleTabChange}
           borderRadius={20}
           paddingVertical={10}
           selectedOption={
-            selectedBtn === 'featured' ? tabs.featured :
-            selectedBtn === 'not-featured' ? tabs.notFeatured :
-            tabs.all
+            selectedBtn === 'featured'
+              ? tabs.featured
+              : selectedBtn === 'not-featured'
+              ? tabs.notFeatured
+              : tabs.all
           }
         />
-        
+
         <TopSpace top={5} />
-        
+
         <FlatList
           data={properties}
           renderItem={renderListedProperty}
+          keyExtractor={(item) => item.property_id.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.listContainer,
-            properties.length === 0 && styles.emptyListContainer
+            properties.length === 0 && styles.emptyListContainer,
           ]}
-          keyExtractor={item => item.property_id.toString()}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={renderFooter}
           onEndReached={handleLoadMore}
@@ -243,3 +252,4 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
 });
+

@@ -49,9 +49,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'error': 'Invalid message data.'}))
             return
 
+        # Prevent self chats by checking if the receiver_id is the same as the sender's user_id.
+        if int(receiver_id) == self.user.user_id:
+            await self.send(text_data=json.dumps({'error': 'Self chats are not allowed.'}))
+            return
+
         # Save the message to the database
         message = await self.create_message(self.user.user_id, receiver_id, message_body)
-
+        
         # Serialize the message
         serialized_message = MessageSerializer(message).data
 
@@ -64,6 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': serialized_message
             }
         )
+
 
     # Receive message from receiver's group
     async def chat_message(self, event):

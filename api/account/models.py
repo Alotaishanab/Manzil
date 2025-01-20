@@ -1,8 +1,10 @@
-import uuid
+# accounts/models.py
+
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
 from django.utils import timezone
 from .managers.UserManager import UserManager
+import uuid
 
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
@@ -16,6 +18,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     preferences = models.JSONField(null=True, blank=True)
     subscription_plan_id = models.IntegerField(null=True, blank=True)
     is_staff = models.BooleanField(default=False)
+    profile_picture = models.URLField(max_length=500, null=True, blank=True)  # New optional field
 
     objects = UserManager()
 

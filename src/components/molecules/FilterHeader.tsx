@@ -7,12 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { ExploreIcon, FilterIcon } from '@svgs'; // Ensure these are correctly imported
-import { Colors } from '@colors'; // Adjust the path as necessary
-import { fonts } from '../../../src/assets/fonts'; // Adjust the path as necessary
-import { globalStyles } from '../../../src/styles/globalStyles'; // Adjust the path as necessary
-import { useIntl } from '@context'; // Ensure useIntl is correctly implemented
-import FilterModal from '../../helpers/FilterModal'; // Adjust the import path as necessary
+import { ExploreIcon, FilterIcon } from '@svgs';
+import FilterModal from '../../helpers/FilterModal';
 
 interface FilterHeaderProps {
   isFilterVisible: boolean;
@@ -30,36 +26,31 @@ const FilterHeader = forwardRef<TextInput, FilterHeaderProps>(
     textInputRef,
     onFocusInput,
   }) => {
-    const { intl } = useIntl();
-
     return (
       <View>
-        <View style={globalStyles.simpleRow}>
+        <View style={styles.row}>
           <View style={styles.exploreWrap}>
-            <ExploreIcon width={30} height={30} />
+            <ExploreIcon width={30} height={30} fill="#FFFFFF" />
             <TextInput
               ref={textInputRef}
               numberOfLines={2}
               multiline
               style={styles.inputStyle}
               onFocus={onFocusInput}
-              placeholderTextColor={Colors.light.headingTitle}
-              placeholder={intl.formatMessage({
-                id: 'explore.search-placeholder',
-              })}
+              placeholderTextColor="#FFFFFF"
+              placeholder="Find what you're looking for..."
             />
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={toggleFilterModal} // Toggle FilterModal when pressed
+            onPress={toggleFilterModal}
             style={styles.filterBtn}
             accessibilityLabel="Open filter options"
           >
-            <FilterIcon width={25} height={25} />
+            <FilterIcon width={25} height={25} fill="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
-        {/* Filter Modal */}
         <FilterModal
           isVisible={isFilterVisible}
           onClose={toggleFilterModal}
@@ -71,36 +62,41 @@ const FilterHeader = forwardRef<TextInput, FilterHeaderProps>(
 );
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // Center the search bar and filter button horizontally
+  },
   exploreWrap: {
     borderWidth: 0.5,
     borderRadius: 30,
     paddingHorizontal: 20,
-    flex: 1,
+    flex: 1, // Set flex of the search bar container to 0.9
     height: 50,
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: Colors.light.filterLine,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: '#4CAF50', // Green border color
   },
   filterBtn: {
     borderWidth: 1,
     borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent background for frosted glass effect
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     width: 50,
     height: 50,
     marginLeft: 10,
     justifyContent: 'center',
-    borderColor: Colors.light.filterLine,
     alignItems: 'center',
-    zIndex: 1001, // Ensure it stays above other components
+    borderColor: '#4CAF50', // Green border color
   },
   inputStyle: {
     flex: 1,
     height: '100%',
-    fontSize: 11,
+    fontSize: 14, // Bigger font size for the text & placeholder
     lineHeight: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
+    color: '#FFFFFF',
+    textAlignVertical: 'center', // For Android vertical centering
+    paddingTop: 6, // Adjust this value for iOS vertical alignment if needed
   },
 });
 

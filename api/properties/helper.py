@@ -3,7 +3,6 @@ import requests
 
 
 def map_property(property_instance, distance=None):
-
     address = None
     lat = None
     lng = None
@@ -44,15 +43,19 @@ def map_property(property_instance, distance=None):
         "number_of_units": property_instance.number_of_units,
         "property_features": property_instance.property_features,
         "address": address,
-        "ownership_type": property_instance.ownership_type
+        "ownership_type": property_instance.ownership_type,
     }
 
     if lat and lng:
         property_data["coordinates"] = {"lat": lat, "long": lng}
 
-    # Only add distance if it is available (for nearby property searches)
     if distance is not None:
         property_data["distance"] = distance.m  # meters
+
+    # Add lister's details since a property cannot exist without an associated user
+    property_data["lister_name"] = property_instance.user.name
+    property_data["lister_registration_date"] = property_instance.user.registration_date
+    property_data["lister_id"] = property_instance.user.user_id
 
     return property_data
 

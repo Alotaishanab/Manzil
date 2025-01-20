@@ -1,8 +1,7 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {TouchableOpacity, Pressable, Text, StyleSheet} from 'react-native';
-import {Colors} from '@colors';
-import {fonts} from '../../assets/fonts/index';
+import { TouchableOpacity, Pressable, Text, StyleSheet } from 'react-native';
+import { Colors } from '@colors';
+import { fonts } from '../../assets/fonts/index';
 import * as SVGs from '../../assets/svgs';
 
 type ButtonProps = {
@@ -46,7 +45,8 @@ export const CustomButton = ({
   borderColor,
   textButtonWithIcon = false,
   borderRadius = 5,
-  leftIconColor = Colors.light.headingTitle,
+  // Set default leftIconColor to white
+  leftIconColor = Colors.light.background,
   fontFamily = fonts.primary.medium,
 }: ButtonProps) => {
   const Icon = SVGs[iconName];
@@ -97,6 +97,8 @@ export const CustomButton = ({
             {
               borderRadius: borderRadius,
               flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
               borderColor: borderColor ? borderColor : btnBg,
               width: btnWidth,
               backgroundColor: disabled ? Colors.light.disabled : btnBg,
@@ -111,6 +113,8 @@ export const CustomButton = ({
             style={[
               styles.simpleTextStyle,
               {
+                marginLeft: 8,
+                textAlign: 'center',
                 fontFamily: fontFamily,
                 color: textColor,
                 fontSize: textSize,
@@ -151,7 +155,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textStyle: {
-    flex: 1,
     textAlign: 'center',
     fontSize: 16,
     color: Colors.light.background,
@@ -159,7 +162,6 @@ const styles = StyleSheet.create({
   },
   simpleTextStyle: {
     textAlign: 'center',
-    marginLeft: 10,
     color: Colors.light.background,
     fontFamily: fonts.primary.medium,
   },

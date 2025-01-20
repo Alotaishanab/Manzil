@@ -2,6 +2,8 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncHelper from '../helpers/asyncHelper';
 import LoggingWebSocketManager from '../services/websocket/LoggingWebSocketManager';
+import apiInstance, { setAuthLogoutHandler } from '../services/api/api'; 
+
 
 interface AuthContextProps {
   token: string | null;
@@ -32,6 +34,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userId, setUserIdState] = useState<string | null>(null);
   const [guestId, setGuestIdState] = useState<string | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+
+
+  useEffect(() => {
+    // Pass the logout function to our API, so that if refresh fails, the API can call it
+    setAuthLogoutHandler(() => {
+      // This is the function the api will call if refresh fails
+      console.log('[AuthContext] forced logout from API refresh failure => clearAuth');
+      clearAuth();
+    });
+  }, []);
 
   useEffect(() => {
     // Update WebSocket credentials whenever token or guestId changes

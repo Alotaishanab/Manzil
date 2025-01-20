@@ -15,14 +15,15 @@ from .serializers import (
     UserSessionStartSerializer,
     UserVerifyPhoneSerializer,
     UserRegisterPhoneSerializer,
-    UserChangePasswordSerializer
+    UserChangePasswordSerializer,
+    UserProfilePictureSerializer
 )
 from .jwt_utils import generate_token, blacklist_token
 from .models import User, UserSession
 from .verify import send_code, check_code
 from django.utils import timezone
 from django.contrib.auth import authenticate
-
+from properties.utils import upload_to_s3
 from .permissions import IsAuthenticatedOrGuest
 
 logger = logging.getLogger(__name__)
@@ -89,6 +90,52 @@ def resend_phone_code(request):
                 return Response({"message": "User has no phone registered"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class UpdateProfilePictureView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, format=None):
+        """
+        Handle uploading or updating the profile picture.
+        """
+        serializer = UserProfilePictureSerializer(data=request.data)
+        if serializer.is_valid():
+            profile_picture = serializer.validated_data.get('profile_picture', None)
+            user = request.user
+
+            if profile_picture:
+                # Generate a unique file name
+                file_extension = profile_picture.name.split('.')[-1]
+                file_name = f"{uuid.uuid4()}.{file_extension}"
+
+                # Upload to S3
+                s3_url = upload_to_s3(profile_picture, file_name, 'profile_pics')
+
+                if s3_url:
+                    user.profile_picture = s3_url
+                    user.save(update_fields=['profile_picture'])
+                    logger.info(f"User {user.user_id} updated profile picture.")
+                    return Response({"profile_picture": s3_url}, status=status.HTTP_200_OK)
+                else:
+                    logger.error(f"Failed to upload profile picture for user {user.user_id}.")
+                    return Response({"error": "Failed to upload profile picture."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                # If no profile_picture provided, do not update
+                return Response({"error": "No profile picture provided."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, format=None):
+        """
+        Handle removing the profile picture.
+        """
+        user = request.user
+        if user.profile_picture:
+            user.profile_picture = None
+            user.save(update_fields=['profile_picture'])
+            logger.info(f"User {user.user_id} removed profile picture.")
+            return Response({"message": "Profile picture removed."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No profile picture to remove."}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def logout_user(request):
@@ -168,21 +215,29 @@ def change_user_password(request):
             else:
                 return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
+
 @api_view(["GET"])
 def get_user_info(request):
     if request.method == 'GET':
         user = request.user
+        print("DEBUG: request.user:", user)
 
-        if not user:
+        # If user isn't authenticated or doesn't exist
+        if not user or user.is_anonymous:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # Safely map each attribute, falling back to None if not present
         user_data = {
-            "id": user.user_id,
-            "email": user.email,
-            "name": user.name,
+            "id": user.user_id or None,
+            "email": user.email or None,
+            "name": user.name or None,
+            "profile_picture": user.profile_picture or None,
         }
+        print("DEBUG: returning user_data:", user_data)
 
         return Response(user_data, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])

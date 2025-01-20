@@ -1,5 +1,4 @@
-// components/Account.tsx
-
+// src/components/Account.tsx
 import React, { useState } from 'react';
 import { ScrollView, Text, StyleSheet } from 'react-native';
 import { GenericModal, Screen } from '@components';
@@ -9,40 +8,41 @@ import DeleteAccountContent from './component/DeleteAcountContent';
 import { useGetProfile } from '@services';
 import { AsyncHelper } from '../../../src/helpers/asyncHelper';
 import { useFocusEffect } from '@react-navigation/native';
-import { Colors } from '@colors'; // Ensure Colors is imported
+import { Colors } from '@colors';
 
 export const Account = () => {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [checked, setChecked] = useState(false);
   const [isLoggedin, setIsLoggedin] = useState<boolean>(false);
-  const [hasCheckedAuth, setHasCheckedAuth] = useState<boolean>(false); // Track auth check completion
+  const [hasCheckedAuth, setHasCheckedAuth] = useState<boolean>(false); // Track completion of auth check
 
   useFocusEffect(
     React.useCallback(() => {
       const checkLoginStatus = async () => {
         try {
+          // Retrieve the token using AsyncHelper
           const token = await AsyncHelper.getToken();
-          setIsLoggedin(!!token); // True if token exists, else false (guest)
+          setIsLoggedin(!!token); // If token exists, user is logged in
         } catch (error) {
-          console.error("Error checking login status:", error);
+          console.error('Error checking login status:', error);
           setIsLoggedin(false);
         } finally {
-          setHasCheckedAuth(true); // Mark auth check as complete
+          setHasCheckedAuth(true); // Mark that the auth check is complete
         }
       };
       checkLoginStatus();
     }, [])
   );
 
-  // Only attempt to fetch profile if the user is logged in
+  // Only fetch profile if the user is logged in
   const { data: profile, isError, isLoading: isProfileLoading } = useGetProfile({
     enabled: isLoggedin,
   });
 
-  const toggleDeleteAccountModal = () => setShowDeleteAccount(!showDeleteAccount);
+  const toggleDeleteAccountModal = () => setShowDeleteAccount(prev => !prev);
 
+  // While the auth check is still in progress, return null to avoid flicker
   if (!hasCheckedAuth) {
-    // Render nothing or a placeholder to avoid flickering
     return null;
   }
 

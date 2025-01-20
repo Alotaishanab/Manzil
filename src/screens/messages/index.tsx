@@ -1,96 +1,146 @@
-// src/screens/Messages.tsx
-
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
-  Image,
   RefreshControl,
+  Image,
+  StyleSheet,
+  Animated,
 } from 'react-native';
-import { Colors } from '@colors'; // Ensure this path is correct
-import { fonts } from '@fonts'; // Ensure this path is correct
-import { useIntl } from '@context'; // Ensure this path is correct
-import { Ads, CustomButton } from '@components'; // Import CustomButton from @components
-import { AsyncHelper } from '@helpers'; // Import AsyncHelper from @helpers
-import Icon from 'react-native-vector-icons/Ionicons'; // Ensure you have installed react-native-vector-icons
+import Icon from 'react-native-vector-icons/Ionicons';
+import LottieView from 'lottie-react-native';
+import { useIntl } from '@context';
+import { useFocusEffect } from '@react-navigation/native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import axios from 'axios'; // Ensure axios is installed
 
-interface Message {
-  id: string;
-  sender: string;
-  senderAvatar?: string; // Optional avatar URL
-  subject: string;
-  snippet: string;
-  timestamp: string;
-}
+import AsyncHelper from '../../helpers/asyncHelper';
+import { MessagingWebSocketManager, Message, fetchChats } from '@services';
+import { CustomButton } from '@components';
+import { Colors } from '@colors';
+import { fonts, messageAnimation, launchScreen } from '@assets';
+import { UserIcon } from '@svgs';
 
 interface MessagesProps {
-  navigation: any; // Replace with appropriate navigation type
+  navigation: any;
 }
 
 export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
   const { intl } = useIntl();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [localToken, setLocalToken] = useState<string | null>(null);
+  const [myUserId, setMyUserId] = useState<number | null>(null);
+  const [groupedChats, setGroupedChats] = useState<Record<string, Message>>({});
   const [loading, setLoading] = useState<boolean>(true);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  // Function to fetch messages from API
-  const fetchMessages = async () => {
+  // WebSocket manager
+  const messagingWS = MessagingWebSocketManager;
+
+  // Animated background values
+  const backgroundOpacity = useRef(new Animated.Value(0)).current;
+  const backgroundScale = useRef(new Animated.Value(0.5)).current;
+
+  // Animate background only if user is logged in & has messages
+  const shouldAnimateBackground =
+    !!localToken && localToken.trim().length > 0 && Object.keys(groupedChats).length > 0;
+
+  useEffect(() => {
+    if (shouldAnimateBackground) {
+      Animated.parallel([
+        Animated.timing(backgroundOpacity, {
+          toValue: 0.1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(backgroundScale, {
+          toValue: 1,
+          friction: 4,
+          tension: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      backgroundOpacity.setValue(0);
+      backgroundScale.setValue(0.5);
+    }
+  }, [shouldAnimateBackground]);
+
+  // Replace with your actual logic; for demo purposes, returning 7.
+  const getCurrentUserId = async (): Promise<number | null> => {
+    return 7;
+  };
+
+  // Updated loadChats that receives the userId as a parameter
+  const loadChats = async (token: string, currentUserId: number) => {
     try {
-      setLoading(true);
-      // Replace 'YOUR_API_ENDPOINT' with your actual API endpoint
-      const token = await AsyncHelper.getToken();
-      if (!token) {
-        setIsLoggedIn(false);
-        setMessages([]);
-        return;
-      }
+      const response = await fetchChats(token);
+      console.log('[Messages] Retrieved chats:', JSON.stringify(response, null, 2));
+      const chats = Array.isArray(response) ? response : [];
 
-      // Example API call using axios
-      const response = await axios.get<Message[]>('YOUR_API_ENDPOINT/messages', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Group messages by the "other user" in each conversation.
+      // Convert partnerKey to string for consistency.
+      const grouped: Record<string, Message> = {};
+      chats.forEach((msg) => {
+        const isMeSender = msg.sender?.user_id === currentUserId;
+        const partnerKey = isMeSender ? msg.receiver?.user_id : msg.sender?.user_id;
+        if (partnerKey != null) {
+          const key = String(partnerKey);
+          // Use the most recent message for the conversation
+          if (
+            !grouped[key] ||
+            new Date(msg.timestamp) > new Date(grouped[key].timestamp)
+          ) {
+            grouped[key] = msg;
+          }
+        }
       });
-
-      setMessages(response.data);
-      setIsLoggedIn(true);
+      setGroupedChats(grouped);
     } catch (error) {
-      console.error('Error fetching messages:', error);
-      // Handle specific error cases if needed
-      setIsLoggedIn(false);
-      setMessages([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      console.error('Error loading chats:', error);
     }
   };
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+  // Focus effect: fetch token, userId, and then load chats
+  useFocusEffect(
+    useCallback(() => {
+      const updateTokenAndLoadChats = async () => {
+        const tokenFromStorage = await AsyncHelper.getToken();
+        const userIdFromStorage = await getCurrentUserId();
+        setMyUserId(userIdFromStorage);
+        console.log('[Messages] Token from storage:', tokenFromStorage);
+        setLocalToken(tokenFromStorage);
 
+        if (tokenFromStorage && tokenFromStorage.trim().length > 0 && userIdFromStorage) {
+          messagingWS.setToken(tokenFromStorage);
+          await loadChats(tokenFromStorage, userIdFromStorage);
+        } else {
+          messagingWS.setToken(null);
+          setGroupedChats({});
+        }
+        setLoading(false);
+      };
+      updateTokenAndLoadChats();
+    }, [])
+  );
+
+  // Pull-to-refresh logic
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchMessages();
-  }, []);
+    if (localToken && localToken.trim().length > 0 && myUserId) {
+      loadChats(localToken, myUserId).finally(() => setRefreshing(false));
+    } else {
+      setRefreshing(false);
+    }
+  }, [localToken, myUserId]);
 
+  // Navigate to chat screen
   const handleMessagePress = (message: Message) => {
-    // Navigate to a detailed message screen if available
-    navigation.navigate('MessageDetail', { message });
-    // console.log('Message pressed:', message);
+    navigation.navigate('Auth', { screen: 'ChatScreen', params: { message } });
   };
 
-  const handleLoginPress = () => {
-    navigation.navigate('Auth', { screen: 'Login' }); // Adjust based on your navigation structure
-  };
-
+  // Skeleton for loading
   const renderSkeleton = () => (
     <SkeletonPlaceholder>
       <View style={styles.messageItem}>
@@ -108,60 +158,76 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
     </SkeletonPlaceholder>
   );
 
-  const renderItem = ({ item, index }: { item: Message; index: number }) => (
-    <>
-      <TouchableOpacity
-        style={styles.messageItem}
-        onPress={() => handleMessagePress(item)}
-        accessibilityLabel={`Message from ${item.sender}`}
-      >
-        {item.senderAvatar ? (
-          <Image source={{ uri: item.senderAvatar }} style={styles.avatar} />
+  // Identify the "other" user in a chat
+  const getChatPartner = (msg: Message) => {
+    const isMeSender = msg.sender?.user_id === myUserId;
+    return isMeSender ? msg.receiver : msg.sender;
+  };
+
+  // Render a chat item
+  const renderItem = ({ item }: { item: Message }) => {
+    const partner = getChatPartner(item);
+    const partnerPic = partner?.profile_picture;
+    const partnerName = partner?.name || 'Unknown';
+
+    // Format date/time: "Jan 17, 2025 • 13:16"
+    const dateObj = new Date(item.timestamp);
+    const dateString = dateObj.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const timeString = dateObj.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    // Highlight if status is "sent" (assumed to be unread)
+    const isUnread = item.status === 'sent';
+    const containerStyle = [
+      styles.messageItem,
+      isUnread && styles.unreadItem,
+    ];
+
+    return (
+      <TouchableOpacity style={containerStyle} onPress={() => handleMessagePress(item)}>
+        {partnerPic ? (
+          <Image source={{ uri: partnerPic }} style={styles.avatar} />
         ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Icon name="person-circle-outline" size={48} color={Colors.light.greyDescription} />
+          <View style={styles.avatarFallback}>
+            <UserIcon width={32} height={32} /> 
           </View>
         )}
         <View style={styles.messageContent}>
           <View style={styles.messageHeader}>
-            <Text style={styles.senderText}>{item.sender}</Text>
-            <Text style={styles.timestampText}>{item.timestamp}</Text>
+            <Text style={styles.senderText}>{partnerName}</Text>
           </View>
-          <Text style={styles.subjectText}>{item.subject}</Text>
           <Text style={styles.snippetText} numberOfLines={2}>
-            {item.snippet}
+            {item.body}
+          </Text>
+          <Text style={styles.timestampText}>
+            {`${dateString} • ${timeString}`}
           </Text>
         </View>
-
-        {/* Chevron Icon */}
-        <Icon name="chevron-forward" size={20} color={Colors.light.icon} />
       </TouchableOpacity>
-      {index === 0 && <Ads style={styles.ad} />}
-    </>
-  );
+    );
+  };
 
   const keyExtractor = (item: Message) => item.id;
+  // Flatten the grouped chats into a list
+  const chatList = Object.values(groupedChats);
 
   if (loading && !refreshing) {
-    // Display skeleton loaders
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.title}>Messages</Text>
-            <TouchableOpacity
-              onPress={() => {
-                // Handle new message action
-                console.log('New message button pressed');
-              }}
-              accessibilityLabel="Compose new message"
-            >
-              <Icon name="create-outline" size={24} color={Colors.light.onPrimary} />
-            </TouchableOpacity>
           </View>
           <View style={styles.listContent}>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <View key={index}>{renderSkeleton()}</View>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <View key={idx}>{renderSkeleton()}</View>
             ))}
           </View>
         </View>
@@ -169,66 +235,90 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
     );
   }
 
-  if (!isLoggedIn) {
+  if (!localToken || localToken.trim().length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.title}>Messages</Text>
-            <TouchableOpacity
-              onPress={() => {
-                // Handle new message action
-                console.log('New message button pressed');
-              }}
-              accessibilityLabel="Compose new message"
-            >
-              <Icon name="create-outline" size={24} color={Colors.light.onPrimary} />
-            </TouchableOpacity>
           </View>
           <View style={styles.notLoggedInContainer}>
-            <Text style={styles.notLoggedInText}>
+            <Text style={styles.emptyText}>
               {intl.formatMessage({
-                id: 'messagesScreen.loginPrompt',
+                id: 'messagesScreen.loginHeading',
                 defaultMessage: 'Log in to contact and message property owners.',
               })}
             </Text>
-            
+            <Text style={styles.subEmptyText}>
+              {intl.formatMessage({
+                id: 'messagesScreen.loginSubText',
+                defaultMessage: 'Sign in to access exclusive features and start a conversation.',
+              })}
+            </Text>
+            <View style={{ marginTop: 20 }}>
+              <CustomButton
+                btnWidth="100%"
+                disabled={false}
+                textSize={16}
+                borderRadius={30}
+                title={intl.formatMessage({ id: 'buttons.signIn', defaultMessage: 'Sign In' })}
+                showSocialButton={false}
+                showRightIconButton={true}
+                textButtonWithIcon
+                iconName="UserIcon"
+                handleClick={() => navigation.navigate('Auth', { screen: 'Login' })}
+              />
+            </View>
+            <LottieView source={messageAnimation} style={styles.animation} autoPlay loop />
           </View>
         </View>
       </SafeAreaView>
     );
   }
 
+  // Show a background only if there are messages
+  const showBackground = chatList.length > 0;
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {showBackground && (
+          <View style={StyleSheet.absoluteFillObject}>
+            <Animated.Image
+              source={launchScreen}
+              style={[
+                styles.manzilBackground,
+                {
+                  opacity: backgroundOpacity,
+                  transform: [{ scale: backgroundScale }],
+                },
+              ]}
+            />
+          </View>
+        )}
         <View style={styles.header}>
           <Text style={styles.title}>Messages</Text>
-          <TouchableOpacity
-            onPress={() => {
-              // Handle new message action
-              console.log('New message button pressed');
-            }}
-            accessibilityLabel="Compose new message"
-          >
-            <Icon name="create-outline" size={24} color={Colors.light.onPrimary} />
-          </TouchableOpacity>
         </View>
         <FlatList
-          data={messages}
+          data={chatList}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Icon name="chatbubble-ellipses-outline" size={64} color={Colors.light.greyDescription} />
               <Text style={styles.emptyText}>
                 {intl.formatMessage({
                   id: 'messagesScreen.noMessages',
-                  defaultMessage: 'You have no messages. Contact property owners to start a conversation.',
+                  defaultMessage: 'Message real estate owners and agencies to find your property!',
                 })}
               </Text>
+              <Text style={styles.subEmptyText}>
+                {intl.formatMessage({
+                  id: 'messagesScreen.noMessagesSubText',
+                  defaultMessage: 'Start a conversation today to unlock exclusive property details.',
+                })}
+              </Text>
+              <LottieView source={messageAnimation} style={styles.animation} autoPlay loop />
             </View>
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -243,55 +333,90 @@ export default Messages;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.primaryButton, // Green background for SafeAreaView
+    backgroundColor: Colors.light.primaryButton,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background, // White background for the main content
+    backgroundColor: Colors.light.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.light.primaryButton, // Green background for header
+    backgroundColor: Colors.light.primaryButton,
     padding: 16,
   },
   title: {
     fontSize: 24,
     fontFamily: fonts.primary.bold,
-    color: Colors.light.onPrimary, // White text on green background
+    color: Colors.light.onPrimary,
   },
   listContent: {
     padding: 16,
     paddingTop: 8,
   },
+  manzilBackground: {
+    width: '80%',
+    height: '80%',
+    alignSelf: 'center',
+  },
+  notLoggedInContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    padding: 32,
+    paddingTop: 40,
+  },
+  emptyContainer: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 22,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+  },
+  subEmptyText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontFamily: fonts.primary.medium,
+    color: '#8B4513',
+  },
   messageItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.light.cardBackground, // Light gray for message items
+    backgroundColor: Colors.light.cardBackground,
     padding: 12,
     borderRadius: 12,
     elevation: 2,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    marginBottom: 12,
+  },
+  unreadItem: {
+    backgroundColor: '#E2F9E5',
+  },
+  avatarFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.light.primaryButton,
   },
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
     marginRight: 12,
-  },
-  avatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    backgroundColor: Colors.light.greyBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.light.primaryButton,
   },
   messageContent: {
     flex: 1,
@@ -299,74 +424,28 @@ const styles = StyleSheet.create({
   messageHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   senderText: {
     fontSize: 16,
     fontFamily: fonts.primary.medium,
-    color: Colors.light.primaryButton, // Dark green for sender's name
-  },
-  timestampText: {
-    fontSize: 12,
-    fontFamily: fonts.primary.regular,
-    color: Colors.light.greyDescription, // Gray for timestamp
-  },
-  subjectText: {
-    fontSize: 14,
-    fontFamily: fonts.primary.bold,
-    color: Colors.light.headingTitle, // Black for subject
-    marginBottom: 2,
+    color: Colors.light.primaryButton,
   },
   snippetText: {
     fontSize: 13,
     fontFamily: fonts.primary.regular,
-    color: Colors.light.greyDescription, // Gray for snippet
+    color: Colors.light.greyDescription,
+    marginBottom: 4,
   },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    marginTop: 32,
-    padding: 16,
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 16,
-    fontSize: 16,
+  timestampText: {
+    fontSize: 12,
     fontFamily: fonts.primary.regular,
-    color: Colors.light.greyDescription, // Gray text
-  },
-  ad: {
-    marginVertical: 16,
-    alignSelf: 'center',
+    color: Colors.light.greyDescription,
   },
   separator: {
     height: 12,
   },
-  notLoggedInContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  notLoggedInText: {
-    fontSize: 18,
-    fontFamily: fonts.primary.medium,
-    color: Colors.light.headingTitle, // Black text
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  loadingText: {
-    fontSize: 18,
-    fontFamily: fonts.primary.regular,
-    color: Colors.light.headingTitle,
-    textAlign: 'left',
-  },
+  // Skeleton styles
   avatarSkeleton: {
     width: 48,
     height: 48,
@@ -403,5 +482,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
+  },
+  animation: {
+    width: '100%',
+    height: 200,
+    marginTop: 20,
   },
 });

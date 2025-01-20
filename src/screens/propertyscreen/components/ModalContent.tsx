@@ -42,7 +42,7 @@ const ModalContent: React.FC<ModalContentProps> = ({
   return (
     <ScrollView
       ref={scrollViewRef}
-      style={[styles.modalScrollView, { maxHeight: expandedHeight - 50 }]}
+      style={[styles.modalScrollView, { maxHeight: expandedHeight }]}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={true}
       scrollEnabled={isExpanded}
@@ -99,7 +99,7 @@ const ModalContent: React.FC<ModalContentProps> = ({
         <MapComponent location={property.location} />
         <TimetoAddress/>
         <AdInfo property={property} />
-        <AgentDetails contactInformation={property.contact_information} />
+        <AgentDetails property={property} />
 
         <View style={styles.similarHomesSection}>
           <Text style={styles.sectionTitle}>Similar Properties</Text>
@@ -131,8 +131,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   dragIcon: {
-    width: 40,
-    height: 5,
+    width: 75,
+    height: 3,
     backgroundColor: '#aaa',
     borderRadius: 2.5,
     alignSelf: 'center',

@@ -42,25 +42,27 @@ def get_guest_user(guest_id):
 
 class TokenAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
+        # Make a shallow copy so we don't lose channel_layer
+        new_scope = dict(scope)
+
         query_string = scope["query_string"].decode()
         params = parse_qs(query_string)
         token = params.get('token', [None])[0]
         guest_id = params.get('guest_id', [None])[0]
 
         if token:
-            logger.info("Token found in query parameters.")
             user = await get_user(token)
-            scope["user"] = user
-            # Optionally attach token info if needed
-            scope["auth_type"] = "user"
+            new_scope["user"] = user
+            new_scope["auth_type"] = "user"
         elif guest_id:
-            logger.info("Guest ID found in query parameters.")
-            # Attach the guest ID and a flag to allow guest connections in your consumer.
-            scope["user"] = AnonymousUser()
-            scope["guest_id"] = guest_id
-            scope["auth_type"] = "guest"
+            new_scope["user"] = AnonymousUser()
+            new_scope["guest_id"] = guest_id
+            new_scope["auth_type"] = "guest"
         else:
-            logger.warning("No token or guest ID provided in query parameters.")
-            scope["user"] = AnonymousUser()
-        
-        return await super().__call__(scope, receive, send)
+            new_scope["user"] = AnonymousUser()
+
+        # If the original scope had a channel_layer, keep it
+        if "channel_layer" not in new_scope:
+            new_scope["channel_layer"] = scope.get("channel_layer")
+
+        return await super().__call__(new_scope, receive, send)

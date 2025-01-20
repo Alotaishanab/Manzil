@@ -16,4 +16,5 @@ urlpatterns = [
     path('user/session-heartbeat/', views.SessionHeartbeatView.as_view(), name='session-heartbeat'),
     path('user/end-session/', views.EndUserSessionView.as_view(), name='end-session'),
     path('user/refresh-token/', views.refresh_access_token, name='refresh-token'),
+    path('user/update-profile-picture/', views.UpdateProfilePictureView.as_view(), name='update_profile_picture'),
 ]

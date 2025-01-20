@@ -4,6 +4,8 @@ from rest_framework import generics, permissions, filters
 from .models import Message
 from .serializers import MessageSerializer
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10  # Messages per page
@@ -43,3 +45,23 @@ class SentMessageListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Message.objects.filter(sender=user).select_related('sender', 'receiver')
+
+
+class ChatListAPIView(generics.ListAPIView):
+    """
+    GET: List all messages where the authenticated user is either sender or receiver.
+         (You can group them by conversation partner on the client side.)
+    """
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['body', 'sender__email', 'receiver__email']
+    ordering_fields = ['timestamp', 'status']
+
+    def get_queryset(self):
+        user = self.request.user
+        return Message.objects.filter(
+            (Q(sender=user) | Q(receiver=user)) &
+            ~Q(sender=user, receiver=user)  # Exclude self chats
+        ).select_related('sender', 'receiver').order_by('-timestamp')

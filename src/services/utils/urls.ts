@@ -15,13 +15,14 @@ export const apiUrls = {
   resendPhoneCode: 'account/user/resend/code/',
   userProfile: 'account/user/info/',
   refreshToken: 'account/user/refresh-token/',
+  updateProfilePicture: 'account/user/update-profile-picture/',
 
   // Property-related endpoints
   addProperty: 'properties/add/',
   exploreNearbyProperties: 'properties/explore/near-by/',
   exploreInterestedProperties: 'properties/explore/interested/',
   getPropertyById: 'properties/property/',
-  saveProperty: 'properties/',
+  saveProperty: 'properties/:id/save/',
   getUserProperties: 'properties/user/my-properties/',
   getSavedProperties: 'properties/user/saved-properties/',
   makePropertyFeatured: 'properties/user/my-properties',
@@ -30,9 +31,11 @@ export const apiUrls = {
   startSession: 'account/user/start-session/',
   sessionHeartbeat: 'account/user/session-heartbeat/',
 
-  sendMessage: 'messages/send/',
-  fetchReceivedMessages: 'messages/received/',
-  fetchSentMessages: 'messages/sent/',
+  // Message-related endpoints
+  fetchReceivedMessages: 'messaging/received/',
+  fetchSentMessages: 'messaging/sent/',
+  fetchChats: 'messaging/chats/',
+
 };
 
 // WebSocket URLs

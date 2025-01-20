@@ -5,41 +5,51 @@ import api from '../api';
 import { apiUrls } from '../../utils/urls';
 
 export interface ProfileData {
+  id: number;
   email: string;
-  id: number;
   name: string;
-  kids?: Kid[];
-  // subscriptions?: SubscriptionResponse[]
-}
-
-export interface Kid {
-  id: number;
-  name: string;
-  age: number;
+  profile_picture?: string | null; // optional + can be null
+  // kids?: Kid[]; // if needed
+  // ... any other fields from your server
 }
 
 const getProfile = async (): Promise<ProfileData> => {
   try {
-    const data = await api.get<ProfileData>(apiUrls.userProfile);
-    console.log("Profile API response:", data); // Log the data
-    return data; // Adjust based on api.get's return structure
+    // `api.get` returns the raw JSON object, not { data: ... }
+    const response = await api.get<ProfileData>(apiUrls.userProfile);
+
+    console.log('Profile API raw response:', response);
+
+    // If `response` is the actual user object, we check if it's null/undefined
+    if (!response) {
+      throw new Error('No profile data returned from the server.');
+    }
+
+    // Optionally, check if required fields exist:
+    // if (!response.id || !response.email) {
+    //   throw new Error('Incomplete profile data returned.');
+    // }
+
+    console.log('Profile final object returning:', response);
+    return response; // Return the entire object
   } catch (error) {
-    console.error("Error fetching profile data:", error);
+    console.error('Error fetching profile data:', error);
     throw error;
   }
 };
 
 interface UseGetProfileParams {
-  enabled: boolean;
+  enabled?: boolean;
 }
 
 export const useGetProfile = (params: UseGetProfileParams = { enabled: false }) => {
   const { enabled } = params;
+
   return useQuery<ProfileData, Error>({
     queryKey: ['profile'],
     queryFn: getProfile,
     enabled,
-    retry: false, // Optional: Prevent automatic retries
-    staleTime: Infinity, // Optional: Cache indefinitely
+    retry: false,
+    staleTime: Infinity,
   });
 };

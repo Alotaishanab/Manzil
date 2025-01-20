@@ -49,6 +49,7 @@ import {
   PropertyFullScreen,
   AddedProperties,
   MapScreen,
+  ChatScreen,
 } from '@screens';
 import {BottomTabNavigator} from './bottomtab/BottomTabNavigator';
 
@@ -110,6 +111,7 @@ type AuthStackParamList = {
   PropertyScreen?: any;
   PropertyFullScreen?: any;
   MapScreen?: any;
+  ChatScreen?:any;
   AddedProperties?: any;
 };
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -192,6 +194,7 @@ export const AuthNavigator = () => {
       <AuthStack.Screen name="PropertyFullScreen" component={PropertyFullScreen} />
       <AuthStack.Screen name="AddedProperties" component={AddedProperties} />
       <AuthStack.Screen name="MapScreen" component={MapScreen} />
+      <AuthStack.Screen name="ChatScreen" component={ChatScreen} />
     </AuthStack.Navigator>
   );
 };
