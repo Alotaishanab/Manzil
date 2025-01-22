@@ -142,8 +142,16 @@ def logout_user(request):
     if request.method == 'POST':
         serializer = UserLogoutSerializer(data=request.data)
         if serializer.is_valid():
-            blacklist_token(serializer.validated_data.get('refresh'))
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            refresh_token = serializer.validated_data.get('refresh')
+            try:
+                blacklist_token(refresh_token)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except TokenError:
+                # Already expired or invalid => treat as “already logged out” or unauthorized
+                return Response(
+                    {"detail": "Refresh token is invalid or already expired."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])

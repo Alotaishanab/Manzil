@@ -129,6 +129,7 @@ export * from './PrivacyPolicyIcon';
 export * from './PlusIcon';
 export * from './ParkingIcon';
 export * from './PetsIcon';
+export * from './PinIcon';
 
 // Q
 

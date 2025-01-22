@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncHelper from '../helpers/asyncHelper';
 import LoggingWebSocketManager from '../services/websocket/LoggingWebSocketManager';
 import apiInstance, { setAuthLogoutHandler } from '../services/api/api'; 
+import type { ProfileData } from '@services';
 
 
 interface AuthContextProps {
@@ -10,6 +11,8 @@ interface AuthContextProps {
   userId: string | null;
   guestId: string | null;
   loadingAuth: boolean;
+  userProfile: ProfileData | null;       
+  setUserProfile: (profile: ProfileData | null) => void;
   setAuthToken: (token: string) => Promise<void>;
   setAuthUserId: (userId: string) => Promise<void>;
   clearAuth: () => Promise<void>;
@@ -32,6 +35,7 @@ export const AuthContext = createContext<AuthContextProps>({
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [userId, setUserIdState] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<ProfileData | null>(null);
   const [guestId, setGuestIdState] = useState<string | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
@@ -121,6 +125,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         userId,
         guestId,
         loadingAuth,
+        userProfile,
+        setUserProfile,
         setAuthToken,
         setAuthUserId,
         clearAuth,

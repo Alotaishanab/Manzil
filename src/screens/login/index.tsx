@@ -31,7 +31,8 @@ export const Login = () => {
 
   // Extract the session manager helper
   const { stopAndClearSession } = useSessionManager();
-  const { clearGuestId } = useContext(AuthContext);
+  const { clearGuestId,  setUserProfile } = useContext(AuthContext);
+
 
   // react-query for profile + saved props
   const { refetch: refetchProfile } = useGetProfile({ enabled: false });
@@ -83,8 +84,15 @@ export const Login = () => {
 
           // 5) refetch profile + saved
           console.log('Refetching profile...');
-          await refetchProfile();
+          const profileRes = await refetchProfile();
           console.log('Profile refetched successfully');
+
+          // 6) store in AuthContext
+          if (profileRes.data) {
+            setUserProfile(profileRes.data);
+              } else {
+              console.warn('refetchProfile returned no data.');
+             }
 
           console.log('Refetching saved properties...');
           await refetchSavedProperties();
@@ -221,3 +229,5 @@ export const Login = () => {
     </Screen>
   );
 };
+
+

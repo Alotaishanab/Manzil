@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   SafeAreaView,
   View,
@@ -18,11 +18,12 @@ import { AuthContext } from '@context';
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
 
-import { MessagingWebSocketManager, fetchChats } from '@services';
+import { MessagingWebSocketManager } from '@services';
+import { fetchChats } from '@services'; // your newly paginated fetch function
+
 import sendIcon from '../../assets/images/send.png';
 import closeIcon from '../../assets/images/close.png';
-import { launchScreen } from '@assets';
-import { UserIcon } from '@svgs'; // Fallback icon for no profile pic
+import { UserIcon } from '@svgs'; // fallback icon
 
 // --------------------- Types ---------------------
 interface Property {
@@ -52,7 +53,9 @@ interface Message {
 type ChatScreenRouteProp = RouteProp<
   {
     ChatScreen: {
-      message: Message; // The initial message object
+      partnerId?: number;
+      partnerName?: string;
+      partnerPic?: string | null; 
       property?: Property;
     };
   },
@@ -60,41 +63,58 @@ type ChatScreenRouteProp = RouteProp<
 >;
 
 export const ChatScreen: React.FC = () => {
-  const { token, user } = useContext(AuthContext);
+  // 1) Pull token & userId from AuthContext
+  const { token, userId, userProfile } = useContext(AuthContext);
+  const currentUserId = userId ? parseInt(userId, 10) : null;
+
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  // 2) Safely get route params
   const route = useRoute<ChatScreenRouteProp>();
+  const { partnerId, partnerName, partnerPic, property } = route.params || {};
 
-  // Derive current user ID from AuthContext (check both id and user_id)
-  const currentUserId = user?.user_id || user?.id;
-
-  // Destructure the params
-  const { message, property } = route.params;
-
-  // We'll store ALL messages we fetch
+  // States
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-
-  // Input field state
   const [inputText, setInputText] = useState('');
+  const flatListRef = useRef<FlatList<Message>>(null);
 
-  // 1) On mount, set the WebSocket token & fetch all messages
+  // Optional: store "my" profile picture
+  const [myProfilePicture, setMyProfilePicture] = useState<string | null>(null);
+
   useEffect(() => {
+    if (userProfile?.profile_picture) {
+      setMyProfilePicture(userProfile.profile_picture);
+    }
+  }, [userProfile]);
+
+  // ------------------- Load page=1 messages for this partner ------------------- //
+  useEffect(() => {
+    // If you have a token, set it for the WS manager
     if (token) {
       MessagingWebSocketManager.setToken(token);
     }
 
     const loadMessages = async () => {
       try {
-        const chatHistory = await fetchChats(token);
-        console.log('[ChatScreen] Fetched chat history:', chatHistory);
+        if (token && partnerId) {
+          // Fetch page=1 from your paginated endpoint
+          const pagedData = await fetchChats(token, partnerId, undefined, 1);
+          console.log('[ChatScreen] pagedData =>', pagedData); 
 
-        // Sort ascending by timestamp so older messages appear first
-        chatHistory.sort(
-          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-        setMessages(chatHistory);
+
+          // pagedData.results is an array of messages
+          // Sort ascending by timestamp so older appear first
+          const sorted = [...pagedData.results].sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+          setMessages(sorted);
+        } else {
+          // No partner => new conversation
+          setMessages([]);
+        }
       } catch (error) {
         console.error('Error fetching chat history:', error);
       } finally {
@@ -106,59 +126,63 @@ export const ChatScreen: React.FC = () => {
 
     // Listen for new incoming messages
     const handleNewMessage = (msg: Message) => {
-      setMessages((prev) => {
-        const updated = [...prev, msg];
-        updated.sort(
-          (x, y) => new Date(x.timestamp).getTime() - new Date(y.timestamp).getTime()
-        );
-        return updated;
-      });
+      // If the incoming msg belongs to this partner conversation, add it
+      if (
+        (msg.sender.user_id === partnerId &&
+         typeof msg.receiver !== 'number' &&
+         msg.receiver.user_id === currentUserId) ||
+        (typeof msg.receiver !== 'number' &&
+         msg.receiver.user_id === partnerId &&
+         msg.sender.user_id === currentUserId)
+      ) {
+        setMessages((prev) => {
+          const updated = [...prev, msg];
+          updated.sort(
+            (x, y) => new Date(x.timestamp).getTime() - new Date(y.timestamp).getTime()
+          );
+          return updated;
+        });
+      }
     };
 
     MessagingWebSocketManager.on('new_message', handleNewMessage);
-
     return () => {
       MessagingWebSocketManager.off('new_message', handleNewMessage);
     };
-  }, [token]);
+  }, [token, partnerId, currentUserId]);
 
-  // 2) Send a new message
-  const sendMessage = async () => {
-    if (!inputText.trim()) return; // Ensure there's a valid message
+  // ------------------- Determine the actual receiver ID ------------------- //
+  const receiverId = partnerId || property?.lister_id || 0;
+
+  // ------------------- Sending a new message ------------------- //
+  const sendMessage = () => {
+    if (!inputText.trim()) return;
+    if (!receiverId) return;
 
     setSending(true);
 
-    // Determine receiver using currentUserId for the proper comparison
-    const receiverId =
-      message.sender.user_id === currentUserId
-        ? (message.receiver as UserMinimal).user_id
-        : message.sender.user_id;
-
-    // Create a local "Message" object for UI using currentUserId
     const newMsg: Message = {
       id: Date.now().toString(),
       sender: {
         user_id: currentUserId || 0,
-        name: user?.name || 'Me',
-        email: user?.email || '',
-        phone_number: user?.phone_number || '',
-        profile_picture: user?.profile_picture || null,
+        name: 'Me',
+        email: '',
+        phone_number: '',
+        profile_picture: myProfilePicture,
       },
       receiver: { user_id: receiverId },
       body: inputText.trim(),
       timestamp: new Date().toISOString(),
       status: 'sent',
-      property: property,
+      property,
     };
 
     try {
-      // The WebSocket consumer expects only { message, receiver_id }
-      const wsPayload = {
+      // Send via WebSocket
+      MessagingWebSocketManager.send({
         message: newMsg.body,
         receiver_id: receiverId,
-      };
-
-      MessagingWebSocketManager.send(wsPayload);
+      });
 
       // Immediately update UI
       setMessages((prev) => {
@@ -177,7 +201,7 @@ export const ChatScreen: React.FC = () => {
     }
   };
 
-  // 3) Formatting day/time
+  // ------------------- Format date/time ------------------- //
   const formatDate = (str: string) => {
     const d = new Date(str);
     return d.toLocaleDateString('en-US', {
@@ -196,30 +220,19 @@ export const ChatScreen: React.FC = () => {
     });
   };
 
-  // 4) Render each message
+  // ------------------- Render each message ------------------- //
   const renderItem = ({ item, index }: { item: Message; index: number }) => {
     const isMyMessage = item.sender.user_id === currentUserId;
 
-    // Show a day header if day changes
+    // Show a day header if the date changes
     let showDayHeader = false;
     if (index === 0) {
       showDayHeader = true;
     } else {
       const prevDay = new Date(messages[index - 1].timestamp).toDateString();
       const currDay = new Date(item.timestamp).toDateString();
-      if (prevDay !== currDay) {
-        showDayHeader = true;
-      }
+      if (prevDay !== currDay) showDayHeader = true;
     }
-
-    const senderPic = isMyMessage ? user?.profile_picture : item.sender.profile_picture;
-    const avatarContent = senderPic ? (
-      <Image source={{ uri: senderPic }} style={styles.chatAvatar} />
-    ) : (
-      <View style={styles.chatAvatarPlaceholder}>
-        <UserIcon width={16} height={16} fill="#FFF" />
-      </View>
-    );
 
     return (
       <>
@@ -234,71 +247,70 @@ export const ChatScreen: React.FC = () => {
             isMyMessage ? styles.myMessageRow : styles.theirMessageRow,
           ]}
         >
-          {avatarContent}
-          <View
-            style={[
-              styles.messageBubble,
-              isMyMessage ? styles.myBubble : styles.theirBubble,
-            ]}
-          >
+          <View style={[styles.messageBubble, isMyMessage ? styles.myBubble : styles.theirBubble]}>
             <Text style={styles.messageText}>{item.body}</Text>
-            <Text style={styles.timestamp}>{formatTime(item.timestamp)}</Text>
+            <View style={styles.bubbleFooter}>
+              <Text style={styles.timestamp}>{formatTime(item.timestamp)}</Text>
+              {item.sender.profile_picture ? (
+                <Image
+                  source={{ uri: item.sender.profile_picture }}
+                  style={styles.bubbleAvatar}
+                />
+              ) : (
+                <View style={styles.bubbleAvatarPlaceholder}>
+                  <UserIcon width={14} height={14} fill="#FFF" />
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </>
     );
   };
 
-  // 5) Quick replies
+  // Quick replies
   const quickReplies = ["I'm interested…", 'Price?', 'Viewing?'];
   const handleQuickReply = (txt: string) => {
     setInputText(txt);
     sendMessage();
   };
 
-  // 6) Determine the conversation partner
-  // If the logged-in user is the sender, then the partner is message.receiver; otherwise, the partner is message.sender.
-  const partnerFromMessage =
-    message.sender.user_id === currentUserId ? message.receiver : message.sender;
-  const partnerObj =
-    typeof partnerFromMessage === 'number'
-      ? {
-          user_id: partnerFromMessage,
-          name: 'User',
-          email: '',
-          phone_number: '',
-          profile_picture: null,
-        }
-      : partnerFromMessage;
-  const partnerName = partnerObj.name || 'User';
-  const partnerPic = partnerObj.profile_picture || null;
+  // Partner name for header
+  const finalPartnerName = partnerName || property?.lister_name || 'User';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Background image */}
-
+   <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors.light.primaryButton }]}>
       {/* Close Button */}
       <TouchableOpacity
-        style={[styles.closeButton, { top: insets.top + 15 }]}
+        style={[styles.closeButton, { top: insets.top + 8 }]}
         onPress={() => navigation.goBack()}
       >
         <Image source={closeIcon} style={styles.closeIcon} />
       </TouchableOpacity>
 
       {/* Header */}
-      <View style={styles.header}>
-        {partnerPic ? (
-          <Image source={{ uri: partnerPic }} style={styles.headerAvatar} />
-        ) : (
-          <View style={styles.headerAvatarPlaceholder}>
-            <UserIcon width={20} height={20} fill="#FFF" />
-          </View>
-        )}
-        <Text style={styles.headerTitle}>{partnerName}</Text>
-        {property?.address ? (
-          <Text style={styles.subHeader}>{property.address}</Text>
-        ) : null}
-      </View>
+    <TouchableOpacity
+      style={styles.headerContainer}
+      activeOpacity={0.8}
+      onPress={() =>
+        navigation.navigate('Auth' as never, {
+          screen: 'AgencyDetails',
+        } as never)
+      }
+    >
+      {partnerPic ? (
+        <Image
+          source={{ uri: partnerPic }}
+          style={styles.headerAvatar} // define a style with proper width/height
+        />
+      ) : (
+        <View style={styles.headerAvatarPlaceholder}>
+          <UserIcon width={20} height={20} fill="#FFF" />
+        </View>
+      )}
+      <Text style={styles.headerTitle}>{partnerName || property?.lister_name || 'User'}</Text>
+    </TouchableOpacity>
+
 
       {/* Disclaimer */}
       <View style={styles.disclaimerContainer}>
@@ -308,17 +320,21 @@ export const ChatScreen: React.FC = () => {
       </View>
 
       {/* Messages List */}
-      {loading ? (
-        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={messages}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messagesContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      <View style={styles.chatContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            onContentSizeChange={() => {
+              flatListRef.current?.scrollToEnd({ animated: true });
+            }}
+          />
+        )}
+      </View>
 
       {/* Quick Replies */}
       <View style={styles.quickReplies}>
@@ -353,10 +369,7 @@ export const ChatScreen: React.FC = () => {
         >
           <Image
             source={sendIcon}
-            style={[
-              styles.iconImage,
-              (sending || !inputText.trim()) && { opacity: 0.5 },
-            ]}
+            style={[styles.iconImage, (sending || !inputText.trim()) && { opacity: 0.5 }]}
           />
         </TouchableOpacity>
       </KeyboardAvoidingView>
@@ -368,74 +381,68 @@ export const ChatScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   closeButton: {
     position: 'absolute',
-    left: 20,
-    zIndex: 999,
+    left: 16,
+    zIndex: 99,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#fff',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   closeIcon: {
     width: 14,
     height: 14,
     resizeMode: 'contain',
   },
-  header: {
-    flexDirection: 'column',
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
     paddingVertical: 12,
+    justifyContent: 'center',
   },
   headerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: 4,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#aaa',
+    marginRight: 8,
   },
   headerAvatarPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#999',
-    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#888',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
+    marginRight: 8,
   },
   headerTitle: {
     fontSize: 20,
     fontFamily: fonts.primary.bold,
-    color: '#333',
-  },
-  subHeader: {
-    fontSize: 14,
-    fontFamily: fonts.primary.regular,
-    color: '#666',
-    marginTop: 2,
+    color: '#fff',
   },
   disclaimerContainer: {
-    paddingVertical: 6,
     backgroundColor: '#ffe6e6',
     alignItems: 'center',
+    paddingVertical: 4,
   },
   disclaimerText: {
     fontSize: 12,
     color: '#ff0000',
     textAlign: 'center',
   },
+  chatContainer: {
+    flex: 1,
+    backgroundColor: '#f8f8f8', // The main chat area background
+  },
   messagesContainer: {
+    paddingTop: 10,
     paddingHorizontal: 12,
-    flexGrow: 1,
-    paddingBottom: 16,
+    paddingBottom: 20,
   },
   dayHeader: {
     alignSelf: 'center',
@@ -451,41 +458,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
   },
   messageRow: {
-    flexDirection: 'row',
     marginBottom: 8,
-    alignItems: 'flex-end',
   },
   myMessageRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
   theirMessageRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'flex-start',
-  },
-  chatAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginHorizontal: 6,
-  },
-  chatAvatarPlaceholder: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    marginHorizontal: 6,
-    backgroundColor: '#888',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   messageBubble: {
     maxWidth: '75%',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#FFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginHorizontal: 6,
+    // small shadow
     shadowColor: '#000',
     shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.1,
@@ -493,31 +482,54 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   myBubble: {
-    backgroundColor: '#DCF8C6', // green
+    backgroundColor: '#DCF8C6',
+    alignSelf: 'flex-end',
   },
   theirBubble: {
     backgroundColor: '#FFF',
+    alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 15,
     color: '#333',
     fontFamily: fonts.primary.regular,
+    marginBottom: 4,
+  },
+  bubbleFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   timestamp: {
     fontSize: 10,
-    color: '#555',
-    marginTop: 3,
-    alignSelf: 'flex-end',
+    color: '#666',
     fontFamily: fonts.primary.regular,
+    marginRight: 6,
+  },
+  bubbleAvatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  bubbleAvatarPlaceholder: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#999',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickReplies: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 8,
+    backgroundColor: '#f8f8f8',
+    paddingVertical: 6,
   },
   quickReplyButton: {
-    backgroundColor: '#86b757',
-    borderRadius: 16,
+    backgroundColor: Colors.light.primaryButton,
+    borderRadius: 30,
     paddingHorizontal: 12,
     paddingVertical: 4,
     marginHorizontal: 4,
@@ -530,25 +542,30 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    padding: 8,
+    backgroundColor: '#FFF',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
   },
   input: {
     flex: 1,
     backgroundColor: '#fff',
     borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    fontSize: 16,
+    paddingVertical: 8,
+    fontSize: 15,
     color: '#333',
     fontFamily: fonts.primary.regular,
   },
   iconButton: {
-    marginHorizontal: 8,
+    marginLeft: 8,
   },
   iconImage: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     resizeMode: 'contain',
+    // CHANGE: for a darker icon color
+    tintColor: '#333',
   },
 });

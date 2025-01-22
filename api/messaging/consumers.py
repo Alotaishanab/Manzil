@@ -45,12 +45,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_body = data.get('message')
         receiver_id = data.get('receiver_id')
 
+        # Validate input
         if not message_body or not receiver_id:
             await self.send(text_data=json.dumps({'error': 'Invalid message data.'}))
             return
 
-        # Prevent self chats by checking if the receiver_id is the same as the sender's user_id.
-        if int(receiver_id) == self.user.user_id:
+        # Prevent self chats (FIXED BUG HERE)
+        if receiver_id == str(self.user.user_id):  # Compare as strings
             await self.send(text_data=json.dumps({'error': 'Self chats are not allowed.'}))
             return
 

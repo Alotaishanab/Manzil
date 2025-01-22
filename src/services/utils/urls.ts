@@ -1,7 +1,8 @@
 // src/services/urls.ts
 export const BASE_URL_WITHOUT_TRANSPORT = '127.0.0.1:8000';
 export const BASE_URL = `http://${BASE_URL_WITHOUT_TRANSPORT}`;
-
+// 192.168.1.212 
+// 127.0.0.1:8000
 // API Endpoints
 export const apiUrls = {
   // User account-related endpoints
@@ -32,7 +33,7 @@ export const apiUrls = {
   sessionHeartbeat: 'account/user/session-heartbeat/',
 
   // Message-related endpoints
-  fetchReceivedMessages: 'messaging/received/',
+  fetchConversations: 'messaging/conversations/',
   fetchSentMessages: 'messaging/sent/',
   fetchChats: 'messaging/chats/',
 

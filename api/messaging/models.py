@@ -19,6 +19,10 @@ class Message(models.Model):
     body = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='sent')
+    hidden_for = models.ManyToManyField(User, related_name='hidden_messages', blank=True)
+    pinned_by = models.ManyToManyField(User, related_name='pinned_messages', blank=True)
+
+
 
     class Meta:
         ordering = ['-timestamp']
@@ -29,3 +33,15 @@ class Message(models.Model):
 
     def __str__(self):
         return f"From {self.sender.email} to {self.receiver.email} at {self.timestamp}"
+
+class PinnedConversation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pinned_conversations')
+    partner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pinned_by_users')
+    pinned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'partner')
+        ordering = ['-pinned_at']
+
+    def __str__(self):
+        return f"{self.user.email} pinned chat with {self.partner.email}"

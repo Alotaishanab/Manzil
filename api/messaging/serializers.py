@@ -16,6 +16,8 @@ class MessageSerializer(serializers.ModelSerializer):
     # Use the nested user serializer
     sender = UserSerializer(read_only=True)
     receiver = UserSerializer(read_only=True)
+    pinned_by = UserSerializer(many=True, read_only=True)  # Show details of users who pinned
+
 
     class Meta:
         model = Message

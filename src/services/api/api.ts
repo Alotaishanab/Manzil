@@ -103,29 +103,36 @@ class Api {
   }
 
   // Where we call the refresh endpoint, once
+  // Update the handleRefresh function
   private async handleRefresh(): Promise<string | null> {
     try {
       const refreshToken = await AsyncHelper.getRefreshToken();
       if (!refreshToken) {
-        console.log('[Api] No refreshToken => cannot refresh => returning null');
+        console.log('[Api] No refresh token available');
         return null;
       }
-      console.log('[Api] Attempting single refresh...');
-      const response = await axios.post<{ accessToken: string }>(
+
+      // 👇 3 Key changes below 👇
+      const response = await axios.post<{ 
+        access: string,       // 1. Changed from accessToken
+        refresh: string       // 2. Added to handle rotation
+      }>(
         `${QA}account/user/refresh-token/`,
-        { refreshToken },
-        { headers: { Accept: 'application/json' } },
+        { refresh: refreshToken }, // 3. Changed field name
+        { 
+          headers: { 
+            'Content-Type': 'application/json' // 👈 Add content type
+          } 
+        }
       );
-      const newToken = response.data?.accessToken;
-      if (!newToken) {
-        console.warn('[Api] No new accessToken from refresh => returning null');
-        return null;
-      }
-      await AsyncHelper.setToken(newToken);
-      console.log('[Api] Refresh success => stored new token in AsyncHelper');
-      return newToken;
-    } catch (err) {
-      console.error('[Api] Refresh error => returning null', err);
+
+      // Store both tokens if rotation is enabled
+      await AsyncHelper.setToken(response.data.access);
+      await AsyncHelper.setRefreshToken(response.data.refresh); // 👈 Store new refresh token
+
+      return response.data.access;
+    } catch (error) {
+      console.error('[Api] Refresh failed:', error);
       return null;
     }
   }

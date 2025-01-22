@@ -7,6 +7,7 @@ from properties.utils import upload_to_s3
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     confirmPassword = serializers.CharField(write_only=True, required=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
@@ -37,18 +38,24 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        # Remove confirmPassword as it's no longer needed
         validated_data.pop('confirmPassword')
         password = validated_data.pop('password')
+
+        # Safely retrieve phone_number, defaulting to an empty string if not provided
+        phone_number = validated_data.get('phone_number', '')
+
         user = User.objects.create_user(
             email=validated_data['email'],
             password=password,
             name=validated_data['name'],
-            phone_number=validated_data['phone_number'],
+            phone_number=phone_number,  # Use the safely retrieved phone number
             preferences=validated_data.get('preferences'),
             subscription_plan_id=validated_data.get('subscription_plan_id'),
             registration_date=timezone.now()
         )
         return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     profile_picture = serializers.URLField(required=False, allow_null=True)

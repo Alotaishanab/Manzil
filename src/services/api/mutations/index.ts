@@ -13,3 +13,5 @@ export * from './useTrackPropertyClick';
 export * from './useTrackPropertyView';
 export * from './useSendMessage';
 export * from './useProfilePicture';
+export * from './usehideChat';
+export * from './usepinConversation';

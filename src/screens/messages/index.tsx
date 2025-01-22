@@ -10,137 +10,177 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import LottieView from 'lottie-react-native';
-import { useIntl } from '@context';
 import { useFocusEffect } from '@react-navigation/native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-
+import { MessagingWebSocketManager, usehideChat, usepinConversation  } from '@services';
+import { RectButton, Swipeable } from 'react-native-gesture-handler';
 import AsyncHelper from '../../helpers/asyncHelper';
-import { MessagingWebSocketManager, Message, fetchChats } from '@services';
 import { CustomButton } from '@components';
 import { Colors } from '@colors';
 import { fonts, messageAnimation, launchScreen } from '@assets';
-import { UserIcon } from '@svgs';
+import { UserIcon, PinIcon } from '@svgs';
+
+// Types for your conversation items
+export interface ConversationSnippet {
+  partner_id: number;
+  partner_name: string;
+  partner_profile_picture: string | null;
+  last_message_body: string;
+  last_message_timestamp: string;
+  last_message_status: string;
+  pinned: boolean;
+}
+
+// Example fetch function, adjusted for the new shape
+import { fetchConversationList } from '@services';
+// ^ This should call your updated endpoint that returns the new JSON structure
 
 interface MessagesProps {
   navigation: any;
 }
 
 export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
-  const { intl } = useIntl();
-  const [localToken, setLocalToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<number | null>(null);
-  const [groupedChats, setGroupedChats] = useState<Record<string, Message>>({});
+  const [conversations, setConversations] = useState<ConversationSnippet[]>([]);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  // WebSocket manager
-  const messagingWS = MessagingWebSocketManager;
-
-  // Animated background values
   const backgroundOpacity = useRef(new Animated.Value(0)).current;
   const backgroundScale = useRef(new Animated.Value(0.5)).current;
 
-  // Animate background only if user is logged in & has messages
-  const shouldAnimateBackground =
-    !!localToken && localToken.trim().length > 0 && Object.keys(groupedChats).length > 0;
+
+
 
   useEffect(() => {
-    if (shouldAnimateBackground) {
-      Animated.parallel([
-        Animated.timing(backgroundOpacity, {
-          toValue: 0.1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.spring(backgroundScale, {
-          toValue: 1,
-          friction: 4,
-          tension: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      backgroundOpacity.setValue(0);
-      backgroundScale.setValue(0.5);
-    }
-  }, [shouldAnimateBackground]);
-
-  // Replace with your actual logic; for demo purposes, returning 7.
-  const getCurrentUserId = async (): Promise<number | null> => {
-    return 7;
-  };
-
-  // Updated loadChats that receives the userId as a parameter
-  const loadChats = async (token: string, currentUserId: number) => {
-    try {
-      const response = await fetchChats(token);
-      console.log('[Messages] Retrieved chats:', JSON.stringify(response, null, 2));
-      const chats = Array.isArray(response) ? response : [];
-
-      // Group messages by the "other user" in each conversation.
-      // Convert partnerKey to string for consistency.
-      const grouped: Record<string, Message> = {};
-      chats.forEach((msg) => {
-        const isMeSender = msg.sender?.user_id === currentUserId;
-        const partnerKey = isMeSender ? msg.receiver?.user_id : msg.sender?.user_id;
-        if (partnerKey != null) {
-          const key = String(partnerKey);
-          // Use the most recent message for the conversation
-          if (
-            !grouped[key] ||
-            new Date(msg.timestamp) > new Date(grouped[key].timestamp)
-          ) {
-            grouped[key] = msg;
-          }
+    // handleNewMessage => updates or inserts a snippet
+    const handleNewMessage = (msg: {
+      sender: { user_id: number; name?: string; profile_picture?: string | null };
+      receiver: { user_id: number; name?: string; profile_picture?: string | null } | number;
+      body: string; 
+      timestamp: string; 
+      status: string; 
+    }) => {
+      let partnerId: number;
+      // If I'm the sender, the partner is msg.receiver.user_id
+      // If I'm the receiver, the partner is msg.sender.user_id
+      if (msg.sender.user_id === myUserId) {
+        // "other user" is the receiver
+        if (typeof msg.receiver === 'object') {
+          partnerId = msg.receiver.user_id;
+        } else {
+          partnerId = msg.receiver; // if it's just a number
         }
-      });
-      setGroupedChats(grouped);
-    } catch (error) {
-      console.error('Error loading chats:', error);
-    }
-  };
+      } else {
+        // I'm the receiver, so partner is the sender
+        partnerId = msg.sender.user_id;
+      }
 
-  // Focus effect: fetch token, userId, and then load chats
+      setConversations((prev) => {
+        const updated = [...prev];
+        const index = updated.findIndex((conv) => conv.partner_id === partnerId);
+
+        if (index > -1) {
+          // Update existing snippet
+          updated[index] = {
+            ...updated[index],
+            last_message_body: msg.body,
+            last_message_timestamp: msg.timestamp,
+            last_message_status: msg.status,
+          };
+        } else {
+          // Insert a new snippet at the top
+          updated.unshift({
+            partner_id: partnerId,
+            partner_name: msg.sender.name || 'User',
+            partner_profile_picture: msg.sender.profile_picture || null,
+            last_message_body: msg.body,
+            last_message_timestamp: msg.timestamp,
+            last_message_status: msg.status,
+          });
+        }
+        return updated;
+      });
+    };
+
+    MessagingWebSocketManager.on('new_message', handleNewMessage);
+    return () => {
+      MessagingWebSocketManager.off('new_message', handleNewMessage);
+    };
+  }, [myUserId]);
+
   useFocusEffect(
     useCallback(() => {
-      const updateTokenAndLoadChats = async () => {
-        const tokenFromStorage = await AsyncHelper.getToken();
-        const userIdFromStorage = await getCurrentUserId();
-        setMyUserId(userIdFromStorage);
-        console.log('[Messages] Token from storage:', tokenFromStorage);
-        setLocalToken(tokenFromStorage);
+      const loadData = async () => {
+        // read token & user ID
+        const tk = await AsyncHelper.getToken();
+        const uid = await AsyncHelper.getUserId();
+        setToken(tk || null);
+        setMyUserId(uid ? parseInt(uid, 10) : null);
 
-        if (tokenFromStorage && tokenFromStorage.trim().length > 0 && userIdFromStorage) {
-          messagingWS.setToken(tokenFromStorage);
-          await loadChats(tokenFromStorage, userIdFromStorage);
-        } else {
-          messagingWS.setToken(null);
-          setGroupedChats({});
+        if (!tk) {
+          setConversations([]);
+          setLoading(false);
+          return;
+        }
+        try {
+          const data = await fetchConversationList(tk);
+          setConversations(data);
+        } catch (err) {
+          console.error('[Messages] Error loading conversation list:', err);
         }
         setLoading(false);
       };
-      updateTokenAndLoadChats();
+      loadData();
     }, [])
   );
 
-  // Pull-to-refresh logic
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    if (localToken && localToken.trim().length > 0 && myUserId) {
-      loadChats(localToken, myUserId).finally(() => setRefreshing(false));
-    } else {
+    if (!token) {
       setRefreshing(false);
+      return;
     }
-  }, [localToken, myUserId]);
+    fetchConversationList(token)
+      .then((data) => setConversations(data))
+      .catch((err) => console.error(err))
+      .finally(() => setRefreshing(false));
+  }, [token]);
 
-  // Navigate to chat screen
-  const handleMessagePress = (message: Message) => {
-    navigation.navigate('Auth', { screen: 'ChatScreen', params: { message } });
+  const handlePressConversation = (item: ConversationSnippet) => {
+    navigation.navigate('Auth', {
+      screen: 'ChatScreen',
+      params: {
+        partnerId: item.partner_id,
+        partnerName: item.partner_name,
+        partnerPic: item.partner_profile_picture,
+      },
+    });
   };
 
-  // Skeleton for loading
+  const handleDelete = async (partnerId: number) => {
+    try {
+      await usehideChat(partnerId, token!);
+      setConversations(prev => prev.filter(c => c.partner_id !== partnerId));
+    } catch (error) {
+      console.error('Error hiding chat:', error);
+    }
+  };
+  
+  const handlePin = async (partnerId: number, isPinned: boolean) => {
+    try {
+      await usepinConversation(partnerId, token!);
+      setConversations(prev => prev.map(c => 
+        c.partner_id === partnerId ? {...c, pinned: !isPinned} : c
+      ));
+    } catch (error) {
+      console.error('Error pinning conversation:', error);
+    }
+  };
+
+  // Render a skeleton row
   const renderSkeleton = () => (
     <SkeletonPlaceholder>
       <View style={styles.messageItem}>
@@ -153,25 +193,19 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
           <View style={styles.subjectSkeleton} />
           <View style={styles.snippetSkeleton} />
         </View>
-        <View style={styles.iconSkeleton} />
       </View>
     </SkeletonPlaceholder>
   );
 
-  // Identify the "other" user in a chat
-  const getChatPartner = (msg: Message) => {
-    const isMeSender = msg.sender?.user_id === myUserId;
-    return isMeSender ? msg.receiver : msg.sender;
-  };
+  
 
-  // Render a chat item
-  const renderItem = ({ item }: { item: Message }) => {
-    const partner = getChatPartner(item);
-    const partnerPic = partner?.profile_picture;
-    const partnerName = partner?.name || 'Unknown';
+  // Renders each conversation row
+  const renderItem = ({ item }: { item: ConversationSnippet }) => {
+    const partnerPic = item.partner_profile_picture;
+    const partnerName = item.partner_name || 'Unknown';
 
-    // Format date/time: "Jan 17, 2025 • 13:16"
-    const dateObj = new Date(item.timestamp);
+    // Format the date/time
+    const dateObj = new Date(item.last_message_timestamp);
     const dateString = dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -183,41 +217,71 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
       hour12: false,
     });
 
-    // Highlight if status is "sent" (assumed to be unread)
-    const isUnread = item.status === 'sent';
+    // Example "unread" check if status is "sent"
+    const isUnread = item.last_message_status === 'sent';
+    // Replace existing containerStyle definition with:
     const containerStyle = [
-      styles.messageItem,
+      styles.messageItem, 
       isUnread && styles.unreadItem,
+      { marginHorizontal: 0 } // 👈 Remove horizontal margins
     ];
 
+    const renderRightActions = () => (
+      <View style={{ flexDirection: 'row', width: 160 }}>
+        <RectButton
+          style={[styles.swipeAction, styles.pinAction]}
+          onPress={() => handlePin(item.partner_id, item.pinned)}>
+          <Text style={styles.swipeActionText}>
+            {item.pinned ? 'Unpin' : 'Pin'}
+          </Text>
+        </RectButton>
+        <RectButton
+          style={[styles.swipeAction, styles.deleteAction]}
+          onPress={() => handleDelete(item.partner_id)}>
+          <Text style={styles.swipeActionText}>Delete</Text>
+        </RectButton>
+      </View>
+    );
     return (
-      <TouchableOpacity style={containerStyle} onPress={() => handleMessagePress(item)}>
-        {partnerPic ? (
-          <Image source={{ uri: partnerPic }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarFallback}>
-            <UserIcon width={32} height={32} /> 
+      <Swipeable
+        friction={2}
+        rightThreshold={40}
+        renderRightActions={renderRightActions}
+      >
+        <TouchableOpacity
+          style={containerStyle}
+          onPress={() => handlePressConversation(item)}
+        >
+          {partnerPic ? (
+            <Image source={{ uri: partnerPic }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <UserIcon width={32} height={32} />
+            </View>
+          )}
+          <View style={styles.messageContent}>
+            <View style={styles.messageHeader}>
+              <Text style={styles.senderText}>{partnerName}</Text>
+              {/* Add pin indicator */}
+              {item.pinned && (
+                <PinIcon 
+                  width={24} 
+                  height={24} 
+                  style={styles.pinIndicator} 
+                />
+              )}
+            </View>
+            <Text style={styles.snippetText} numberOfLines={2}>
+              {item.last_message_body}
+            </Text>
+            <Text style={styles.timestampText}>{`${dateString} • ${timeString}`}</Text>
           </View>
-        )}
-        <View style={styles.messageContent}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.senderText}>{partnerName}</Text>
-          </View>
-          <Text style={styles.snippetText} numberOfLines={2}>
-            {item.body}
-          </Text>
-          <Text style={styles.timestampText}>
-            {`${dateString} • ${timeString}`}
-          </Text>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </Swipeable>
     );
   };
 
-  const keyExtractor = (item: Message) => item.id;
-  // Flatten the grouped chats into a list
-  const chatList = Object.values(groupedChats);
-
+  // Show skeleton if still loading and not refreshing
   if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -235,7 +299,8 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
     );
   }
 
-  if (!localToken || localToken.trim().length === 0) {
+  // If no token => user isn’t logged in
+  if (!token || token.trim().length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
@@ -244,16 +309,10 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
           </View>
           <View style={styles.notLoggedInContainer}>
             <Text style={styles.emptyText}>
-              {intl.formatMessage({
-                id: 'messagesScreen.loginHeading',
-                defaultMessage: 'Log in to contact and message property owners.',
-              })}
+              Log in to contact and message property owners.
             </Text>
             <Text style={styles.subEmptyText}>
-              {intl.formatMessage({
-                id: 'messagesScreen.loginSubText',
-                defaultMessage: 'Sign in to access exclusive features and start a conversation.',
-              })}
+              Sign in to access exclusive features and start a conversation.
             </Text>
             <View style={{ marginTop: 20 }}>
               <CustomButton
@@ -261,7 +320,7 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
                 disabled={false}
                 textSize={16}
                 borderRadius={30}
-                title={intl.formatMessage({ id: 'buttons.signIn', defaultMessage: 'Sign In' })}
+                title="Sign In"
                 showSocialButton={false}
                 showRightIconButton={true}
                 textButtonWithIcon
@@ -276,11 +335,12 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
     );
   }
 
-  // Show a background only if there are messages
-  const showBackground = chatList.length > 0;
+  // If logged in but no data, show empty state
+  const showBackground = conversations.length > 0;
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* Optional background image animation */}
         {showBackground && (
           <View style={StyleSheet.absoluteFillObject}>
             <Animated.Image
@@ -295,28 +355,24 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
             />
           </View>
         )}
+
         <View style={styles.header}>
           <Text style={styles.title}>Messages</Text>
         </View>
+
         <FlatList
-          data={chatList}
+          data={conversations}
           renderItem={renderItem}
-          keyExtractor={keyExtractor}
+          keyExtractor={(_, idx) => String(idx)} 
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
-                {intl.formatMessage({
-                  id: 'messagesScreen.noMessages',
-                  defaultMessage: 'Message real estate owners and agencies to find your property!',
-                })}
+                Message real estate owners and agencies to find your property!
               </Text>
               <Text style={styles.subEmptyText}>
-                {intl.formatMessage({
-                  id: 'messagesScreen.noMessagesSubText',
-                  defaultMessage: 'Start a conversation today to unlock exclusive property details.',
-                })}
+                Start a conversation today to unlock exclusive property details.
               </Text>
               <LottieView source={messageAnimation} style={styles.animation} autoPlay loop />
             </View>
@@ -329,6 +385,7 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
 };
 
 export default Messages;
+
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -349,10 +406,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: fonts.primary.bold,
     color: Colors.light.onPrimary,
-  },
-  listContent: {
-    padding: 16,
-    paddingTop: 8,
   },
   manzilBackground: {
     width: '80%',
@@ -387,14 +440,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.light.cardBackground,
-    padding: 12,
-    borderRadius: 12,
-    elevation: 2,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    paddingVertical: 16, // 👈 Change from padding to vertical only
+    paddingHorizontal: 16, // 👈 Add horizontal padding
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    width: '100%', // 👈 Ensure full width
+  },
+  listContent: {
+    padding: 0, // Remove padding
+  },
+  separator: {
+    height: 1, // 👈 Make separators thinner
+    backgroundColor: '#f0f0f0',
   },
   unreadItem: {
     backgroundColor: '#E2F9E5',
@@ -421,9 +478,15 @@ const styles = StyleSheet.create({
   messageContent: {
     flex: 1,
   },
+  pinIndicator: {
+    marginLeft: 8,
+    position: 'relative', // Changed from absolute
+    top: 2,
+  },
   messageHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start', // Changed from space-between
+    alignItems: 'center', // Added for vertical alignment
     marginBottom: 2,
   },
   senderText: {
@@ -442,8 +505,21 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.regular,
     color: Colors.light.greyDescription,
   },
-  separator: {
-    height: 12,
+  swipeAction: {
+    width: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+  },
+  deleteAction: {
+    backgroundColor: '#ff4444',
+  },
+  pinAction: {
+    backgroundColor: '#ffc107',
+  },
+  swipeActionText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   // Skeleton styles
   avatarSkeleton: {
@@ -477,6 +553,12 @@ const styles = StyleSheet.create({
     width: '80%',
     height: 12,
     borderRadius: 4,
+  },
+  pinIndicator: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    padding: 4,
   },
   iconSkeleton: {
     width: 20,
