@@ -1,13 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 // src/components/CustomMap.tsx
 
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import MapViewClustering from 'react-native-map-clustering';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, Callout, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MapLayerIcon, PenIcon } from '@svgs'; // Custom SVG icons
-import { throttle } from 'lodash';
+import { MapLayerIcon } from '@svgs';
 import { Colors } from '@colors';
 
 const cities = [
@@ -31,142 +29,140 @@ const cities = [
 export const CustomMap = () => {
   const mapRef = useRef<MapView>(null);
   const insets = useSafeAreaInsets();
-  const [drawing, setDrawing] = useState(false);
-  const [coordinates, setCoordinates] = useState<Array<{ latitude: number; longitude: number }>>([]);
-  const [showDrawMessage, setShowDrawMessage] = useState(false);
   const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
-  const [cityLocked, setCityLocked] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<'kingdom' | 'city'>('kingdom');
+  const zoomAnim = useRef(new Animated.Value(1)).current;
 
-  // Throttle handler to improve drawing performance
-  const throttledHandleMapPress = useCallback(
-    throttle((newCoordinate: { latitude: number; longitude: number }) => {
-      setCoordinates((prevCoords) => [...prevCoords, newCoordinate]);
-    }, 50),
-    []
-  );
+  // Initial kingdom view
+  const KINGDOM_VIEW: Region = {
+    latitude: 23.8859,
+    longitude: 45.0792,
+    latitudeDelta: 20,
+    longitudeDelta: 20,
+  };
 
-  const handleMapPress = useCallback(
-    (e: any) => {
-      if (drawing) {
-        const newCoordinate = e.nativeEvent.coordinate;
-        throttledHandleMapPress(newCoordinate);
+  // Zoom into city with smooth animation
+  const zoomInToCity = (city: typeof cities[0]) => {
+    setCurrentView('city');
+    
+    // First zoom animation
+    Animated.timing(zoomAnim, {
+      toValue: 1.2,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      mapRef.current?.animateToRegion({
+        latitude: city.latitude,
+        longitude: city.longitude,
+        latitudeDelta: 0.5,
+        longitudeDelta: 0.5,
+      }, 1000, () => {
+        // Final zoom animation
+        Animated.spring(zoomAnim, {
+          toValue: 1,
+          friction: 3,
+          useNativeDriver: true,
+        }).start();
+      });
+    });
+  };
+
+  // Reset to kingdom view with animation
+  const resetToKingdomView = () => {
+    Animated.timing(zoomAnim, {
+      toValue: 0.8,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      mapRef.current?.animateToRegion(KINGDOM_VIEW, 1000, () => {
+        Animated.spring(zoomAnim, {
+          toValue: 1,
+          friction: 3,
+          useNativeDriver: true,
+        }).start();
+        setCurrentView('kingdom');
+      });
+    });
+  };
+
+  // Handle map region changes
+  const handleRegionChange = (region: Region) => {
+    if (currentView === 'kingdom') {
+      // Prevent any movement in kingdom view
+      mapRef.current?.animateToRegion(KINGDOM_VIEW, 100);
+    } else if (currentView === 'city') {
+      // Check if user is trying to zoom out
+      if (region.latitudeDelta > 1 || region.longitudeDelta > 1) {
+        resetToKingdomView();
       }
-    },
-    [drawing, throttledHandleMapPress]
-  );
-
-  // Toggle drawing mode and show/hide message
-  const handleToggleDrawing = useCallback(() => {
-    setDrawing((prev) => !prev);
-    setShowDrawMessage(true);
-    setTimeout(() => setShowDrawMessage(false), 1000);
-  }, []);
-
-  // Clear the drawing
-  const handleDeleteDrawing = useCallback(() => {
-    setCoordinates([]);
-  }, []);
-
-  // Zoom into selected city
-  const zoomInToCity = (city: { name: string; latitude: number; longitude: number }) => {
-    setCityLocked(true);
-    setSelectedCity(city.name);
-    const region = {
-      latitude: city.latitude,
-      longitude: city.longitude,
-      latitudeDelta: 0.3,
-      longitudeDelta: 0.3,
-    };
-    mapRef.current?.animateToRegion(region, 1000);
+    }
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <MapViewClustering
+      <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
         mapType={mapType}
-        scrollEnabled={!drawing && cityLocked}
-        zoomEnabled={!drawing && cityLocked}
-        onPress={handleMapPress}
-        initialRegion={{
-          latitude: 23.8859,
-          longitude: 45.0792,
-          latitudeDelta: 20,
-          longitudeDelta: 20,
-        }}
-        clusterColor={Colors.light.primaryButton}
-        clusterTextColor="#fff"
-        clusterBorderColor="#fff"
-        clusterBorderWidth={1}
-        radius={50}
+        initialRegion={KINGDOM_VIEW}
+        scrollEnabled={false}
+        zoomEnabled={false}
+        rotateEnabled={false}
+        pitchEnabled={false}
+        onRegionChange={handleRegionChange}
+        customMapStyle={customMapStyle}
       >
         {cities.map((city, index) => (
-          selectedCity !== city.name && (
-            <Marker
-              key={index}
-              coordinate={{ latitude: city.latitude, longitude: city.longitude }}
-              onPress={() => zoomInToCity(city)}
-            >
-              
-              <Callout>
-                <View style={styles.callout}>
-                  <Text style={styles.markerText}>{city.name}</Text>
-                </View>
-              </Callout>
-            </Marker>
-          )
+          <Marker
+            key={index}
+            coordinate={{ latitude: city.latitude, longitude: city.longitude }}
+            onPress={() => zoomInToCity(city)}
+          >
+            <Animated.View style={{ transform: [{ scale: zoomAnim }] }}>
+              <Image
+                source={require('../../../assets/images/marker.png')}
+                style={{ width: 50, height: 50 }}
+              />
+            </Animated.View>
+            <Callout>
+              <View style={styles.callout}>
+                <Text style={styles.markerText}>{city.name}</Text>
+              </View>
+            </Callout>
+          </Marker>
         ))}
-
-        {/* Draw Polyline while drawing */}
-        {coordinates.length > 0 && (
-          <>
-            <Polyline
-              coordinates={coordinates}
-              strokeColor="#307e20"
-              strokeWidth={6}
-              zIndex={2}
-            />
-            <Marker
-              coordinate={coordinates[coordinates.length - 1]}
-              pinColor="#307e20"
-            />
-          </>
-        )}
-      </MapViewClustering>
-
-      {/* Display draw area message */}
-      {drawing && showDrawMessage && (
-        <View style={[styles.drawYourSearchAreaViewStyle, { top: insets.top + 50 }]}>
-          <Text style={styles.drawSearchText}>Draw your search area</Text>
-        </View>
-      )}
+      </MapView>
 
       {/* Map control buttons */}
-      {cityLocked && (
-        <>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
-            style={[styles.mapLayerBtn, { top: insets.top + 70 }]}
-          >
-            <MapLayerIcon width={30} height={30} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleToggleDrawing}
-            style={[styles.mapLayerBtn, { top: insets.top + 120 }]}
-          >
-            <PenIcon width={30} height={30} />
-          </TouchableOpacity>
-        </>
-      )}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}
+        style={[styles.mapLayerBtn, { top: insets.top + 70 }]}
+      >
+        <MapLayerIcon width={30} height={30} />
+      </TouchableOpacity>
     </View>
   );
 };
+
+const customMapStyle = [
+  {
+    "featureType": "all",
+    "elementType": "labels",
+    "stylers": [{ "visibility": "off" }]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry",
+    "stylers": [{ "visibility": "on" }, { "color": "#f5deb3" }]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "labels.text.fill",
+    "stylers": [{ "visibility": "on" }, { "color": "#000" }, { "weight": 2 }]
+  }
+];
 
 const styles = StyleSheet.create({
   callout: {
@@ -175,6 +171,17 @@ const styles = StyleSheet.create({
   markerText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  customLabelView: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 8,
+    borderRadius: 8,
+  },
+  customLabelText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
   },
   mapLayerBtn: {
     position: 'absolute',
@@ -189,25 +196,5 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.filterLine,
     alignItems: 'center',
     zIndex: 1001,
-  },
-  drawYourSearchAreaViewStyle: {
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: 'green',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    zIndex: 1,
-  },
-  drawSearchText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

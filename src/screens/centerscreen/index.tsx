@@ -5,353 +5,317 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Platform,
+  ScrollView,
   StatusBar,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
-import LottieView from 'lottie-react-native';
-
-import LinearGradient from 'react-native-linear-gradient'; // Ensure you have react-native-linear-gradient installed
 import { BlurView } from '@react-native-community/blur';
+import LottieView from 'lottie-react-native';
+import { emptyAnimation, checkAnimation } from '@assets';
 
-import { Colors } from '@colors'; // Ensure correct import
-import { fonts } from '@fonts';   // Ensure correct import
-import { promotionAnimation, emptyAnimation } from '@assets'; // Ensure correct imports
+const { width: screenWidth } = Dimensions.get('window');
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-export const CenterScreen = ({
-  incompleteOrders = [],
-  requestedProperties = [],
-}) => {
+export const CenterScreen = ({ listings = [], requests = [] }) => {
   const navigation = useNavigation();
 
-  // -------------- NAVIGATION --------------
-  const handleActionClick = (action) => {
-    switch (action) {
-      case 'PromoteProperty':
-        navigation.navigate('Auth', { screen: 'PromoteProperty' });
-        break;
-      case 'AddProperty':
-        navigation.navigate('Auth', { screen: 'AddProperties' });
-        break;
-      case 'AddOrder':
-        navigation.navigate('Auth', { screen: 'AddOrder' });
-        break;
-      case 'RequestProperty':
-        navigation.navigate('Auth', { screen: 'RequestProperty' });
-        break;
-      case 'OrderDetails':
-        // navigation.navigate('Auth', { screen: 'OrderDetails', params: { orderId: someId } });
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Render minimal "no data" view
-  const renderNoData = (message) => (
-    <View style={styles.noDataContainer}>
-      <LottieView source={emptyAnimation} autoPlay loop style={styles.noDataAnimation} />
-      <Text style={styles.noDataText}>{message}</Text>
-    </View>
+  // Beautiful animated checkmark component
+  const AnimatedCheck = () => (
+    <LottieView
+      source={checkAnimation}
+      autoPlay
+      loop={false}
+      style={styles.checkAnimation}
+    />
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
-        backgroundColor="transparent"
-        translucent
-      />
-
-      {/* GRADIENT BACKDROP: top half & bottom half */}
-      <LinearGradient
-        colors={['#a18cd1', '#fbc2eb']} // Purple to pink, adjustable
-        style={styles.topGradient}
-      />
-      <LinearGradient
-        colors={['#fbc2eb', '#a1c4fd']} // Pink to bluish, adjustable
-        style={styles.bottomGradient}
-      />
-
-      {/* APP TITLE */}
-      <View style={styles.headerWrapper}>
-        <Text style={styles.headerTitle}>Manzil</Text>
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Floating Background Elements */}
+      <View style={styles.backgroundPattern}>
+        <View style={styles.circleAccent} />
+        <View style={styles.diagonalLine} />
       </View>
 
-      {/* 2×2 GRID LAYOUT */}
-      <View style={styles.gridContainer}>
-        {/** 1) PROMOTE PROPERTY */}
-        <View style={styles.gridItem}>
-          <View style={styles.glassCard}>
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType="light"
-              blurAmount={15}
-              reducedTransparencyFallbackColor="#fff"
-            />
-            <LottieView
-              source={promotionAnimation}
-              autoPlay
-              loop
-              style={styles.animMedium}
-            />
-            <Text style={styles.cardTitle}>Promote</Text>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleActionClick('PromoteProperty')}
-            >
-              <Text style={styles.actionButtonText}>Boost</Text>
-              <Icon name="rocket-outline" size={20} color="#fff" />
-            </TouchableOpacity>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Elevated Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Manzil</Text>
+          <View style={styles.headerBadge}>
+            <Text style={styles.badgeText}>Premium</Text>
+            <AnimatedCheck />
           </View>
         </View>
 
-        {/** 2) ADD PROPERTY */}
-        <View style={styles.gridItem}>
-          <View style={styles.glassCard}>
+        {/* Action Grid */}
+        <View style={styles.actionGrid}>
+          <TouchableOpacity 
+            style={[styles.actionCard, styles.promoteCard]}
+            onPress={() => navigation.navigate('PromoteProperty')}
+          >
             <BlurView
-              style={StyleSheet.absoluteFill}
+              style={styles.blurBackground}
               blurType="light"
-              blurAmount={15}
-              reducedTransparencyFallbackColor="#fff"
-            />
-            <Icon name="home-outline" size={50} color="#fff" style={styles.bigIcon} />
-            <Text style={styles.cardTitle}>Add Property</Text>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleActionClick('AddProperty')}
+              blurAmount={Platform.OS === 'ios' ? 30 : 15}
+              overlayColor="rgba(255,255,255,0.15)"
             >
-              <Text style={styles.actionButtonText}>Add</Text>
-              <Icon name="add-outline" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
+              <Icon name="rocket" size={28} color="#FFF" />
+              <Text style={styles.actionCardTitle}>Boost Listing</Text>
+              <Text style={styles.actionCardSubtitle}>Reach more buyers</Text>
+            </BlurView>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.actionCard, styles.listCard]}
+            onPress={() => navigation.navigate('AddProperties')}
+          >
+            <BlurView
+              style={styles.blurBackground}
+              blurType="light"
+              blurAmount={Platform.OS === 'ios' ? 30 : 15}
+              overlayColor="rgba(255,255,255,0.15)"
+            >
+              <Icon name="home" size={28} color="#FFF" />
+              <Text style={styles.actionCardTitle}>New Listing</Text>
+              <Text style={styles.actionCardSubtitle}>Sell your property</Text>
+            </BlurView>
+          </TouchableOpacity>
         </View>
 
-        {/** 3) ORDERS */}
-        <View style={styles.gridItem}>
-          <View style={styles.glassCard}>
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType="light"
-              blurAmount={15}
-              reducedTransparencyFallbackColor="#fff"
-            />
-            <Text style={styles.cardTitle}>Orders</Text>
+        {/* Requests Section */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Active Requests</Text>
             <TouchableOpacity
-              style={[styles.actionButton, { alignSelf: 'center', marginBottom: 6 }]}
-              onPress={() => handleActionClick('AddOrder')}
+              style={styles.addButton}
+              onPress={() => navigation.navigate('RequestProperty')}
             >
-              <Text style={styles.actionButtonText}>New Order</Text>
-              <Icon name="add-circle-outline" size={20} color="#fff" />
+              <Icon name="add" size={20} color="#FFF" />
             </TouchableOpacity>
-
-            {incompleteOrders.length > 0 ? (
-              incompleteOrders.map((order) => (
-                <TouchableOpacity
-                  key={order.id}
-                  style={styles.itemRow}
-                  onPress={() =>
-                    navigation.navigate('Auth', {
-                      screen: 'OrderDetails',
-                      params: { orderId: order.id },
-                    })
-                  }
-                >
-                  <Icon name="alert-circle" size={18} color={Colors.light.warning} />
-                  <Text style={styles.itemRowText}>{order.title}</Text>
-                </TouchableOpacity>
-              ))
-            ) : (
-              renderNoData('No orders')
-            )}
           </View>
-        </View>
 
-        {/** 4) REQUESTED PROPERTIES */}
-        <View style={styles.gridItem}>
-          <View style={styles.glassCard}>
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType="light"
-              blurAmount={15}
-              reducedTransparencyFallbackColor="#fff"
-            />
-            <Text style={styles.cardTitle}>Requests</Text>
-            <TouchableOpacity
-              style={[styles.actionButton, { alignSelf: 'center', marginBottom: 6 }]}
-              onPress={() => handleActionClick('RequestProperty')}
-            >
-              <Text style={styles.actionButtonText}>Ask</Text>
-              <Icon name="help-circle" size={20} color="#fff" />
-            </TouchableOpacity>
-
-            {requestedProperties.length > 0 ? (
-              requestedProperties.map((req) => (
-                <TouchableOpacity
-                  key={req.id}
-                  style={styles.itemRow}
-                  onPress={() =>
-                    navigation.navigate('Auth', {
-                      screen: 'PropertyRequestDetails',
-                      params: { requestId: req.id },
-                    })
-                  }
-                >
-                  <Icon name="help-circle" size={18} color={Colors.light.primaryBtn} />
-                  <Text style={styles.itemRowText}>{req.title}</Text>
-                </TouchableOpacity>
-              ))
-            ) : (
-              renderNoData('No requests')
-            )}
-          </View>
+          {requests.length > 0 ? (
+            requests.map((request) => (
+              <View key={request.id} style={styles.requestCard}>
+                <View style={styles.requestIcon}>
+                  <Icon name="document-text" size={18} color="#4CAF50" />
+                </View>
+                <View style={styles.requestContent}>
+                  <Text style={styles.requestTitle}>{request.title}</Text>
+                  <Text style={styles.requestDate}>Created 2 days ago</Text>
+                </View>
+                <Icon name="chevron-forward" size={20} color="#BDBDBD" />
+              </View>
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <LottieView
+                source={emptyAnimation}
+                autoPlay
+                loop
+                style={styles.emptyAnimation}
+              />
+              <Text style={styles.emptyText}>No active requests</Text>
+              <Text style={styles.emptySubtext}>Create your first request to get started</Text>
+            </View>
+          )}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-/* ------------------- STYLES ------------------- */
+// Ultra-Polished Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F8F9FA',
   },
-  topGradient: {
+  backgroundPattern: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#E8F5E9',
+    opacity: 0.3,
+  },
+  circleAccent: {
     position: 'absolute',
-    top: 0,
-    width: screenWidth,
-    height: screenHeight * 0.5,
+    top: -100,
+    right: -100,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(76,175,80,0.1)',
   },
-  bottomGradient: {
+  diagonalLine: {
     position: 'absolute',
-    bottom: 0,
-    width: screenWidth,
-    height: screenHeight * 0.5,
+    bottom: -300,
+    left: -150,
+    width: 600,
+    height: 600,
+    transform: [{ rotate: '-30deg' }],
+    backgroundColor: 'rgba(104,159,56,0.05)',
   },
-  headerWrapper: {
-    alignItems: 'center',
-    marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 10 : 20,
-    marginBottom: 10,
+  scrollContainer: {
+    paddingTop: 44,
+    paddingHorizontal: 24,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontFamily: fonts.primary.bold || 'System',
-    color: '#ffffff',
-    fontWeight: '900',
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-
-  /* 2×2 GRID LAYOUT */
-  gridContainer: {
-    flex: 1,
+  header: {
     flexDirection: 'row',
-    flexWrap: 'wrap', // allows wrapping into 2 rows
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 32,
   },
-  gridItem: {
-    width: '50%',
-    height: '50%',
-    padding: 10,
+  title: {
+    fontSize: 38,
+    fontFamily: 'Inter-ExtraBold',
+    color: '#1B5E20',
+    letterSpacing: -1.2,
+    textShadowColor: 'rgba(76,175,80,0.15)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 12,
   },
-
-  /* GLASSMORPHISM CARD */
-  glassCard: {
+  headerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76,175,80,0.1)',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 6,
+  },
+  badgeText: {
+    fontFamily: 'Inter-SemiBold',
+    color: '#2E7D32',
+    fontSize: 14,
+    letterSpacing: 0.5,
+  },
+  checkAnimation: {
+    width: 24,
+    height: 24,
+  },
+  actionGrid: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 40,
+  },
+  actionCard: {
     flex: 1,
-    borderRadius: 18,
+    height: 180,
+    borderRadius: 28,
     overflow: 'hidden',
-    padding: 12,
+  },
+  promoteCard: {
+    backgroundColor: 'rgba(46,125,50,0.9)',
+  },
+  listCard: {
+    backgroundColor: 'rgba(33,150,83,0.9)',
+  },
+  blurBackground: {
+    ...StyleSheet.absoluteFillObject,
+    padding: 20,
+  },
+  actionCardTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: '#FFF',
+    marginTop: 'auto',
+    lineHeight: 24,
+  },
+  actionCardSubtitle: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 4,
+  },
+  sectionContainer: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 28,
+    padding: 20,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 20,
+    color: '#1B5E20',
+    letterSpacing: -0.5,
+  },
+  addButton: {
+    backgroundColor: '#4CAF50',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
   },
-
-  /* Titles & Subtitles */
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
-    marginVertical: 6,
-    fontFamily: fonts.primary.bold || 'System',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-
-  /* Buttons */
-  actionButton: {
+  requestCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FF7F50', // Coral accent
+    backgroundColor: '#FFF',
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    marginTop: 8,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    marginRight: 5,
-    fontFamily: fonts.primary.bold || 'System',
-    fontWeight: '700',
-  },
-
-  /* For animations and icons */
-  animMedium: {
-    width: 70,
-    height: 70,
-  },
-  bigIcon: {
-    marginVertical: 5,
-  },
-
-  /* Orders / Requests items */
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.6)',
-    padding: 6,
-    marginVertical: 4,
-    borderRadius: 10,
-    alignSelf: 'stretch',
-  },
-  itemRowText: {
-    marginLeft: 5,
-    fontSize: 13,
-    color: '#fff',
-    fontWeight: '600',
-    fontFamily: fonts.primary.medium || 'System',
-    flexShrink: 1,
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
-  },
-
-  /* NO DATA */
-  noDataContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  noDataAnimation: {
+  requestIcon: {
+    backgroundColor: 'rgba(76,175,80,0.1)',
     width: 40,
     height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
-  noDataText: {
-    marginTop: 5,
-    fontSize: 12,
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
-    fontFamily: fonts.primary.medium || 'System',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
+  requestContent: {
+    flex: 1,
+  },
+  requestTitle: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#212121',
+    marginBottom: 4,
+  },
+  requestDate: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 13,
+    color: '#757575',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyAnimation: {
+    width: 160,
+    height: 160,
+    opacity: 0.8,
+  },
+  emptyText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    color: '#BDBDBD',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: '#E0E0E0',
+    marginTop: 4,
   },
 });
 

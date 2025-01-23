@@ -253,14 +253,34 @@ def refresh_access_token(request):
     refresh_token = request.data.get('refresh')
 
     if not refresh_token:
-        return Response({"detail": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Refresh token is required"}, 
+                      status=status.HTTP_400_BAD_REQUEST)
 
     try:
         refresh = RefreshToken(refresh_token)
-        new_access = str(refresh.access_token)
-        return Response({"access": new_access}, status=status.HTTP_200_OK)
+        user_id = refresh.payload.get('user_id')
+        
+        try:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"},
+                          status=status.HTTP_404_NOT_FOUND)
+
+        # Generate new tokens
+        new_refresh = RefreshToken.for_user(user)
+        new_access = str(new_refresh.access_token)
+        
+        # Blacklist old token
+        refresh.blacklist()
+
+        return Response({
+            "access": new_access,
+            "refresh": str(new_refresh)
+        }, status=status.HTTP_200_OK)
+
     except (TokenError, InvalidToken) as e:
-        return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"detail": str(e)},
+                      status=status.HTTP_401_UNAUTHORIZED)
 
 class StartUserSessionView(APIView):
     permission_classes = [IsAuthenticatedOrGuest]

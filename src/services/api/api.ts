@@ -111,25 +111,20 @@ class Api {
         console.log('[Api] No refresh token available');
         return null;
       }
-
-      // 👇 3 Key changes below 👇
+  
       const response = await axios.post<{ 
-        access: string,       // 1. Changed from accessToken
-        refresh: string       // 2. Added to handle rotation
+        access: string,
+        refresh: string // Now expecting both tokens
       }>(
         `${QA}account/user/refresh-token/`,
-        { refresh: refreshToken }, // 3. Changed field name
-        { 
-          headers: { 
-            'Content-Type': 'application/json' // 👈 Add content type
-          } 
-        }
+        { refresh: refreshToken },
+        { headers: { 'Content-Type': 'application/json' } }
       );
-
-      // Store both tokens if rotation is enabled
+  
+      // Store both tokens
       await AsyncHelper.setToken(response.data.access);
-      await AsyncHelper.setRefreshToken(response.data.refresh); // 👈 Store new refresh token
-
+      await AsyncHelper.setRefreshToken(response.data.refresh);
+  
       return response.data.access;
     } catch (error) {
       console.error('[Api] Refresh failed:', error);

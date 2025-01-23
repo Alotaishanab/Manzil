@@ -16,7 +16,7 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { MessagingWebSocketManager, usehideChat, usepinConversation  } from '@services';
 import { RectButton, Swipeable } from 'react-native-gesture-handler';
 import AsyncHelper from '../../helpers/asyncHelper';
-import { CustomButton } from '@components';
+import { CustomButton, SearchBar } from '@components';
 import { Colors } from '@colors';
 import { fonts, messageAnimation, launchScreen } from '@assets';
 import { UserIcon, PinIcon } from '@svgs';
@@ -50,6 +50,13 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
 
   const backgroundOpacity = useRef(new Animated.Value(0)).current;
   const backgroundScale = useRef(new Animated.Value(0.5)).current;
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Add filtered conversations
+  const filteredConversations = conversations.filter(conv => 
+    conv.partner_name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  );
+
 
 
 
@@ -360,6 +367,18 @@ export const Messages: React.FC<MessagesProps> = ({ navigation }) => {
           <Text style={styles.title}>Messages</Text>
         </View>
 
+        {/* Search Bar - Only show when logged in */}
+        {token && (
+          <View style={styles.searchContainer}>
+            <SearchBar
+              placeholder="Search by name"
+              showFilterBtn={false}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        )}
+
         <FlatList
           data={conversations}
           renderItem={renderItem}
@@ -429,6 +448,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: fonts.primary.bold,
     color: Colors.light.headingTitle,
+  },
+  
+  searchContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 10,
   },
   subEmptyText: {
     marginTop: 8,
