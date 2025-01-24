@@ -1,5 +1,3 @@
-// src/screens/Explore.tsx
-/* eslint-disable react-native/no-inline-styles */
 import React, {
   useCallback,
   useEffect,
@@ -9,34 +7,34 @@ import React, {
 } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
-  PropertyCard,
-  TopSpace,
-  CardSkeleton,
-  Ads,
-  Survey,
-  AgencyItem,
-} from '@components';
-import FilterHeader from '../../../src/components/molecules/FilterHeader';
-import { useIntl } from '@context';
-import {
   FlatList,
   Text,
   TouchableOpacity,
   View,
   RefreshControl,
   TextInput,
-  ActivityIndicator,
   StyleSheet,
-  Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import Haptic from 'react-native-haptic-feedback';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// Import your new scroll-out header
+import {
+  PropertyCard,
+  TopSpace,
+  CardSkeleton,
+  Ads,
+  Survey,
+  AgencyItem,
+  ScrollOutHeader,
+} from '@components';
+import { useIntl } from '@context';
 import { Colors } from '@colors';
 import { globalStyles } from '../../../src/styles/globalStyles';
 import { ArrowForIcon } from '@svgs';
 import { ag1, ag2, ag5, ag6, ag7 } from '@assets';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Haptic from 'react-native-haptic-feedback';
-import { SimilarProperties } from '@screens';
 import {
   useGetNearbyProperties,
   UserLocation,
@@ -47,63 +45,9 @@ import { AsyncHelper } from '@helpers';
 export const Explore = () => {
   const navigation: any = useNavigation();
   const { intl } = useIntl();
+  const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    const setFirstTimeIfNeeded = async () => {
-      const isFirstTime = await AsyncHelper.isFirstTime();
-      if (isFirstTime) {
-        await AsyncHelper.setFirstTimeFlag();
-      }
-    };
-    setFirstTimeIfNeeded();
-  }, []);
-
-  const sampleAdsData = useMemo(
-    () => [
-      {
-        id: 'ad1',
-        image: { uri: 'https://via.placeholder.com/300/FF0000/FFFFFF?text=Ad+1' },
-        title: 'Find the Best Properties',
-        description: 'Discover great deals on properties near you!',
-        onPress: () => console.log('Ad 1 clicked'),
-      },
-      {
-        id: 'ad2',
-        image: { uri: 'https://via.placeholder.com/300/00FF00/FFFFFF?text=Ad+2' },
-        title: 'Luxury Homes Available',
-        description: 'Explore our collection of luxury homes.',
-        onPress: () => console.log('Ad 2 clicked'),
-      },
-      {
-        id: 'ad3',
-        image: { uri: 'https://via.placeholder.com/300/0000FF/FFFFFF?text=Ad+3' },
-        title: 'Affordable Apartments',
-        description: 'Find affordable apartments in your area.',
-        onPress: () => console.log('Ad 3 clicked'),
-      },
-      {
-        id: 'ad4',
-        image: { uri: 'https://via.placeholder.com/300/FFFF00/FFFFFF?text=Ad+4' },
-        title: 'Modern Condos for Sale',
-        description: 'Check out our modern condo listings.',
-        onPress: () => console.log('Ad 4 clicked'),
-      },
-      {
-        id: 'ad5',
-        image: { uri: 'https://via.placeholder.com/300/FF00FF/FFFFFF?text=Ad+5' },
-        title: 'Spacious Villas Available',
-        description: 'Discover spacious villas perfect for families.',
-        onPress: () => console.log('Ad 5 clicked'),
-      },
-    ],
-    []
-  );
-
-  const [location] = useState<UserLocation>({
-    latitude: 37.76816965856596,
-    longitude: -122.4264693260193,
-  });
-
+  // Normal data/fetch states
   const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState<{ [key: number]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -111,6 +55,13 @@ export const Explore = () => {
   const [showBottomWidget, setShowBottomWidget] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
 
+  const searchInputRef = useRef<TextInput>(null);
+
+  // Example location & data
+  const [location] = useState<UserLocation>({
+    latitude: 37.768,
+    longitude: -122.426,
+  });
   const { data: nearByData, isLoading: nearByLoading, error: nearByError } =
     useGetNearbyProperties(location);
   const {
@@ -119,31 +70,40 @@ export const Explore = () => {
     error: interestedError,
   } = useGetInterestedProperties();
 
-  const searchInputRef = useRef<TextInput>(null);
-
-  const onRefresh = useCallback(() => {
-    Haptic.trigger('impactMedium', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
-
+  // Combine loading & error
   useEffect(() => {
-    if (!nearByLoading && !interestedLoading) {
-      setIsLoading(false);
+    const loadingNow = nearByLoading || interestedLoading;
+    setIsLoading(loadingNow);
+    if (!loadingNow) {
       if (nearByError || interestedError) {
         setError('Failed to load properties.');
       } else {
         setError(null);
       }
-    } else {
-      setIsLoading(true);
     }
   }, [nearByLoading, interestedLoading, nearByError, interestedError]);
+
+  useEffect(() => {
+    const checkFirstTime = async () => {
+      if (await AsyncHelper.isFirstTime()) {
+        await AsyncHelper.setFirstTimeFlag();
+      }
+    };
+    checkFirstTime();
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    Haptic.trigger('impactMedium');
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1500);
+  }, []);
+
+  // Combine properties
+  const combinedProperties = useMemo(() => {
+    const nearby = nearByData?.properties || [];
+    const interested = interestedData?.properties || [];
+    return [...nearby, ...interested];
+  }, [nearByData, interestedData]);
 
   const handleFavoriteClick = (propertyId: number) => {
     setFavorites((prev) => ({
@@ -152,58 +112,43 @@ export const Explore = () => {
     }));
   };
 
-  const combinedProperties = useMemo(() => {
-    const nearby = nearByData?.properties || [];
-    const interested = interestedData?.properties || [];
-    return [...nearby, ...interested];
-  }, [nearByData, interestedData]);
+  // Example ads
+  const sampleAdsData = useMemo(() => [
+    {
+      id: 'ad1',
+      image: { uri: 'https://via.placeholder.com/300/FF0000/FFFFFF?text=Ad+1' },
+      title: 'Find the Best Properties',
+      description: 'Discover great deals on properties near you!',
+      onPress: () => console.log('Ad 1 clicked'),
+    },
+    {
+      id: 'ad2',
+      image: { uri: 'https://via.placeholder.com/300/00FF00/FFFFFF?text=Ad+2' },
+      title: 'Luxury Homes Available',
+      description: 'Explore our collection of luxury homes.',
+      onPress: () => console.log('Ad 2 clicked'),
+    },
+  ], []);
 
+  // For loading skeletons
   const renderSkeletons = () => (
-    <View>
+    <>
       {Array.from({ length: 5 }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}
-    </View>
+    </>
   );
 
-  const agencies = useMemo(
-    () => [
-      { id: 'ag5', image: ag5, name: 'Agency Five' },
-      { id: 'ag6', image: ag6, name: 'Agency Six' },
-      { id: 'ag7', image: ag7, name: 'Agency Seven' },
-      { id: 'ag2', image: ag2, name: 'Agency Two' },
-      { id: 'ag1', image: ag1, name: 'Agency One' },
-    ],
-    []
-  );
+  // Agencies
+  const agencies = useMemo(() => [
+    { id: 'ag5', image: ag5, name: 'Agency Five' },
+    { id: 'ag6', image: ag6, name: 'Agency Six' },
+    { id: 'ag7', image: ag7, name: 'Agency Seven' },
+    { id: 'ag2', image: ag2, name: 'Agency Two' },
+    { id: 'ag1', image: ag1, name: 'Agency One' },
+  ], []);
 
-  const renderItem = ({ item }: { item: any }) => {
-    switch (item.type) {
-      case 'property':
-        return (
-          <PropertyCard
-            item={item.data}
-            isFavorite={favorites[item.data.property_id]}
-            handleFavoriteClick={() =>
-              handleFavoriteClick(item.data.property_id)
-            }
-          />
-        );
-      case 'ads':
-        return <Ads ads={sampleAdsData} isVisible />;
-      case 'survey':
-        return (
-          <Survey
-            question="Are you satisfied with the property listings?"
-            onYes={() => console.log('User answered Yes')}
-            onNo={() => console.log('User answered No')}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
+  // Render agencies
   const renderAgencies = () => (
     <View style={styles.topAgencyWrap}>
       <View style={globalStyles.rowSpaceBetween}>
@@ -214,18 +159,15 @@ export const Explore = () => {
           onPress={() => navigation.navigate('Auth', { screen: 'AllAgencies' })}
           style={globalStyles.simpleRow}
         >
-          <Text style={styles.sellAll}>
-            {intl.formatMessage({ id: 'buttons.sell-all' })}
-            {'  '}
-          </Text>
+          <Text style={styles.sellAll}>{intl.formatMessage({ id: 'buttons.sell-all' })}</Text>
           <ArrowForIcon width={20} height={20} />
         </TouchableOpacity>
       </View>
       <TopSpace top={10} />
       <FlatList
         data={agencies}
-        keyExtractor={(item) => item.id}
         horizontal
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <AgencyItem
             image={item.image}
@@ -244,68 +186,58 @@ export const Explore = () => {
     </View>
   );
 
-  const renderRecommendedSection = () => (
-    <View style={styles.recommendedSectionWrap}>
-      <View style={globalStyles.rowSpaceBetween}>
-        <Text style={styles.recommendedTitle}>
-          {intl.formatMessage({ id: 'explore.recommended-for-you' })}
-        </Text>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('Auth', { screen: 'propertyfullscreen' })
-          }
-          style={globalStyles.simpleRow}
-        >
-          <Text style={styles.searchWithAiText}>
-            {intl.formatMessage({ id: 'buttons.explore-with-ai' })}
-          </Text>
-          <ArrowForIcon width={20} height={20} />
-        </TouchableOpacity>
-      </View>
-      <TopSpace top={10} />
-      <SimilarProperties />
-    </View>
-  );
-
-  const combinedData = useMemo(() => {
+  // Combine property data with ads/survey
+  const combinedData2 = useMemo(() => {
     const data: any[] = [];
-    combinedProperties.forEach((property, index) => {
-      data.push({ type: 'property', data: property });
+    combinedProperties.forEach((prop, index) => {
+      data.push({ type: 'property', data: prop });
       if (index === 0) data.push({ type: 'ads' });
-      else if (index === 2) data.push({ type: 'survey' });
+      if (index === 2) data.push({ type: 'survey' });
     });
     return data;
   }, [combinedProperties]);
 
+  // Render item
+  const renderItem = ({ item }: { item: any }) => {
+    switch (item.type) {
+      case 'property':
+        return (
+          <PropertyCard
+            item={item.data}
+            isFavorite={favorites[item.data.property_id]}
+            handleFavoriteClick={() => handleFavoriteClick(item.data.property_id)}
+          />
+        );
+      case 'ads':
+        return <Ads ads={sampleAdsData} isVisible />;
+      case 'survey':
+        return (
+          <Survey
+            question="Are you satisfied with the property listings?"
+            onYes={() => console.log('Yes')}
+            onNo={() => console.log('No')}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Filter logic
   const toggleFilterModal = () => setIsFilterVisible(!isFilterVisible);
   const handleApplyFilters = () => {
     console.log('Filters applied');
     toggleFilterModal();
   };
-  const focusSearchInput = () => {
-    if (searchInputRef.current) searchInputRef.current.focus();
-  };
-
-  const onScroll = useCallback(
-    (event) => {
-      const scrollY = event.nativeEvent.contentOffset.y;
-      const headerHeight = 250;
-      if (scrollY > headerHeight && !showBottomWidget) setShowBottomWidget(true);
-      else if (scrollY <= headerHeight && showBottomWidget)
-        setShowBottomWidget(false);
-    },
-    [showBottomWidget]
-  );
+  const focusSearchInput = () => searchInputRef.current?.focus();
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={styles.container}>
+      {/* The entire header is part of the scroll content, so it's placed in ListHeaderComponent */}
       <FlatList
-        data={isLoading ? [] : combinedData}
+        data={isLoading ? [] : combinedData2}
         keyExtractor={(item, index) => `item-${index}`}
         renderItem={renderItem}
-        ListEmptyComponent={isLoading ? renderSkeletons() : null}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -314,35 +246,32 @@ export const Explore = () => {
             colors={[Colors.light.primary]}
           />
         }
+        ListEmptyComponent={isLoading ? renderSkeletons() : null}
+        // 1) Place your green glass "ScrollOutHeader" at the very top
+        // 2) Then your agencies below that
         ListHeaderComponent={
           <>
-            {/* Green header container with header text and search/filter bar */}
-            <View style={styles.greenHeader}>
-              <Text style={styles.greetingTitle}>Hello, Welcome Home!</Text>
-              <Text style={styles.greetingSubtitle}>
-                Discover your perfect place with Manzil.
-              </Text>
-              <FilterHeader
-                isFilterVisible={isFilterVisible}
-                toggleFilterModal={toggleFilterModal}
-                onApplyFilters={handleApplyFilters}
-                textInputRef={searchInputRef}
-                // Remove containerStyle if not used by FilterHeader; or pass it here if needed.
-              />
-            </View>
+            <ScrollOutHeader
+              isFilterVisible={isFilterVisible}
+              toggleFilterModal={toggleFilterModal}
+              onApplyFilters={handleApplyFilters}
+              textInputRef={searchInputRef}
+            />
             {renderAgencies()}
-            {renderRecommendedSection()}
           </>
         }
-        onScroll={onScroll}
-        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
         style={styles.list}
       />
+
+      {/* Error Handling */}
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
+
+      {/* If you still want a bottom widget, up to you. */}
       {showBottomWidget && (
         <View style={styles.bottomWidgetContainer}>
           <View style={styles.bottomWidget}>
@@ -356,20 +285,30 @@ export const Explore = () => {
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
+
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    // You can either keep the SafeAreaView background as green
-    // or set it to a neutral color so that only the header area is green.
-    backgroundColor: Colors.light.primaryButton,
+  },
+  flatListContent: {
+    paddingBottom: 120,
+  },
+  list: {
+    flex: 1,
   },
   greenHeader: {
     backgroundColor: Colors.light.primaryButton,
     padding: 20,
+  },
+  propertiesTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginHorizontal: 15,
+    color: '#333',
   },
   greetingTitle: {
     fontSize: 28,
@@ -381,15 +320,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
     marginBottom: 15,
-  },
-  flatListContent: {
-    paddingBottom: 120,
-    // Here we set the background for the scrollable content.
-    backgroundColor: Colors.light.background,
-  },
-  list: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
   },
   topAgencyWrap: {
     marginTop: 20,

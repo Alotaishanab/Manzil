@@ -1,5 +1,4 @@
 // src/navigation/bottomtab/BottomTabNavigator.tsx
-
 import React, { useRef, useEffect } from 'react';
 import {
   Animated,
@@ -12,29 +11,30 @@ import {
   Dimensions,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Haptic from 'react-native-haptic-feedback'; // Haptic Feedback
+import Haptic from 'react-native-haptic-feedback';
+import { BlurView } from '@react-native-community/blur'; // Make sure this is installed/linked
+
+// Import your screens/stacks/icons properly:
 import {
   Account,
   ExploreMaps,
-  Messages, // Import the new Messages screen
+  Messages,
   CenterScreen,
-} from '@screens'; // Ensure Messages is exported from @screens
-import { Colors } from '@colors';
+} from '@screens';
+import { ExploreStack } from '../explorestack';
 import {
   ExploreIcon,
-  FavoriteIcon,
   MapTabIcon,
   PlusIcon,
+  MessagesIcon,
   UserIcon,
-  MessagesIcon, // Import the new MessagesIcon
 } from '@svgs';
+import { Colors } from '@colors';
 import { fonts } from '../../../src/assets/fonts';
-import { ExploreStack } from '../explorestack';
 import { useIntl } from '@context';
-import { BlurView } from '@react-native-community/blur'; // BlurView
 
-const Tab = createBottomTabNavigator();
 const { width: screenWidth } = Dimensions.get('window');
+const Tab = createBottomTabNavigator();
 
 export const BottomTabNavigator = () => {
   const { intl } = useIntl();
@@ -43,16 +43,8 @@ export const BottomTabNavigator = () => {
     const colorSelectionText = focused
       ? Colors.light.primaryBtn
       : Colors.light.headingTitle;
-
     return (
-      <Text
-        style={[
-          styles.tabText,
-          {
-            color: colorSelectionText,
-          },
-        ]}
-      >
+      <Text style={[styles.tabText, { color: colorSelectionText }]}>
         {text}
       </Text>
     );
@@ -70,12 +62,10 @@ export const BottomTabNavigator = () => {
           headerShown: false,
           tabBarLabel: ({ focused }) =>
             customText({
-              text: intl.formatMessage({
-                id: 'buttons.explore',
-              }),
+              text: intl.formatMessage({ id: 'buttons.explore' }),
               focused,
             }),
-      }}
+        }}
       />
 
       <Tab.Screen
@@ -85,12 +75,10 @@ export const BottomTabNavigator = () => {
           headerShown: false,
           tabBarLabel: ({ focused }) =>
             customText({
-              text: intl.formatMessage({
-                id: 'addpropertyScreen.map',
-              }),
+              text: intl.formatMessage({ id: 'addpropertyScreen.map' }),
               focused,
             }),
-      }}
+        }}
       />
 
       <Tab.Screen
@@ -98,27 +86,10 @@ export const BottomTabNavigator = () => {
         component={CenterScreen}
         options={{
           headerShown: false,
-          tabBarLabel: () => null, // No label for the center tab
-      }}
+          tabBarLabel: () => null, // no label for the center tab
+        }}
       />
 
-      {/* Remove the SavedProperties tab */}
-      {/* <Tab.Screen
-        name="SavedProperties"
-        component={SavedProperties}
-        options={{
-          headerShown: false,
-          tabBarLabel: ({ focused }) =>
-            customText({
-              text: intl.formatMessage({
-                id: 'buttons.saved',
-              }),
-              focused,
-            }),
-      }}
-      /> */}
-
-      {/* Add the Messages tab */}
       <Tab.Screen
         name="Messages"
         component={Messages}
@@ -126,12 +97,10 @@ export const BottomTabNavigator = () => {
           headerShown: false,
           tabBarLabel: ({ focused }) =>
             customText({
-              text: intl.formatMessage({
-                id: 'buttons.messages',
-              }),
+              text: intl.formatMessage({ id: 'buttons.messages' }),
               focused,
             }),
-      }}
+        }}
       />
 
       <Tab.Screen
@@ -141,17 +110,16 @@ export const BottomTabNavigator = () => {
           headerShown: false,
           tabBarLabel: ({ focused }) =>
             customText({
-              text: intl.formatMessage({
-                id: 'buttons.account',
-              }),
+              text: intl.formatMessage({ id: 'buttons.account' }),
               focused,
             }),
-      }}
+        }}
       />
     </Tab.Navigator>
   );
 };
 
+// The custom glassmorphic tab bar
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   const tabWidth = screenWidth / state.routes.length;
   const indicatorPosition = useRef(new Animated.Value(0)).current;
@@ -161,7 +129,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
       toValue: state.index * tabWidth,
       duration: 200,
       easing: Easing.out(Easing.ease),
-      useNativeDriver: true, // translateX can use native driver
+      useNativeDriver: true,
     }).start();
   }, [state.index, tabWidth, indicatorPosition]);
 
@@ -174,6 +142,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
   return (
     <View style={styles.tabBarWrapper}>
+      {/* The BlurView that gives the glass effect */}
       <BlurView
         style={styles.blurView}
         blurType="light"
@@ -192,7 +161,6 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                 target: route.key,
                 canPreventDefault: true,
               });
-
               if (!isFocused && !event.defaultPrevented) {
                 handleHapticFeedback();
                 navigation.navigate(route.name);
@@ -211,7 +179,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                 Icon = PlusIcon;
                 break;
               case 'Messages':
-                Icon = MessagesIcon; // Use the new MessagesIcon
+                Icon = MessagesIcon;
                 break;
               case 'Account':
                 Icon = UserIcon;
@@ -223,9 +191,6 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             return (
               <TouchableOpacity
                 key={route.key}
-                accessibilityRole="button"
-                accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={options.tabBarAccessibilityLabel}
                 onPress={onPress}
                 style={styles.tabBarItemStyle}
               >
@@ -233,7 +198,9 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                   width={route.name === 'Manzili' ? 28 : 22}
                   height={route.name === 'Manzili' ? 28 : 22}
                   fill={
-                    isFocused ? Colors.light.primaryBtn : Colors.light.headingTitle
+                    isFocused
+                      ? Colors.light.primaryBtn
+                      : Colors.light.headingTitle
                   }
                 />
                 {options.tabBarLabel ? (
@@ -256,17 +223,17 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             );
           })}
         </View>
-        {/* Indicator */}
+
+        {/* The sliding indicator at the bottom */}
         <Animated.View
           style={[
             styles.indicator,
             {
               width: tabWidth,
               transform: [{ translateX: indicatorPosition }],
-              borderTopLeftRadius:
-                state.index === 0 ? 20 : 0, // Curve for first tab
+              borderTopLeftRadius: state.index === 0 ? 20 : 0,
               borderTopRightRadius:
-                state.index === state.routes.length - 1 ? 20 : 0, // Curve for last tab
+                state.index === state.routes.length - 1 ? 20 : 0,
             },
           ]}
         />
@@ -275,6 +242,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   tabText: {
     fontSize: 11,
@@ -319,7 +287,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     height: 4,
-    backgroundColor: Colors.light.primaryBtn, // Updated to primary button color
+    backgroundColor: Colors.light.primaryBtn,
   },
 });
 

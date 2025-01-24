@@ -1,5 +1,3 @@
-// PropertyCard.js
-
 import React, { useState, useRef } from 'react';
 import {
   Animated,
@@ -24,22 +22,23 @@ import {
   HeartIcon,
   HeartOutlineIcon,
   ShareIcon,
-  PlayIcon, // Ensure PlayIcon is correctly exported from '@svgs'
+  PlayIcon,
 } from '@svgs';
 import { useIntl } from '@context';
 import { useSaveProperty } from '@services';
 import { useNavigation } from '@react-navigation/native';
 import { isVideo, isImage } from '../../utils/mediaUtils';
-import { renderPropertyIcons } from '@helpers'; // Adjust the path as needed
+import { renderPropertyIcons } from '@helpers'; // Adjust path as needed
 
 const { width: screenWidth } = Dimensions.get('window');
-const ITEM_WIDTH = screenWidth * 0.8;
-const SPACING = 20;
-const STACK_OFFSET = 60;
+// Reduced some dimensions to make everything a bit smaller
+const ITEM_WIDTH = screenWidth * 0.75;
+const SPACING = 15;
+const STACK_OFFSET = 45;
 
 export const PropertyCard = ({
   item,
-  marginBottom = 15,
+  marginBottom = 10, // made smaller
   handleClick = () => {},
   isFavorite = false,
   handleFavoriteClick = () => {},
@@ -68,7 +67,6 @@ export const PropertyCard = ({
     console.log("Property item:", item);
     console.log("Property ID:", item.property_id);
 
-    // Ensure property_id is valid
     if (!item.property_id) {
       console.error("property_id is undefined");
       return;
@@ -93,7 +91,7 @@ export const PropertyCard = ({
     );
   };
 
-  // Ensure images are first, then videos
+  // Media = images + videos
   const images = item?.property_images || [];
   const videos = item?.property_videos || [];
   const media = [...images, ...videos].filter(Boolean);
@@ -101,7 +99,7 @@ export const PropertyCard = ({
   const options = {
     title: 'Share this property',
     message: 'Check out this property!',
-    url: media[currentVisibleIndex], // Adjusted to use currentVisibleIndex
+    url: media[currentVisibleIndex],
   };
 
   const handleShare = () => {
@@ -113,13 +111,12 @@ export const PropertyCard = ({
   };
 
   const formatPrice = (price) => {
-    // Format the price and remove .00 if exists
     return parseFloat(price).toLocaleString();
   };
 
   const renderPropertyDetails = () => {
     const propertyCategory = item?.property_category || 'Home';
-    const propertyType = item?.property_type?.toLowerCase() || 'sale'; // Assuming default 'sale'
+    const propertyType = item?.property_type?.toLowerCase() || 'sale';
     const saleOrRent = propertyType === 'sell' ? 'For Sale' : 'For Rent';
 
     return (
@@ -129,10 +126,8 @@ export const PropertyCard = ({
     );
   };
 
-  // Viewability Config for FlatList
+  // FlatList config
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
-
-  // onViewableItemsChanged Callback
   const onViewRef = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       setCurrentVisibleIndex(viewableItems[0].index);
@@ -149,15 +144,17 @@ export const PropertyCard = ({
 
   return (
     <View style={[styles.mainWrapper, { marginBottom }]}>
-      {/* Apply BlurView as Background */}
+      {/* The blurred glass background */}
       <BlurView
         style={styles.blurView}
         blurType="light"
         blurAmount={20}
-        reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.2)"
+        reducedTransparencyFallbackColor="white"
       />
+      {/* Slight frosty overlay on top of the blur */}
+      <View style={styles.glassOverlay} />
 
-      {/* Image and Video Carousel */}
+      {/* Carousel (images/videos) */}
       <View style={styles.carouselContainer}>
         {media.length > 0 ? (
           <Animated.FlatList
@@ -217,9 +214,9 @@ export const PropertyCard = ({
                           disabled={isSaving}
                         >
                           {isFavorite ? (
-                            <HeartIcon width={30} height={30} />
+                            <HeartIcon width={25} height={25} />
                           ) : (
-                            <HeartOutlineIcon width={30} height={30} />
+                            <HeartOutlineIcon width={25} height={25} />
                           )}
                         </TouchableOpacity>
                       </ImageBackground>
@@ -230,14 +227,14 @@ export const PropertyCard = ({
                         source={{ uri: item }}
                         style={styles.videoStyle}
                         controls={true}
-                        paused={!isCurrent} // Autoplay if current
-                        repeat={true} // Loop the video
+                        paused={!isCurrent}
+                        repeat={true}
                         resizeMode="cover"
                         onError={(error) => {
                           console.error('Video Playback Error:', error);
                         }}
                       />
-                      {/* Play Button Overlay */}
+                      {/* Play button overlay */}
                       {!isCurrent && (
                         <TouchableOpacity
                           onPress={() => setCurrentVisibleIndex(index)}
@@ -245,13 +242,13 @@ export const PropertyCard = ({
                           activeOpacity={0.7}
                         >
                           {PlayIcon ? (
-                            <PlayIcon width={50} height={50} />
+                            <PlayIcon width={40} height={40} />
                           ) : (
-                            <Text style={{ color: '#fff', fontSize: 24 }}>▶️</Text> // Placeholder
+                            <Text style={{ color: '#fff', fontSize: 20 }}>▶️</Text>
                           )}
                         </TouchableOpacity>
                       )}
-                      {/* Favorite button inside the video */}
+                      {/* Favorite button in the video */}
                       <TouchableOpacity
                         onPress={handlePress}
                         style={styles.favoriteButton}
@@ -259,9 +256,9 @@ export const PropertyCard = ({
                         disabled={isSaving}
                       >
                         {isFavorite ? (
-                          <HeartIcon width={30} height={30} />
+                          <HeartIcon width={25} height={25} />
                         ) : (
-                          <HeartOutlineIcon width={30} height={30} />
+                          <HeartOutlineIcon width={25} height={25} />
                         )}
                       </TouchableOpacity>
                     </View>
@@ -273,7 +270,7 @@ export const PropertyCard = ({
         ) : (
           <View style={styles.noMediaContainer}>
             <Text style={styles.noMediaText}>No media available</Text>
-            {/* Show favorite button even if there is no media */}
+            {/* Favorite button even if no media */}
             <TouchableOpacity
               onPress={handlePress}
               style={styles.favoriteButton}
@@ -281,23 +278,23 @@ export const PropertyCard = ({
               disabled={isSaving}
             >
               {isFavorite ? (
-                <HeartIcon width={30} height={30} />
+                <HeartIcon width={25} height={25} />
               ) : (
-                <HeartOutlineIcon width={30} height={30} />
+                <HeartOutlineIcon width={25} height={25} />
               )}
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      {/* Content over the BlurView */}
+      {/* The actual content */}
       <TouchableHighlight
         onPress={handlePropertyClick}
         underlayColor="rgba(255, 255, 255, 0.1)"
         style={styles.contentWrapper}
       >
         <View>
-          {/* Property Details */}
+          {/* Property details */}
           <View style={styles.priceLocationContainer}>
             <View style={styles.priceFeaturedContainer}>
               <Text style={styles.priceText}>
@@ -317,11 +314,8 @@ export const PropertyCard = ({
                 ? `Added on ${getDateInEnglish(item.listing_date)}`
                 : 'Date not available'}
             </Text>
-            <TouchableOpacity
-              onPress={handleShare}
-              style={styles.shareButton}
-            >
-              <ShareIcon width={28} height={28} />
+            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+              <ShareIcon width={24} height={24} />
             </TouchableOpacity>
           </View>
         </View>
@@ -332,32 +326,41 @@ export const PropertyCard = ({
 
 const styles = StyleSheet.create({
   mainWrapper: {
-    borderRadius: 20,
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    backgroundColor: 'transparent', // Transparent to allow BlurView to handle the background
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 15,
-    width: '100%',
+    borderRadius: 15,
     overflow: 'hidden',
-    position: 'relative', // Ensure absolute children are positioned relative to this container
+    position: 'relative',
+    marginBottom: 10, // smaller
+    // We keep backgroundColor transparent for the glass effect
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
+  // The BlurView behind everything
   blurView: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
-    zIndex: 0, // Ensure it stays below media and content
+    zIndex: 1,
+  },
+  // A frosty overlay on top of the BlurView
+  glassOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 2,
+    borderRadius: 15,
+  },
+  contentWrapper: {
+    // This ensures content is above the frosty overlay
+    zIndex: 3,
+    paddingHorizontal: 15, // reduced
+    paddingVertical: 10, // reduced
   },
   carouselContainer: {
-    height: 300,
+    zIndex: 5, // keep media above the blur
+    height: 270, // slightly smaller
     alignItems: 'center',
   },
   imageContainer: {
     width: ITEM_WIDTH,
-    height: 300,
+    height: 270,
     marginHorizontal: SPACING / 2,
-    borderRadius: 20,
+    borderRadius: 15, // smaller
     overflow: 'hidden',
     position: 'relative',
   },
@@ -368,7 +371,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageBgStyle: {
-    borderRadius: 20,
+    borderRadius: 15, // smaller
   },
   videoContainer: {
     flex: 1,
@@ -381,114 +384,73 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
-    top: 15,
-    right: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 15,
-    padding: 5,
-    zIndex: 2, // Ensure it stays above BlurView
+    top: 10, // smaller
+    right: 10, // smaller
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    borderRadius: 10, // smaller
+    padding: 3, // smaller
+    zIndex: 999, // ensure on top
   },
   playButton: {
     position: 'absolute',
+    zIndex: 999,
+    width: 50, // smaller
+    height: 50, // smaller
+    borderRadius: 25, // smaller
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 2, // Ensure it stays above BlurView
   },
-  contentWrapper: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    zIndex: 1, // Ensure content is above BlurView
+  noMediaContainer: {
+    width: ITEM_WIDTH,
+    height: 270, // match the new height
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noMediaText: {
+    color: Colors.light.headingTitleDark,
+    fontFamily: fonts.primary.medium,
+    fontSize: 14, // smaller
   },
   priceLocationContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    paddingBottom: 10,
+    paddingBottom: 8, // smaller
   },
   priceFeaturedContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   priceText: {
-    color: Colors.light.headingTitleDark, // Use a darker color for better contrast
-    fontSize: 28,
+    color: Colors.light.headingTitleDark,
+    fontSize: 24, // smaller
     fontFamily: fonts.primary.bold,
   },
   placeText: {
-    color: Colors.light.headingTitleDark, // Darker color
-    fontSize: 18,
+    color: Colors.light.headingTitleDark,
+    fontSize: 16, // smaller
     fontFamily: fonts.primary.medium,
   },
   propertyTypeText: {
-    color: Colors.light.headingTitleDark, // Darker color
-    fontSize: 16,
+    color: Colors.light.headingTitleDark,
+    fontSize: 14, // smaller
     fontFamily: fonts.primary.bold,
-    marginTop: 5,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center', // Center icons
-    alignItems: 'center',     // Vertically center icons
-    padding: 5,
-  },
-  iconWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,  // Adjust horizontal spacing between icons
-  },
-  countText: {
-    marginLeft: 5,
-    color: Colors.light.headingTitleDark, // Darker color
-    fontFamily: fonts.primary.regular,
-    fontSize: 14,
+    marginTop: 4,
   },
   footerWrap: {
     flexDirection: 'row',
     paddingHorizontal: 0,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 8, // smaller
   },
   dateText: {
     color: Colors.light.serialNoGreen,
     fontFamily: fonts.primary.regular,
-    fontSize: 12,
+    fontSize: 10, // smaller
   },
   shareButton: {
-    paddingHorizontal: 5,
-  },
-  noMediaContainer: {
-    width: ITEM_WIDTH,
-    height: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noMediaText: {
-    color: Colors.light.headingTitleDark, // Darker color for better contrast
-    fontFamily: fonts.primary.medium,
-    fontSize: 16,
-  },
-  // Skeleton styles (if needed)
-  skeletonCard: {
-    width: '100%',
-    height: 300,
-    marginBottom: 15,
-    borderRadius: 20,
-  },
-  skeletonImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 20,
-  },
-  skeletonText: {
-    width: '60%',
-    height: 20,
-    marginTop: 10,
-    borderRadius: 4,
+    paddingHorizontal: 3, // smaller
   },
 });
 

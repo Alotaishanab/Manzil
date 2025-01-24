@@ -23,3 +23,4 @@ export * from './CardSkeleton';
 export * from './MediaCarousel';
 export * from './MapScreen';
 export * from './AgencyItem';
+export * from './ScrollOutHeader';
