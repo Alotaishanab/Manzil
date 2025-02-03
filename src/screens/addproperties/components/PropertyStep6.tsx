@@ -1,21 +1,21 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Vibration,
 } from 'react-native';
-import {TopSpace, CustomButton} from '@components';
-import {Colors} from '@colors';
-import {fonts} from '@fonts';
-import {useIntl} from '@context';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // DateTimePicker for DOB
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { TopSpace, CustomButton } from '@components';
+import { Colors } from '@colors';
+import { fonts } from '@fonts';
+import { useIntl } from '@context';
+import { renderInputFields } from '@helpers';
 
 const PropertyStep6 = ({
-  ownershipType, // Current ownership type ('independent', 'multipleOwners', 'agency')
-  setOwnershipType, // Function to set the ownership type
+  ownershipType, // 'independent', 'multipleOwners', 'agency'
+  setOwnershipType,
   selectedDOBs,
   setSelectedDOBs,
   independentFields,
@@ -26,12 +26,11 @@ const PropertyStep6 = ({
   setAgencyFields,
   handleNext,
 }) => {
-  const [errors, setErrors] = useState({}); // To handle error messages
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // For DOB calendar
-  const [dobFieldKey, setDobFieldKey] = useState(null); // To identify the current DOB field
-  const {intl} = useIntl();
+  const [errors, setErrors] = useState({});
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [dobFieldKey, setDobFieldKey] = useState(null);
+  const { intl } = useIntl();
 
-  // Show date picker and set the field key for identifying which DOB field to update
   const showDatePicker = key => {
     setDobFieldKey(key);
     setDatePickerVisibility(true);
@@ -39,40 +38,27 @@ const PropertyStep6 = ({
 
   const hideDatePicker = () => setDatePickerVisibility(false);
 
-  // Handle confirming the DOB
-  const handleConfirmDOB = date => {
-    const formattedDate = date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
-    setSelectedDOBs(prev => ({...prev, [dobFieldKey]: formattedDate})); // Update the corresponding DOB
+  const handleConfirmDOB = (date: Date) => {
+    const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    setSelectedDOBs(prev => ({ ...prev, [dobFieldKey]: formattedDate }));
     setDatePickerVisibility(false);
   };
 
-  // Handle input change
-  const handleInputChange = (field, value, type) => {
-    const onlyNumbers = value.replace(/[^0-9]/g, ''); // Restrict to numbers only for ID fields
+  const handleInputChange = (field: string, value: string, type: string) => {
+    const onlyNumbers = value.replace(/[^0-9]/g, '');
     if (type === 'independent') {
-      setIndependentFields({
-        ...independentFields,
-        [field]: field.includes('ID') ? onlyNumbers : value,
-      });
+      setIndependentFields({ ...independentFields, [field]: field.includes('ID') ? onlyNumbers : value });
     } else if (type === 'multipleOwners') {
-      setMultipleOwnersFields({
-        ...multipleOwnersFields,
-        [field]: field.includes('ID') ? onlyNumbers : value,
-      });
+      setMultipleOwnersFields({ ...multipleOwnersFields, [field]: field.includes('ID') ? onlyNumbers : value });
     } else {
-      setAgencyFields({
-        ...agencyFields,
-        [field]: field.includes('ID') ? onlyNumbers : value,
-      });
+      setAgencyFields({ ...agencyFields, [field]: field.includes('ID') ? onlyNumbers : value });
     }
   };
 
-  // Validation logic
   const validateFields = () => {
-    let currentErrors = {};
+    let currentErrors: Record<string, string> = {};
     let hasError = false;
 
-    // Determine which fields to validate based on ownershipType
     const fieldsToValidate =
       ownershipType === 'independent'
         ? independentFields
@@ -80,15 +66,11 @@ const PropertyStep6 = ({
         ? multipleOwnersFields
         : agencyFields;
 
-    // Validation for required fields
     if (!fieldsToValidate.instrumentNumber) {
       currentErrors.instrumentNumber = 'Instrument number is required';
       hasError = true;
     }
-    if (
-      !fieldsToValidate.ownerIDNumber ||
-      fieldsToValidate.ownerIDNumber.length !== 10
-    ) {
+    if (!fieldsToValidate.ownerIDNumber || fieldsToValidate.ownerIDNumber.length !== 10) {
       currentErrors.ownerIDNumber = 'Owner ID must be 10 digits';
       hasError = true;
     }
@@ -98,14 +80,10 @@ const PropertyStep6 = ({
     }
     if (ownershipType === 'agency') {
       if (!fieldsToValidate.commercialRegNumber) {
-        currentErrors.commercialRegNumber =
-          'Commercial registration number is required';
+        currentErrors.commercialRegNumber = 'Commercial registration number is required';
         hasError = true;
       }
-      if (
-        !fieldsToValidate.agentIDNumber ||
-        fieldsToValidate.agentIDNumber.length !== 10
-      ) {
+      if (!fieldsToValidate.agentIDNumber || fieldsToValidate.agentIDNumber.length !== 10) {
         currentErrors.agentIDNumber = 'Agent ID must be 10 digits';
         hasError = true;
       }
@@ -114,7 +92,7 @@ const PropertyStep6 = ({
         hasError = true;
       }
       if (!selectedDOBs.agency) {
-        currentErrors.agentDOB = 'Agent DOB is required'; // Added check for Agent DOB
+        currentErrors.agentDOB = 'Agent DOB is required';
         hasError = true;
       }
     }
@@ -126,328 +104,80 @@ const PropertyStep6 = ({
 
     if (hasError) {
       setErrors(currentErrors);
-      Vibration.vibrate(50); // Vibrate for 50ms on error
+      Vibration.vibrate(50);
     } else {
       setErrors({});
-      handleNext(); // Proceed to the next step if no errors
-    }
-  };
-
-  const renderInputFields = () => {
-    switch (ownershipType) {
-      case 'independent':
-        return (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Instrument Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter instrument number"
-                placeholderTextColor={Colors.light.black}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.instrumentNumber && styles.errorBorder,
-                ]}
-                value={independentFields.instrumentNumber}
-                onChangeText={value =>
-                  handleInputChange('instrumentNumber', value, 'independent')
-                }
-              />
-              {errors.instrumentNumber && (
-                <Text style={styles.errorText}>{errors.instrumentNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Owner ID Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter owner ID number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                maxLength={10}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.ownerIDNumber && styles.errorBorder,
-                ]}
-                value={independentFields.ownerIDNumber}
-                onChangeText={value =>
-                  handleInputChange('ownerIDNumber', value, 'independent')
-                }
-              />
-              {errors.ownerIDNumber && (
-                <Text style={styles.errorText}>{errors.ownerIDNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Owner DOB</Text>
-              <TopSpace top={10} />
-              <TouchableOpacity onPress={() => showDatePicker('independent')}>
-                <View pointerEvents="none">
-                  <TextInput
-                    placeholder="Select date of birth"
-                    placeholderTextColor={Colors.light.black}
-                    value={selectedDOBs.independent}
-                    style={[
-                      styles.textInputFullWidth,
-                      errors.ownerDOB && styles.errorBorder,
-                    ]}
-                    editable={false}
-                  />
-                </View>
-              </TouchableOpacity>
-              {errors.ownerDOB && (
-                <Text style={styles.errorText}>{errors.ownerDOB}</Text>
-              )}
-            </View>
-          </>
-        );
-
-      case 'multipleOwners':
-        return (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Instrument Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter instrument number"
-                placeholderTextColor={Colors.light.black}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.instrumentNumber && styles.errorBorder,
-                ]}
-                value={multipleOwnersFields.instrumentNumber}
-                onChangeText={value =>
-                  handleInputChange('instrumentNumber', value, 'multipleOwners')
-                }
-              />
-              {errors.instrumentNumber && (
-                <Text style={styles.errorText}>{errors.instrumentNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                Owner ID Number (One of the Owners)
-              </Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter owner ID number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                maxLength={10}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.ownerIDNumber && styles.errorBorder,
-                ]}
-                value={multipleOwnersFields.ownerIDNumber}
-                onChangeText={value =>
-                  handleInputChange('ownerIDNumber', value, 'multipleOwners')
-                }
-              />
-              {errors.ownerIDNumber && (
-                <Text style={styles.errorText}>{errors.ownerIDNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Agency Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter agency number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                style={[
-                  styles.textInputFullWidth,
-                  errors.agencyNumber && styles.errorBorder,
-                ]}
-                value={multipleOwnersFields.agencyNumber}
-                onChangeText={value =>
-                  handleInputChange('agencyNumber', value, 'multipleOwners')
-                }
-              />
-              {errors.agencyNumber && (
-                <Text style={styles.errorText}>{errors.agencyNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Owner DOB (One of the Owners)</Text>
-              <TopSpace top={10} />
-              <TouchableOpacity
-                onPress={() => showDatePicker('multipleOwners')}>
-                <View pointerEvents="none">
-                  <TextInput
-                    placeholder="Select owner date of birth"
-                    placeholderTextColor={Colors.light.black}
-                    value={selectedDOBs.multipleOwners}
-                    style={[
-                      styles.textInputFullWidth,
-                      errors.ownerDOB && styles.errorBorder,
-                    ]}
-                    editable={false}
-                  />
-                </View>
-              </TouchableOpacity>
-              {errors.ownerDOB && (
-                <Text style={styles.errorText}>{errors.ownerDOB}</Text>
-              )}
-            </View>
-          </>
-        );
-
-      case 'agency':
-        return (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Instrument Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter instrument number"
-                placeholderTextColor={Colors.light.black}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.instrumentNumber && styles.errorBorder,
-                ]}
-                value={agencyFields.instrumentNumber}
-                onChangeText={value =>
-                  handleInputChange('instrumentNumber', value, 'agency')
-                }
-              />
-              {errors.instrumentNumber && (
-                <Text style={styles.errorText}>{errors.instrumentNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Commercial Registration Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter commercial registration number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                style={[
-                  styles.textInputFullWidth,
-                  errors.commercialRegNumber && styles.errorBorder,
-                ]}
-                value={agencyFields.commercialRegNumber}
-                onChangeText={value =>
-                  handleInputChange('commercialRegNumber', value, 'agency')
-                }
-              />
-              {errors.commercialRegNumber && (
-                <Text style={styles.errorText}>
-                  {errors.commercialRegNumber}
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Agent ID Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter agent ID number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                maxLength={10}
-                style={[
-                  styles.textInputFullWidth,
-                  errors.agentIDNumber && styles.errorBorder,
-                ]}
-                value={agencyFields.agentIDNumber}
-                onChangeText={value =>
-                  handleInputChange('agentIDNumber', value, 'agency')
-                }
-              />
-              {errors.agentIDNumber && (
-                <Text style={styles.errorText}>{errors.agentIDNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Agency Number</Text>
-              <TopSpace top={10} />
-              <TextInput
-                placeholder="Enter agency number"
-                placeholderTextColor={Colors.light.black}
-                keyboardType="numeric"
-                style={[
-                  styles.textInputFullWidth,
-                  errors.agencyNumber && styles.errorBorder,
-                ]}
-                value={agencyFields.agencyNumber}
-                onChangeText={value =>
-                  handleInputChange('agencyNumber', value, 'agency')
-                }
-              />
-              {errors.agencyNumber && (
-                <Text style={styles.errorText}>{errors.agencyNumber}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Agent DOB</Text>
-              <TopSpace top={10} />
-              <TouchableOpacity onPress={() => showDatePicker('agency')}>
-                <View pointerEvents="none">
-                  <TextInput
-                    placeholder="Select agent date of birth"
-                    placeholderTextColor={Colors.light.black}
-                    value={selectedDOBs.agency}
-                    style={[
-                      styles.textInputFullWidth,
-                      errors.agentDOB && styles.errorBorder,
-                    ]}
-                    editable={false}
-                  />
-                </View>
-              </TouchableOpacity>
-              {errors.agentDOB && (
-                <Text style={styles.errorText}>{errors.agentDOB}</Text>
-              )}
-            </View>
-          </>
-        );
-
-      default:
-        return null;
+      handleNext();
     }
   };
 
   return (
     <View style={styles.container}>
       <TopSpace top={20} />
-      {/* Tabs for selecting Independent, Multiple Owners, or Agency */}
-      <View style={styles.row}>
-        <TouchableOpacity onPress={() => setOwnershipType('independent')}>
+
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.screenTitle}>Ownership & Verification</Text>
+        <Text style={styles.screenSubtitle}>
+          Please provide the necessary ownership details for your property.
+        </Text>
+      </View>
+
+      {/* Revolut-inspired Tabs */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            ownershipType === 'independent' ? styles.tabButtonActive : styles.tabButtonInactive,
+          ]}
+          onPress={() => setOwnershipType('independent')}
+        >
           <Text
-            style={
-              ownershipType === 'independent' ? styles.tabActive : styles.tab
-            }>
+            style={ownershipType === 'independent' ? styles.tabTextActive : styles.tabTextInactive}
+          >
             Independent
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setOwnershipType('multipleOwners')}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            ownershipType === 'multipleOwners' ? styles.tabButtonActive : styles.tabButtonInactive,
+          ]}
+          onPress={() => setOwnershipType('multipleOwners')}
+        >
           <Text
-            style={
-              ownershipType === 'multipleOwners' ? styles.tabActive : styles.tab
-            }>
+            style={ownershipType === 'multipleOwners' ? styles.tabTextActive : styles.tabTextInactive}
+          >
             Multiple Owners
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setOwnershipType('agency')}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            ownershipType === 'agency' ? styles.tabButtonActive : styles.tabButtonInactive,
+          ]}
+          onPress={() => setOwnershipType('agency')}
+        >
           <Text
-            style={ownershipType === 'agency' ? styles.tabActive : styles.tab}>
+            style={ownershipType === 'agency' ? styles.tabTextActive : styles.tabTextInactive}
+          >
             Agency
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Input Fields */}
-      {renderInputFields()}
+      {/* Render Input Fields */}
+      {renderInputFields({
+        ownershipType,
+        errors,
+        independentFields,
+        multipleOwnersFields,
+        agencyFields,
+        selectedDOBs,
+        handleInputChange,
+        showDatePicker,
+      })}
 
-      {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -455,13 +185,13 @@ const PropertyStep6 = ({
         onCancel={hideDatePicker}
       />
 
-      {/* Next Button */}
       <CustomButton
-        btnWidth={'100%'}
+        btnWidth="100%"
         borderRadius={30}
         disabled={false}
-        handleClick={validateFields} // Validate before proceeding
-        title={intl.formatMessage({id: 'buttons.submit'})}
+        handleClick={validateFields}
+        title={intl.formatMessage({ id: 'buttons.next', defaultMessage: 'Next' })}
+        showRightIconButton
       />
     </View>
   );
@@ -470,55 +200,60 @@ const PropertyStep6 = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 0,
+    padding: 20,
+    backgroundColor: '#fff',
   },
-  row: {
+  headerContainer: {
+    marginBottom: 30,
+    alignItems: 'flex-start',
+  },
+  screenTitle: {
+    fontSize: 26,
+    fontFamily: fonts.primary.bold,
+    color: Colors.light.headingTitle,
+  },
+  screenSubtitle: {
+    fontSize: 16,
+    fontFamily: fonts.primary.regular,
+    color: Colors.light.textSecondary || '#555',
+    marginTop: 8,
+  },
+  tabContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginBottom: 20,
   },
-  tab: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#9CA3AF', // Gray color for inactive tab
-    paddingBottom: 5,
-  },
-  tabActive: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937', // Darker color for active tab
-    borderBottomWidth: 2,
-    borderBottomColor: '#3B82F6', // Blue underline for active tab
-    paddingBottom: 5,
-  },
-  inputContainer: {
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  textInputFullWidth: {
-    height: 50,
-    borderColor: Colors.light.inputBg,
-    width: '100%',
-    paddingHorizontal: 20,
-    color: Colors.light.headingTitle,
-    fontFamily: fonts.primary.regular,
-    borderWidth: 1,
-    fontSize: 16,
-    backgroundColor: Colors.light.inputBg,
-    borderRadius: 10,
+  tabButton: {
+    flex: 1,
+    marginHorizontal: 6,
+    paddingVertical: 14,      // a bit more vertical padding for a substantial feel
+    paddingHorizontal: 10,    // added horizontal padding for balanced spacing
+    borderRadius: 20,         // a modern, rounded rectangle rather than an overly pill-like shape
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  errorBorder: {
-    borderColor: 'red',
+  tabButtonActive: {
+    backgroundColor: '#2E7D32', // deep, rich green remains unchanged
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,             // enhanced elevation for a more prominent raised effect
   },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
+  tabButtonInactive: {
+    backgroundColor: '#E8F5E9', // very light green for inactive state
+    borderWidth: 1,
+    borderColor: '#A5D6A7',     // soft medium green border for subtle definition
+  },
+  tabTextActive: {
+    color: '#FFFFFF',         // white text on the active green background
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  tabTextInactive: {
+    color: '#2E7D32',         // deep green text for inactive buttons
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

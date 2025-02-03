@@ -14,13 +14,13 @@ import {
   RefreshControl,
   TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Haptic from 'react-native-haptic-feedback';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Import your new scroll-out header
 import {
   PropertyCard,
   TopSpace,
@@ -34,7 +34,7 @@ import { useIntl } from '@context';
 import { Colors } from '@colors';
 import { globalStyles } from '../../../src/styles/globalStyles';
 import { ArrowForIcon } from '@svgs';
-import { ag1, ag2, ag5, ag6, ag7 } from '@assets';
+import { ag1, ag2, ag5, ag6, ag7, fonts } from '@assets';
 import {
   useGetNearbyProperties,
   UserLocation,
@@ -159,7 +159,9 @@ export const Explore = () => {
           onPress={() => navigation.navigate('Auth', { screen: 'AllAgencies' })}
           style={globalStyles.simpleRow}
         >
-          <Text style={styles.sellAll}>{intl.formatMessage({ id: 'buttons.sell-all' })}</Text>
+          <Text style={styles.sellAll}>
+            {intl.formatMessage({ id: 'buttons.sell-all' })}
+          </Text>
           <ArrowForIcon width={20} height={20} />
         </TouchableOpacity>
       </View>
@@ -183,6 +185,22 @@ export const Explore = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.agenciesList}
       />
+    </View>
+  );
+
+  // --- Updated AI Search Section ---
+  const renderAISearchSection = () => (
+    <View style={styles.aiSearchSection}>
+      <Text style={styles.aiSearchTitle}>AI Property Search</Text>
+      <Text style={styles.aiSearchSubtitle}>
+        Let our AI find the best properties for you.
+      </Text>
+      <TouchableOpacity
+        style={styles.aiSearchButton}
+        onPress={() => navigation.navigate('Auth', { screen: 'PropertyFullScreen' })}
+      >
+        <Text style={styles.aiSearchButtonText}>Search with AI</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -223,7 +241,6 @@ export const Explore = () => {
     }
   };
 
-  // Filter logic
   const toggleFilterModal = () => setIsFilterVisible(!isFilterVisible);
   const handleApplyFilters = () => {
     console.log('Filters applied');
@@ -233,7 +250,6 @@ export const Explore = () => {
 
   return (
     <View style={styles.container}>
-      {/* The entire header is part of the scroll content, so it's placed in ListHeaderComponent */}
       <FlatList
         data={isLoading ? [] : combinedData2}
         keyExtractor={(item, index) => `item-${index}`}
@@ -247,8 +263,6 @@ export const Explore = () => {
           />
         }
         ListEmptyComponent={isLoading ? renderSkeletons() : null}
-        // 1) Place your green glass "ScrollOutHeader" at the very top
-        // 2) Then your agencies below that
         ListHeaderComponent={
           <>
             <ScrollOutHeader
@@ -258,20 +272,19 @@ export const Explore = () => {
               textInputRef={searchInputRef}
             />
             {renderAgencies()}
+            {renderAISearchSection()}
           </>
         }
         showsVerticalScrollIndicator={false}
         style={styles.list}
       />
 
-      {/* Error Handling */}
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
-      {/* If you still want a bottom widget, up to you. */}
       {showBottomWidget && (
         <View style={styles.bottomWidgetContainer}>
           <View style={styles.bottomWidget}>
@@ -289,6 +302,7 @@ export const Explore = () => {
   );
 };
 
+export default Explore;
 
 const styles = StyleSheet.create({
   container: {
@@ -300,27 +314,7 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
-  greenHeader: {
-    backgroundColor: Colors.light.primaryButton,
-    padding: 20,
-  },
-  propertiesTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginHorizontal: 15,
-    color: '#333',
-  },
-  greetingTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  greetingSubtitle: {
-    fontSize: 18,
-    color: '#fff',
-    marginBottom: 15,
-  },
+  // --- Top Agencies Styles ---
   topAgencyWrap: {
     marginTop: 20,
     paddingHorizontal: 20,
@@ -337,19 +331,50 @@ const styles = StyleSheet.create({
   agenciesList: {
     paddingVertical: 10,
   },
-  recommendedSectionWrap: {
+  // --- Updated AI Search Section Styles ---
+  aiSearchSection: {
     marginTop: 20,
-    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    padding: 15,
+    borderRadius: 12,
+    backgroundColor: Colors.light.cardBackground, // Use your card background color
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    alignItems: 'center',
   },
-  recommendedTitle: {
+  aiSearchTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: fonts.primary.bold,
     color: Colors.light.text,
+    marginBottom: 5,
   },
-  searchWithAiText: {
+  aiSearchSubtitle: {
     fontSize: 16,
-    color: Colors.light.primary,
+    fontFamily: fonts.primary.regular,
+    color: Colors.light.textSecondary,
+    marginBottom: 10,
+    textAlign: 'center',
   },
+  aiSearchButton: {
+    backgroundColor: Colors.light.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  aiSearchButtonText: {
+    fontSize: 16,
+    fontFamily: fonts.primary.medium,
+    color: '#fff',
+  },
+  // --- Error & Bottom Widget Styles ---
   errorContainer: {
     position: 'absolute',
     top: 100,
@@ -390,6 +415,5 @@ const styles = StyleSheet.create({
     height: 30,
     backgroundColor: '#fff',
   },
+  // --- Other styles remain unchanged ---
 });
-
-export default Explore;

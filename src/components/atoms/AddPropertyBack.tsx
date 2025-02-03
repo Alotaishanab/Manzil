@@ -6,7 +6,6 @@ import { BackChevronIcon } from '@svgs';
 import { fonts } from '@fonts';
 
 type Prop = {
-  text: string;
   fontFamily?: any;
   textColor?: any;
   backgroundColor?: any;
@@ -45,7 +44,6 @@ export const AddPropertyBack = ({
             color: textColor,
           },
         ]}>
-        {text}
       </Text>
     </View>
   );

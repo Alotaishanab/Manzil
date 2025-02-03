@@ -1,5 +1,5 @@
 // src/components/AgentDetails.tsx
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,21 +13,24 @@ import {
 import { useIntl } from '@context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { fonts } from '../../../assets/fonts/index';
-import { UserIcon } from '@assets'; // Importing the UserIcon component
+import { UserIcon } from '@assets'; // Default user icon component
 import { AuthContext } from '@context';
 import { GenericModal, CustomButton } from '@components';
-import AsyncHelper from '../../../helpers/asyncHelper'; // Import AsyncHelper for re-reading token
+import AsyncHelper from '../../../helpers/asyncHelper';
+import { formatDate } from '@helpers'; // Your imported helper (not used below to force locale)
 
-const TitleValueRow = ({
-  title,
-  value,
-  onPress,
-  style,
-}: {
+interface TitleValueRowProps {
   title: string;
   value: string;
   onPress?: () => void;
   style?: { titleStyle?: any; valueStyle?: any };
+}
+
+const TitleValueRow: React.FC<TitleValueRowProps> = ({
+  title,
+  value,
+  onPress,
+  style,
 }) => (
   <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
     <Text style={[styles.titleText, style?.titleStyle]}>{title}</Text>
@@ -35,14 +38,16 @@ const TitleValueRow = ({
   </TouchableOpacity>
 );
 
-const TitleArrowIconWrap = ({
-  headingTitle,
-  showIcon = true,
-  style,
-}: {
+interface TitleArrowIconWrapProps {
   headingTitle: string;
   showIcon?: boolean;
   style?: any;
+}
+
+const TitleArrowIconWrap: React.FC<TitleArrowIconWrapProps> = ({
+  headingTitle,
+  showIcon = true,
+  style,
 }) => (
   <View style={styles.titleWrap}>
     <Text style={[styles.title, style]}>{headingTitle}</Text>
@@ -55,14 +60,21 @@ const TitleArrowIconWrap = ({
   </View>
 );
 
-const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
-  const { intl } = useIntl();
+interface AgentDetailsProps {
+  property: any; // Expected to contain { property_details, lister_info }
+}
+
+const AgentDetails: React.FC<AgentDetailsProps> = ({ property }) => {
+  // Destructure the nested objects from property
+  const { property_details, lister_info } = property;
+  // Use ownership type from property_details
+  const isIndependent = property_details?.ownership_type === 'independent';
+
   const navigation = useNavigation();
-  const { token, loadingAuth, setAuthToken } = useContext(AuthContext);
+  const { token, loadingAuth } = useContext(AuthContext);
   const [localToken, setLocalToken] = useState<string | null>(token);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // On focus, re-read the token from AsyncStorage in case it was updated after login.
   useFocusEffect(
     useCallback(() => {
       const refreshToken = async () => {
@@ -74,7 +86,6 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
     }, [])
   );
 
-  // While auth state is loading, show a loading indicator.
   if (loadingAuth) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -83,15 +94,11 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
     );
   }
 
-  // Determine if the lister is independent based on ownership_type.
-  const isIndependent = property.ownership_type === 'independent';
-
   const handleVisitPress = () => {
     navigation.navigate('AgencyDetails');
   };
 
   const handleContactPress = () => {
-    // Check if the token exists and is non-empty (using our local token state).
     if (localToken && localToken.trim().length > 0) {
       navigation.navigate('ChatScreen', { property });
     } else {
@@ -99,9 +106,13 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
     }
   };
 
-  // Format the lister registration date using locale formatting.
-  const registrationDate = property.lister_registration_date
-    ? new Date(property.lister_registration_date).toLocaleDateString()
+  // Force 'en-US' locale for the registration date.
+  const registrationDate = lister_info?.lister_registration_date
+    ? new Date(lister_info.lister_registration_date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
     : 'N/A';
 
   return (
@@ -114,9 +125,14 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
             style={styles.titleStyle}
           />
 
-          {/* Show UserIcon or Agency Image */}
+          {/* Render the lister image or fallback */}
           <View style={styles.iconWrapper}>
-            {isIndependent ? (
+            {lister_info?.lister_profile_picture && lister_info.lister_profile_picture.trim() !== '' ? (
+              <Image
+                source={{ uri: lister_info.lister_profile_picture }}
+                style={styles.listerImage}
+              />
+            ) : isIndependent ? (
               <UserIcon width={75} height={75} fill="#fff" />
             ) : (
               <Image
@@ -128,7 +144,7 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
 
           <TitleValueRow
             title="Lister Name:"
-            value={property.lister_name || 'N/A'}
+            value={lister_info?.lister_name || 'N/A'}
             style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }}
           />
           <TitleValueRow
@@ -142,12 +158,20 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
             style={{ titleStyle: styles.titleText, valueStyle: styles.valueText }}
           />
 
-          {/* Row with Visit and Contact buttons */}
+          {/* Visit and Contact buttons */}
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.visitButton} onPress={handleVisitPress} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.visitButton}
+              onPress={handleVisitPress}
+              activeOpacity={0.7}
+            >
               <Text style={styles.visitButtonText}>Visit</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.contactButton} onPress={handleContactPress} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={handleContactPress}
+              activeOpacity={0.7}
+            >
               <Text style={styles.contactButtonText}>Contact</Text>
             </TouchableOpacity>
           </View>
@@ -177,7 +201,10 @@ const AgentDetails: React.FC<{ property: any }> = ({ property }) => {
               navigation.navigate('Auth', { screen: 'Login' });
             }}
           />
-          <TouchableOpacity onPress={() => setShowLoginModal(false)} style={styles.notNowContainer}>
+          <TouchableOpacity
+            onPress={() => setShowLoginModal(false)}
+            style={styles.notNowContainer}
+          >
             <Text style={styles.notNowText}>Not Now</Text>
           </TouchableOpacity>
         </GenericModal>
@@ -312,6 +339,13 @@ const styles = StyleSheet.create({
     color: 'red',
     textDecorationLine: 'underline',
     textAlign: 'center',
+  },
+  listerImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 37.5,
+    resizeMode: 'cover', // Ensure the image fills the space
+    backgroundColor: '#eee', // Optional: a background color while loading
   },
   loadingContainer: {
     flex: 1,

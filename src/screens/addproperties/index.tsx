@@ -12,7 +12,6 @@ import {
   Image,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
 import {Colors} from '@colors';
 import {useNavigation} from '@react-navigation/native';
 import {AddPropertyBack, PropertyStepHeader, TopSpace} from '@components';
@@ -27,7 +26,7 @@ import PropertyStep3 from './components/PropertyStep3';
 import PropertyStep4 from './components/PropertyStep4';
 import PropertyStep5 from './components/PropertyStep5';
 import PropertyStep6 from './components/PropertyStep6';
-import axios from 'axios'; // Make sure axios is installed
+import FinalStep from './components/FinalStep';
 import {
   AddPropertyPayload,
   DirectionType,
@@ -40,6 +39,9 @@ import {
 
 export const AddProperties = () => {
   const navigation: any = useNavigation();
+
+  // Update total steps to 7 so that step 7 is the FinalStep component.
+  const totalSteps = 7;
 
   const [step, setStep] = useState(1);
   const [selectedPropertyType, setSelectedPropertyType] = useState('House');
@@ -84,13 +86,10 @@ export const AddProperties = () => {
   const [floorPlan, setFloorPlan] = useState('');
   const [media, setMedia] = useState<any[]>([]);
   const [selectedPropertyFeatures, setSelectedPropertyFeatures] = useState([]);
-  const [markerPosition, setMarkerPosition] = useState<MarkerPosition | null>(
-    null,
-  ); // Coordinates
+  const [markerPosition, setMarkerPosition] = useState<MarkerPosition | null>(null); // Coordinates
 
   // Step 6
-  const [ownershipType, setOwnershipType] =
-    useState<OwnershipType>('independent');
+  const [ownershipType, setOwnershipType] = useState<OwnershipType>('independent');
   const [selectedDOBs, setSelectedDOBs] = useState({
     independent: '',
     multipleOwners: '',
@@ -117,20 +116,16 @@ export const AddProperties = () => {
 
   // New state variables for property fields
   const [propertyFeature, setPropertyFeature] = useState<PropertyFeature[]>([]);
-
   const [bedroomCount, setBedroomCount] = useState<number | string | null>(1);
   const [bathroomCount, setBathroomCount] = useState<number | string | null>(1);
-
   const [priceMeter, setPriceMeter] = useState<string | null>(null);
-
   const [images, setImages] = useState<Array<any>>([]);
 
   const {intl} = useIntl();
   const {mutate: addProperty} = useAddProperty();
 
-  const totalSteps = 6;
-
   const handleNext = () => {
+    // Increase step until we reach the final step (7)
     setStep(prevStep => (prevStep < totalSteps ? prevStep + 1 : prevStep));
   };
 
@@ -147,225 +142,187 @@ export const AddProperties = () => {
 
   const onChangePropertyFeature = (feature: PropertyFeature) => {
     const exists = propertyFeature.some(item => item.id === feature.id);
-
     if (!exists) {
       setPropertyFeature([...propertyFeature, feature]);
     } else {
-      setPropertyFeature(
-        propertyFeature.filter(item => item.id !== feature.id),
-      );
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowErrorModal(false);
-    setErrorMessage("");
-  };
-
-  const handlePicker = async () => {
-    try {
-      const res: any = await launchImageLibrary({
-        mediaType: 'photo',
-        selectionLimit: 0,
-        includeBase64: false,
-      });
-      if (res?.didCancel) {
-        console.log('User canceled the action');
-      } else if (Array.isArray(res.assets)) {
-        const selectedImages: any = res.assets.map((asset: any) => ({
-          uri: asset.uri,
-        }));
-        // @ts-ignore
-        setPhotos((prevPhotos: any) => [...prevPhotos, ...selectedImages]);
-      } else {
-        console.log('No images selected or response format is incorrect');
-      }
-    } catch (e) {
-      console.log('Error:', e);
+      setPropertyFeature(propertyFeature.filter(item => item.id !== feature.id));
     }
   };
 
   const submitProperty = async () => {
     setIsLoading(true); // Show loading animation
     try {
-        // Initialize the common data that applies to all property types
-        let propertyData: AddPropertyPayload = {
-            propertyCategory: selectedPropertyType,
-            title,
-            price,
-            description,
-            area: size,
-            propertyAge,
-            propertyType, // Sell or Rent
-            direction: direction as unknown as DirectionType,
-            waterAccess: waterAccess === 'Yes',
-            electricityAccess: electricityAccess === 'Yes',
-            sewageSystem: sewageSystem === 'Yes',
-            media,
-            floorPlan,
-            propertyFeature: selectedPropertyFeatures,
-            markerPosition,
-            ownershipType,
+      // Initialize the common data that applies to all property types
+      let propertyData: AddPropertyPayload = {
+        propertyCategory: selectedPropertyType,
+        title,
+        price,
+        description,
+        area: size,
+        propertyAge,
+        propertyType, // Sell or Rent
+        direction: direction as unknown as DirectionType,
+        waterAccess: waterAccess === 'Yes',
+        electricityAccess: electricityAccess === 'Yes',
+        sewageSystem: sewageSystem === 'Yes',
+        media,
+        floorPlan,
+        propertyFeature: selectedPropertyFeatures,
+        markerPosition,
+        ownershipType,
+      };
+
+      // Include rentDuration if propertyType is rent
+      if (propertyType === 'rent') {
+        propertyData = {
+          ...propertyData,
+          rentDuration,
         };
-
-        // If the property is for rent, include rentDuration in the property data
-        if (propertyType === 'rent') {
-            propertyData = {
-                ...propertyData,
-                rentDuration, // Assuming rentDuration is available in the state
-            };
-        }
-
-        switch (selectedPropertyType) {
-            case 'House':
-                propertyData = {
-                    ...propertyData,
-                    bedrooms: beds,
-                    bathrooms: baths,
-                    floors,
-                    livingRooms,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Appartment':
-                propertyData = {
-                    ...propertyData,
-                    rooms,
-                    bathrooms: baths,
-                    floorNumber,
-                    livingRooms,
-                    floors,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Workers Residence':
-                propertyData = {
-                    ...propertyData,
-                    bedrooms: beds,
-                    bathrooms: baths,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Land':
-                propertyData = {
-                    ...propertyData,
-                    direction: direction as unknown as DirectionType,
-                    numberOfStreets,
-                };
-                break;
-            case 'Farmhouse':
-                propertyData = {
-                    ...propertyData,
-                    bedrooms: beds,
-                    bathrooms: baths,
-                    livingRooms,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Shop':
-                propertyData = {
-                    ...propertyData,
-                    footTraffic: footTraffic as unknown as FootTrafficType,
-                    proximity, // Assuming proximity is available in the state
-                };
-                break;
-            case 'Chalet':
-                propertyData = {
-                    ...propertyData,
-                    bedrooms: beds,
-                    bathrooms: baths,
-                    livingRooms,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Office':
-                propertyData = {
-                    ...propertyData,
-                    floors,
-                    parkingSpaces,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            case 'Warehouse':
-                propertyData = {
-                    ...propertyData,
-                    numberOfGates,
-                    loadingDocks,
-                    storageCapacity,
-                };
-                break;
-            case 'Tower':
-                propertyData = {
-                    ...propertyData,
-                    rooms,
-                    bathrooms: baths,
-                    numberOfUnits,
-                    floors,
-                    direction: direction as unknown as DirectionType,
-                };
-                break;
-            default:
-                throw new Error('Invalid property type selected');
-        }
-
-        // Handle ownership-specific fields based on the ownership type
-        if (ownershipType === 'independent') {
-            propertyData.ownership = {
-                instrumentNumber: independentFields.instrumentNumber,
-                ownerIDNumber: independentFields.ownerIDNumber,
-                ownerDOB: selectedDOBs.independent,
-            };
-        } else if (ownershipType === 'multipleOwners') {
-            propertyData.ownership = {
-                instrumentNumber: multipleOwnersFields.instrumentNumber,
-                ownerIDNumber: multipleOwnersFields.ownerIDNumber,
-                agencyNumber: multipleOwnersFields.agencyNumber,
-                ownerDOB: selectedDOBs.multipleOwners,
-            };
-        } else if (ownershipType === 'agency') {
-            propertyData.ownership = {
-                instrumentNumber: agencyFields.instrumentNumber,
-                commercialRegNumber: agencyFields.commercialRegNumber,
-                agentIDNumber: agencyFields.agentIDNumber,
-                agencyNumber: agencyFields.agencyNumber,
-                agentDOB: selectedDOBs.agency,
-            };
-        }
-
-        // Log the final property data for debugging
-        console.log(
-            'Submitting property data:',
-            JSON.stringify(propertyData, null, 2)
-        );
-
-        addProperty(propertyData, {
-          onSuccess: (data) => {
-            // Stop loading animation
-            setIsLoading(false);
-            console.log('Property created with ID:', data.propertyId);
-            // Navigate to PropertyScreen with propertyId
-            navigation.navigate('PropertyScreen', { propertyId: data.propertyId });
-          },
-          onError: (error) => {
-            // Stop loading animation and show error modal
-            setIsLoading(false);
-            setErrorMessage(error.message || "An unexpected error occurred");
-            setShowErrorModal(true);
-          },
-        });
-      } catch (error) {
-        // Stop loading animation and show error modal
-        setIsLoading(false);
-        setErrorMessage(error.message || "An unexpected error occurred");
-        setShowErrorModal(true);
       }
-    };
+
+      switch (selectedPropertyType) {
+        case 'House':
+          propertyData = {
+            ...propertyData,
+            bedrooms: beds,
+            bathrooms: baths,
+            floors,
+            livingRooms,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Appartment':
+          propertyData = {
+            ...propertyData,
+            rooms,
+            bathrooms: baths,
+            floorNumber,
+            livingRooms,
+            floors,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Workers Residence':
+          propertyData = {
+            ...propertyData,
+            bedrooms: beds,
+            bathrooms: baths,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Land':
+          propertyData = {
+            ...propertyData,
+            direction: direction as unknown as DirectionType,
+            numberOfStreets,
+          };
+          break;
+        case 'Farmhouse':
+          propertyData = {
+            ...propertyData,
+            bedrooms: beds,
+            bathrooms: baths,
+            livingRooms,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Shop':
+          propertyData = {
+            ...propertyData,
+            footTraffic: footTraffic as unknown as FootTrafficType,
+            proximity,
+          };
+          break;
+        case 'Chalet':
+          propertyData = {
+            ...propertyData,
+            bedrooms: beds,
+            bathrooms: baths,
+            livingRooms,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Office':
+          propertyData = {
+            ...propertyData,
+            floors,
+            parkingSpaces,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        case 'Warehouse':
+          propertyData = {
+            ...propertyData,
+            numberOfGates,
+            loadingDocks,
+            storageCapacity,
+          };
+          break;
+        case 'Tower':
+          propertyData = {
+            ...propertyData,
+            rooms,
+            bathrooms: baths,
+            numberOfUnits,
+            floors,
+            direction: direction as unknown as DirectionType,
+          };
+          break;
+        default:
+          throw new Error('Invalid property type selected');
+      }
+
+      // Ownership-specific fields
+      if (ownershipType === 'independent') {
+        propertyData.ownership = {
+          instrumentNumber: independentFields.instrumentNumber,
+          ownerIDNumber: independentFields.ownerIDNumber,
+          ownerDOB: selectedDOBs.independent,
+        };
+      } else if (ownershipType === 'multipleOwners') {
+        propertyData.ownership = {
+          instrumentNumber: multipleOwnersFields.instrumentNumber,
+          ownerIDNumber: multipleOwnersFields.ownerIDNumber,
+          agencyNumber: multipleOwnersFields.agencyNumber,
+          ownerDOB: selectedDOBs.multipleOwners,
+        };
+      } else if (ownershipType === 'agency') {
+        propertyData.ownership = {
+          instrumentNumber: agencyFields.instrumentNumber,
+          commercialRegNumber: agencyFields.commercialRegNumber,
+          agentIDNumber: agencyFields.agentIDNumber,
+          agencyNumber: agencyFields.agencyNumber,
+          agentDOB: selectedDOBs.agency,
+        };
+      }
+
+      // Debug log the final property data
+      console.log(
+        'Submitting property data:',
+        JSON.stringify(propertyData, null, 2)
+      );
+
+      addProperty(propertyData, {
+        onSuccess: (data) => {
+          setIsLoading(false);
+          console.log('Property created with ID:', data.propertyId);
+          navigation.navigate('PropertyScreen', { propertyId: data.propertyId });
+        },
+        onError: (error) => {
+          setIsLoading(false);
+          setErrorMessage(error.message || "An unexpected error occurred");
+          setShowErrorModal(true);
+        },
+      });
+    } catch (error) {
+      setIsLoading(false);
+      setErrorMessage(error.message || "An unexpected error occurred");
+      setShowErrorModal(true);
+    }
+  };
 
   const handleSubmit = () => {
-    let valid = true;
-    const newErrors: Record<string, string> = {};
-
-    // If everything is valid, submit the property
+    // You can add any final validation here before submission.
     submitProperty();
   };
 
@@ -373,16 +330,10 @@ export const AddProperties = () => {
     <SafeAreaView style={globalStyles.wrapScreen}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        // eslint-disable-next-line react-native/no-inline-styles
         contentContainerStyle={{
-          paddingHorizontal: Platform.OS === 'ios' ? 20 : 0,
+          paddingHorizontal: Platform.OS === 'ios' ? 10 : 0,
         }}>
-        <AddPropertyBack text={'Add Properties'} onPress={handleBack} />
-        <TopSpace top={10} />
-        <PropertyStepHeader step={step} totalSteps={6} />
-
-
-        <TopSpace top={10} />
+        <AddPropertyBack onPress={handleBack} />
 
         {/* Step Components */}
         {step === 1 && (
@@ -453,37 +404,31 @@ export const AddProperties = () => {
             sewageSystem={sewageSystem}
             setSewageSystem={setSewageSystem}
             handleNext={handleNext}
-            electricityAccess={electricityAccess}
-            setElectricityAccess={setElectricityAccess}
-            setSewageSystem={setSewageSystem}
-            setWaterAccess={setWaterAccess}
-            sewageSystem={sewageSystem}
-            waterAccess={waterAccess}
+          />
+        )}
+
+        {step === 4 && (
+          <PropertyStep4
+            propertyType={propertyType}
+            setPropertyType={setPropertyType}
+            setPrice={setPrice}
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            price={price}
             selectedPropertyFeatures={selectedPropertyFeatures}
             setSelectedPropertyFeatures={setSelectedPropertyFeatures}
             propertyFeature={propertyFeature}
             setPropertyFeature={onChangePropertyFeature}
+            rentDuration={rentDuration}
+            setRentDuration={setRentDuration}
+            handleNext={handleNext}
+            handleBack={handleBack}
+            errors={errors}
+            setErrors={setErrors}
           />
         )}
-
-{step === 4 && (
-  <PropertyStep4
-    propertyType={propertyType}
-    setPropertyType={setPropertyType}
-    setPrice={setPrice}
-    title={title}
-    setTitle={setTitle}
-    description={description}
-    setDescription={setDescription}
-    price={price}
-    rentDuration={rentDuration} // Keep rentDuration if it's needed for rent properties
-    setRentDuration={setRentDuration} // Keep setRentDuration for rent properties
-    handleNext={handleNext}
-    handleBack={handleBack}
-    errors={errors}
-    setErrors={setErrors}
-  />
-)}
 
         {step === 5 && (
           <PropertyStep5
@@ -517,53 +462,101 @@ export const AddProperties = () => {
             setAgencyFields={setAgencyFields}
             ownershipType={ownershipType}
             setOwnershipType={setOwnershipType}
-            handleNext={handleSubmit} // Assuming this is your submission function
-            handleBack={handleBack} // Handle going back to the previous step
+            handleNext={handleNext}  // This now moves to step 7 (the final step)
+            handleBack={handleBack}
           />
         )}
 
-<Modal
-  transparent={true}
-  visible={showErrorModal}
-  animationType="slide"
-  onRequestClose={() => setShowErrorModal(false)}
->
-  <TouchableWithoutFeedback onPress={() => setShowErrorModal(false)}>
-    <View style={styles.modalOverlay}>
-      <TouchableWithoutFeedback>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalText}>Error</Text>
-            <TouchableOpacity onPress={() => setShowErrorModal(false)}>
-              <Image
-                source={require('../../assets/images/close.png')}
-                style={styles.closeIconImage}
+        {step === 7 && (
+          <FinalStep
+            // Pass all fields so the user can review them before final submission.
+            data={{
+              selectedPropertyType,
+              title,
+              description,
+              size,
+              propertyAge,
+              propertyType,
+              direction,
+              beds,
+              baths,
+              floors,
+              livingRooms,
+              rooms,
+              numberOfStreets,
+              footTraffic,
+              proximity,
+              floorNumber,
+              numberOfGates,
+              loadingDocks,
+              storageCapacity,
+              numberOfUnits,
+              parkingSpaces,
+              waterAccess,
+              electricityAccess,
+              sewageSystem,
+              rentDuration,
+              price,
+              floorPlan,
+              selectedPropertyFeatures,
+              propertyFeature,
+              markerPosition,
+              ownershipType,
+              selectedDOBs,
+              independentFields,
+              multipleOwnersFields,
+              agencyFields,
+              bedroomCount,
+              bathroomCount,
+              priceMeter,
+              media,
+              images,
+            }}
+            handleSubmit={handleSubmit}  // Call final submission when ready
+            handleBack={handleBack}
+          />
+        )}
+
+        {/* Error Modal */}
+        <Modal
+          transparent={true}
+          visible={showErrorModal}
+          animationType="slide"
+          onRequestClose={() => setShowErrorModal(false)}>
+          <TouchableWithoutFeedback onPress={() => setShowErrorModal(false)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalText}>Error</Text>
+                    <TouchableOpacity onPress={() => setShowErrorModal(false)}>
+                      <Image
+                        source={require('../../assets/images/close.png')}
+                        style={styles.closeIconImage}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.modalBody}>
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        {isLoading && (
+          <View style={styles.loadingOverlay}>
+            <View style={styles.loadingContainer}>
+              <LottieView
+                source={loadingAnimation}
+                autoPlay
+                loop
+                style={styles.loadingAnimation}
               />
-            </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.modalBody}>
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-
-
-{isLoading && (
-  <View style={styles.loadingOverlay}>
-    <View style={styles.loadingContainer}>
-      <LottieView
-        source={loadingAnimation}
-        autoPlay
-        loop
-        style={styles.loadingAnimation}
-      />
-    </View>
-  </View>
-)}
-
+        )}
 
         <TopSpace top={10} />
       </ScrollView>

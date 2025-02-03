@@ -1,5 +1,6 @@
+// src/helpers/renderPropertyIcons.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import {
   AreaIcon,
   BathroomIcon,
@@ -13,8 +14,9 @@ import {
   WaterIcon,
   ElectricityIcon,
   SewageIcon,
-} from '@svgs'; // Ensure all icons are correctly imported
+} from '@svgs';
 
+// Define your property interface
 interface Property {
   area?: string;
   bedrooms?: number;
@@ -33,30 +35,44 @@ interface Property {
   property_category?: string;
 }
 
-export const renderPropertyIcons = (property: Property) => {
+// Props for the helper
+interface RenderIconsProps {
+  property: Property;
+  containerStyle?: StyleProp<ViewStyle>;
+}
+
+export const renderPropertyIcons = ({
+  property,
+  containerStyle,
+}: RenderIconsProps) => {
   const { property_category } = property || {};
 
+  // Helper: show vertical separators between icons
   const renderSeparator = () => (
     <Text style={styles.separator}>|</Text>
   );
 
   const iconElements = [];
 
+  // Area icon
   if (property?.area) {
     iconElements.push(
       <View style={styles.iconWrapper} key="area">
         <AreaIcon width={24} height={24} />
-        <Text style={styles.countText}>{`${parseInt(property.area).toLocaleString()} sq ft`}</Text>
+        <Text style={styles.countText}>
+          {parseInt(property.area).toLocaleString()} sq ft
+        </Text>
       </View>
     );
   }
 
+  // House category
   if (property_category === 'House') {
     if (property?.bedrooms) {
       iconElements.push(
         <View style={styles.iconWrapper} key="bedrooms">
           <BedIcon width={20} height={20} />
-          <Text style={styles.countText}>{`${property.bedrooms} Beds`}</Text>
+          <Text style={styles.countText}>{property.bedrooms} Beds</Text>
         </View>
       );
     }
@@ -64,7 +80,7 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="bathrooms">
           <BathroomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.bathrooms} Baths`}</Text>
+          <Text style={styles.countText}>{property.bathrooms} Baths</Text>
         </View>
       );
     }
@@ -72,12 +88,15 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="living_rooms">
           <LivingRoomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.living_rooms} Living Room(s)`}</Text>
+          <Text style={styles.countText}>
+            {property.living_rooms} Living Room(s)
+          </Text>
         </View>
       );
     }
   }
 
+  // Land category
   if (property_category === 'Land') {
     if (property?.has_water) {
       iconElements.push(
@@ -107,25 +126,32 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="number_of_streets">
           <StreetIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.number_of_streets} Streets`}</Text>
+          <Text style={styles.countText}>
+            {property.number_of_streets} Streets
+          </Text>
         </View>
       );
     }
     if (property?.direction) {
       iconElements.push(
         <View style={styles.iconWrapper} key="direction">
-          <Text style={styles.countText}>{`Direction: ${property.direction}`}</Text>
+          <Text style={styles.countText}>
+            Direction: {property.direction}
+          </Text>
         </View>
       );
     }
   }
 
+  // Warehouse
   if (property_category === 'Warehouse') {
     if (property?.number_of_gates) {
       iconElements.push(
         <View style={styles.iconWrapper} key="number_of_gates">
           <GateIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.number_of_gates} Gates`}</Text>
+          <Text style={styles.countText}>
+            {property.number_of_gates} Gates
+          </Text>
         </View>
       );
     }
@@ -133,18 +159,23 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="storage_capacity">
           <StorageIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.storage_capacity} Capacity`}</Text>
+          <Text style={styles.countText}>
+            {property.storage_capacity} Capacity
+          </Text>
         </View>
       );
     }
   }
 
+  // Office
   if (property_category === 'Office') {
     if (property?.floors) {
       iconElements.push(
-        <View style={styles.iconWrapper} key="floors">
+        <View style={styles.iconWrapper} key="floors_office">
           <FloorIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.floors} Floors`}</Text>
+          <Text style={styles.countText}>
+            {property.floors} Floors
+          </Text>
         </View>
       );
     }
@@ -152,18 +183,21 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="living_rooms_office">
           <LivingRoomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.living_rooms} Living Room(s)`}</Text>
+          <Text style={styles.countText}>
+            {property.living_rooms} Living Room(s)
+          </Text>
         </View>
       );
     }
   }
 
+  // Chalet
   if (property_category === 'Chalet') {
     if (property?.bedrooms) {
       iconElements.push(
         <View style={styles.iconWrapper} key="bedrooms_chalet">
           <BedIcon width={20} height={20} />
-          <Text style={styles.countText}>{`${property.bedrooms} Beds`}</Text>
+          <Text style={styles.countText}>{property.bedrooms} Beds</Text>
         </View>
       );
     }
@@ -171,7 +205,7 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="bathrooms_chalet">
           <BathroomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.bathrooms} Baths`}</Text>
+          <Text style={styles.countText}>{property.bathrooms} Baths</Text>
         </View>
       );
     }
@@ -179,18 +213,21 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="living_rooms_chalet">
           <LivingRoomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.living_rooms} Living Room(s)`}</Text>
+          <Text style={styles.countText}>
+            {property.living_rooms} Living Room(s)
+          </Text>
         </View>
       );
     }
   }
 
+  // Farmhouse
   if (property_category === 'Farmhouse') {
     if (property?.bedrooms) {
       iconElements.push(
         <View style={styles.iconWrapper} key="bedrooms_farmhouse">
           <BedIcon width={20} height={20} />
-          <Text style={styles.countText}>{`${property.bedrooms} Beds`}</Text>
+          <Text style={styles.countText}>{property.bedrooms} Beds</Text>
         </View>
       );
     }
@@ -198,7 +235,7 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="bathrooms_farmhouse">
           <BathroomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.bathrooms} Baths`}</Text>
+          <Text style={styles.countText}>{property.bathrooms} Baths</Text>
         </View>
       );
     }
@@ -206,61 +243,77 @@ export const renderPropertyIcons = (property: Property) => {
       iconElements.push(
         <View style={styles.iconWrapper} key="living_rooms_farmhouse">
           <LivingRoomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.living_rooms} Living Room(s)`}</Text>
+          <Text style={styles.countText}>
+            {property.living_rooms} Living Room(s)
+          </Text>
         </View>
       );
     }
   }
 
+  // Tower
   if (property_category === 'Tower') {
     if (property?.floors) {
       iconElements.push(
         <View style={styles.iconWrapper} key="floors_tower">
           <FloorIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.floors} Floors`}</Text>
+          <Text style={styles.countText}>
+            {property.floors} Floors
+          </Text>
         </View>
       );
     }
     if (property?.number_of_units) {
       iconElements.push(
-        <View style={styles.iconWrapper} key="number_of_units">
+        <View style={styles.iconWrapper} key="number_of_units_tower">
           <BedIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.number_of_units} Units`}</Text>
+          <Text style={styles.countText}>
+            {property.number_of_units} Units
+          </Text>
         </View>
       );
     }
   }
 
+  // Workers Residence
   if (property_category === 'Workers Residence') {
     if (property?.number_of_units) {
       iconElements.push(
-        <View style={styles.iconWrapper} key="units_workers_residence">
+        <View style={styles.iconWrapper} key="units_workers_res">
           <BedIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.number_of_units} Units`}</Text>
+          <Text style={styles.countText}>
+            {property.number_of_units} Units
+          </Text>
         </View>
       );
     }
     if (property?.living_rooms) {
       iconElements.push(
-        <View style={styles.iconWrapper} key="living_rooms_workers_residence">
+        <View style={styles.iconWrapper} key="living_rooms_workers_res">
           <LivingRoomIcon width={28} height={28} />
-          <Text style={styles.countText}>{`${property.living_rooms} Living Room(s)`}</Text>
+          <Text style={styles.countText}>
+            {property.living_rooms} Living Room(s)
+          </Text>
         </View>
       );
     }
   }
 
+  // Shop
   if (property_category === 'Shop') {
     if (property?.foot_traffic) {
       iconElements.push(
         <View style={styles.iconWrapper} key="foot_traffic">
           <FootTrafficIcon width={28} height={28} />
-          <Text style={styles.countText}>{`Foot Traffic: ${property.foot_traffic}`}</Text>
+          <Text style={styles.countText}>
+            Foot Traffic: {property.foot_traffic}
+          </Text>
         </View>
       );
     }
   }
 
+  // Insert separators between icons
   const elementsWithSeparators = [];
   iconElements.forEach((icon, index) => {
     elementsWithSeparators.push(icon);
@@ -269,26 +322,39 @@ export const renderPropertyIcons = (property: Property) => {
     }
   });
 
-  return <View style={styles.iconRow}>{elementsWithSeparators}</View>;
-};
+  // If no icons, return null or an empty View.
+  if (iconElements.length === 0) {
+    return null;
+  }
 
+  return (
+    <View style={[styles.iconRow, containerStyle]}>
+      {elementsWithSeparators}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   iconRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center', // Align icons to the left
-    alignItems: 'center',     // Vertically center icons
+    justifyContent: 'center', // default center
+    alignItems: 'center',
   },
   iconWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 8,  // Adjust horizontal spacing between icons
+    marginHorizontal: 8,
+    marginVertical: 4,
   },
   countText: {
     marginLeft: 5,
     fontSize: 14,
     color: '#000',
+  },
+  separator: {
+    marginHorizontal: 4,
+    color: '#999',
   },
 });
 

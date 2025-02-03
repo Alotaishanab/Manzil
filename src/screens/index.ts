@@ -16,7 +16,6 @@ export * from './savedproperties/index';
 export * from './signupotpverification/index';
 
 export * from './home/index';
-export * from './land/index';
 export * from './propertyscreen';
 export * from './similarproperties';
 export * from './exploresearch';

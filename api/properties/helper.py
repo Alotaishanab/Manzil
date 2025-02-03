@@ -1,6 +1,95 @@
 from core import settings
 import requests
+from django.db.models import F
+from django.db.models.functions import Abs
+from .models import Property
 
+def calculate_similar_properties(base_property):
+    """
+    Calculate up to 3 similar properties for the given base_property.
+    This function applies:
+      - Matching property type and category,
+      - Category-specific filters (e.g., bedrooms for House, parking_spaces for Shop),
+      - A price difference threshold that depends on whether the property is for sale or rent.
+    Returns a list of mapped property dictionaries.
+    """
+    try:
+        base_price = float(base_property.price)
+    except (TypeError, ValueError):
+        return []
+
+    # Define price threshold based on property type:
+    if base_property.property_type in ['for_sale', 'land_sale']:
+        price_threshold = base_price * 0.10
+    else:
+        price_threshold = base_price * 0.20
+
+    # Base queryset: same type and category, excluding the base property.
+    qs = Property.objects.filter(
+        property_type=base_property.property_type,
+        property_category=base_property.property_category
+    ).exclude(property_id=base_property.property_id)
+
+    category = base_property.property_category
+
+    # Apply category-specific filters.
+    if category == 'House':
+        if base_property.bedrooms is not None:
+            qs = qs.filter(
+                bedrooms__gte=max(0, base_property.bedrooms - 1),
+                bedrooms__lte=base_property.bedrooms + 1
+            )
+        if base_property.bathrooms is not None:
+            qs = qs.filter(
+                bathrooms__gte=max(0, base_property.bathrooms - 1),
+                bathrooms__lte=base_property.bathrooms + 1
+            )
+        if base_property.floors is not None:
+            qs = qs.filter(
+                floors__gte=max(0, base_property.floors - 1),
+                floors__lte=base_property.floors + 1
+            )
+    elif category == 'Apartment':
+        if base_property.bedrooms is not None:
+            qs = qs.filter(
+                bedrooms__gte=max(0, base_property.bedrooms - 1),
+                bedrooms__lte=base_property.bedrooms + 1
+            )
+    elif category == 'Shop':
+        if base_property.parking_spaces is not None:
+            qs = qs.filter(
+                parking_spaces__gte=max(0, base_property.parking_spaces - 1),
+                parking_spaces__lte=base_property.parking_spaces + 1
+            )
+    elif category == 'Warehouse':
+        if base_property.number_of_gates is not None:
+            qs = qs.filter(number_of_gates=base_property.number_of_gates)
+        if base_property.storage_capacity is not None:
+            qs = qs.filter(
+                storage_capacity__gte=base_property.storage_capacity * 0.9,
+                storage_capacity__lte=base_property.storage_capacity * 1.1
+            )
+    elif category == 'Office':
+        if base_property.parking_spaces is not None:
+            qs = qs.filter(
+                parking_spaces__gte=max(0, base_property.parking_spaces - 1),
+                parking_spaces__lte=base_property.parking_spaces + 1
+            )
+    elif category in ['Tower', 'Chalet', 'Workers Residence']:
+        if base_property.bedrooms is not None:
+            qs = qs.filter(
+                bedrooms__gte=max(0, base_property.bedrooms - 1),
+                bedrooms__lte=base_property.bedrooms + 1
+            )
+    elif category in ['Land', 'Farmland']:
+        qs = qs.filter(area=base_property.area)
+
+    # Annotate with absolute price difference and filter by threshold.
+    qs = qs.annotate(price_diff=Abs(F('price') - base_price))
+    qs = qs.filter(price_diff__lte=price_threshold).order_by('price_diff')[:3]
+
+    similar_properties = [map_property(prop) for prop in qs]
+    return similar_properties
 
 def map_property(property_instance, distance=None):
     address = None
@@ -58,7 +147,6 @@ def map_property(property_instance, distance=None):
     property_data["lister_id"] = property_instance.user.user_id
 
     return property_data
-
 
 def get_property_address(lat, lng):
     api_key = settings.GOOGLE_API_KEY

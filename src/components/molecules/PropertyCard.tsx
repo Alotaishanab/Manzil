@@ -305,7 +305,10 @@ export const PropertyCard = ({
               {item?.address || 'Address not available'}
             </Text>
             {renderPropertyDetails()}
-            {renderPropertyIcons(item)}
+            {renderPropertyIcons({
+              property: item,
+              containerStyle: { justifyContent: 'flex-start' },
+            })}
           </View>
 
           <View style={styles.footerWrap}>

@@ -1,40 +1,44 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'; // Google Maps provider
-import { FullScreenIcon, HouseIcon } from '@svgs'; // Icons
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { FullScreenIcon, HouseIcon } from '@svgs';
 import { Colors } from '@colors';
-import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import { useNavigation } from '@react-navigation/native';
 
-export const CustomMap = ({
-  showMaximizeScreen = true,
+interface CustomMapProps {
+  showMaximizeScreen?: boolean;
+  height?: number;
+  markerPosition?: { latitude: number; longitude: number };
+  showHome?: boolean;
+  isAbsoluteFill?: boolean;
+  mapType?: 'standard' | 'satellite' | 'hybrid';
+}
+
+export const CustomMap: React.FC<CustomMapProps> = ({
   height = 200,
   markerPosition,
   showHome = true,
   isAbsoluteFill = true,
   mapType = 'standard',
 }) => {
-  const navigation = useNavigation(); // React Navigation hook
+  const navigation = useNavigation();
 
   return (
     <View
       style={[
         isAbsoluteFill ? StyleSheet.absoluteFillObject : null,
         styles.container,
-        {
-          height: height, // Height control
-          borderRadius: 5,
-          overflow: 'hidden',
-        },
+        { height, borderRadius: 8, overflow: 'hidden' },
       ]}
     >
       <MapView
-        provider={PROVIDER_GOOGLE} // Use Google Maps provider
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         mapType={mapType}
-        scrollEnabled={false} // Disable scrolling
-        zoomEnabled={false} // Disable zooming
-        rotateEnabled={false} // Disable rotating
-        pitchEnabled={false} // Disable pitch (tilt)
+        scrollEnabled={false}
+        zoomEnabled={false}
+        rotateEnabled={false}
+        pitchEnabled={false}
         region={
           markerPosition
             ? {
@@ -44,7 +48,7 @@ export const CustomMap = ({
                 longitudeDelta: 0.005,
               }
             : {
-                latitude: 37.78825, // Default location
+                latitude: 37.78825,
                 longitude: -122.4324,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
@@ -53,25 +57,14 @@ export const CustomMap = ({
       >
         {markerPosition && (
           <Marker coordinate={markerPosition}>
-            {showHome ? (
-              <TouchableOpacity activeOpacity={0.8} style={styles.homeBtnStyle}>
+            {showHome && (
+              <TouchableOpacity activeOpacity={0.8} style={styles.homeBtn}>
                 <HouseIcon fill={Colors.light.background} width={20} height={20} />
               </TouchableOpacity>
-            ) : null}
+            )}
           </Marker>
         )}
       </MapView>
-
-      {/* Full-screen button */}
-      {showMaximizeScreen && (
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('MapScreen')} // Navigate to MapScreen
-          style={styles.maximizeScreenBtn}
-        >
-          <FullScreenIcon width={25} height={25} />
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -83,20 +76,19 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  maximizeScreenBtn: {
+  fullscreenBtn: {
     backgroundColor: Colors.light.background,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
     borderRadius: 8,
     height: 40,
     width: 40,
     top: 10,
-    alignSelf: 'flex-end',
     right: 10,
+    position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  homeBtnStyle: {
+  homeBtn: {
     height: 35,
     width: 35,
     justifyContent: 'center',

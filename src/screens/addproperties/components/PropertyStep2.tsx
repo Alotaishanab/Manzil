@@ -1,35 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  Modal,
-  TextInput,
   StyleSheet,
   Vibration,
-  TouchableHighlight,
 } from 'react-native';
 import { CustomButton, TopSpace } from '@components';
 import { Colors } from '@colors';
-import { Picker } from '@react-native-picker/picker';
 import { fonts } from '@fonts';
 import { useIntl } from '@context';
-import {
-  HouseComponent,
-  ApartmentComponent,
-  WorkersResidenceComponent,
-  LandComponent,
-  FarmhouseComponent,
-  ShopComponent,
-  ChaletComponent,
-  OfficeComponent,
-  WarehouseComponent,
-  TowerComponent,
-} from '@components';
+import { RenderPropertyFields } from '@helpers';
 
-const PropertyStep2 = ({
+export const PropertyStep2 = ({
   selectedPropertyType,
   handleNext,
   beds,
@@ -63,12 +47,9 @@ const PropertyStep2 = ({
   parkingSpaces,
   setParkingSpaces,
 }: any) => {
-
-
-  // Intl
   const { intl } = useIntl();
 
-  // Errors
+  // Errors state for validations
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = () => {
@@ -80,7 +61,7 @@ const PropertyStep2 = ({
       valid = false;
     }
 
-    // Add validation based on property type
+    // Validation logic based on property type
     switch (selectedPropertyType) {
       case 'House':
         if (!beds || beds <= 0) {
@@ -212,7 +193,7 @@ const PropertyStep2 = ({
           newErrors.floors = 'Please select the number of floors.';
           valid = false;
         }
-        if (!parkingSpaces || parkingSpaces < 0) {
+        if (parkingSpaces === undefined || parkingSpaces < 0) {
           newErrors.parkingSpaces = 'Please select the number of parking spaces.';
           valid = false;
         }
@@ -231,7 +212,7 @@ const PropertyStep2 = ({
           newErrors.loadingDocks = 'Loading docks cannot be negative.';
           valid = false;
         }
-        if (!storageCapacity || storageCapacity < 0) {
+        if (storageCapacity === undefined || storageCapacity < 0) {
           newErrors.storageCapacity = 'Please select the storage capacity.';
           valid = false;
         }
@@ -275,192 +256,83 @@ const PropertyStep2 = ({
     handleNext();
   };
 
-  
-
-
-  // Function to render fields dynamically based on selected property type
-  const renderFieldsForPropertyType = () => {
-    switch (selectedPropertyType) {
-      case 'House':
-        return (
-          <HouseComponent
-            beds={beds}
-            setBeds={setBeds}
-            baths={baths}
-            setBaths={setBaths}
-            floors={floors}
-            setFloors={setFloors}
-            livingRooms={livingRooms}
-            setLivingRooms={setLivingRooms}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-          />
-        );
-
-      case 'Appartment':
-        return (
-          <ApartmentComponent
-            rooms={rooms}
-            setRooms={setRooms}
-            baths={baths}
-            setBaths={setBaths}
-            floorNumber={floorNumber}
-            setFloorNumber={setFloorNumber}
-            livingRooms={livingRooms}
-            setLivingRooms={setLivingRooms}
-            floors={floors}
-            setFloors={setFloors}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-          />
-        );
-
-      case 'Workers Residence':
-        return (
-          <WorkersResidenceComponent
-            beds={beds}
-            setBeds={setBeds}
-            baths={baths}
-            setBaths={setBaths}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-          />
-        );
-
-      case 'Land':
-        return (
-          <LandComponent
-            direction={direction}
-            setDirection={setDirection}
-            numberOfStreets={numberOfStreets}
-            setNumberOfStreets={setNumberOfStreets}
-            errors={errors}
-          />
-        );
-
-      case 'Farmhouse':
-        return (
-          <FarmhouseComponent
-            beds={beds}
-            setBeds={setBeds}
-            baths={baths}
-            setBaths={setBaths}
-            livingRooms={livingRooms}
-            setLivingRooms={setLivingRooms}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-          />
-        );
-
-      case 'Shop':
-        return (
-          <ShopComponent
-            footTraffic={footTraffic}
-            setFootTraffic={setFootTraffic}
-            proximity={proximity}
-            setProximity={setProximity}
-            errors={errors}
-
-          />
-        );
-
-      case 'Chalet':
-        return (
-          <ChaletComponent
-            beds={beds}
-            setBeds={setBeds}
-            baths={baths}
-            setBaths={setBaths}
-            livingRooms={livingRooms}
-            setLivingRooms={setLivingRooms}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-
-          />
-        );
-
-      case 'Office':
-        return (
-          <OfficeComponent
-            floors={floors}
-            setFloors={setFloors}
-            parkingSpaces={parkingSpaces}
-            setParkingSpaces={setParkingSpaces}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-
-          />
-        );
-
-      case 'Warehouse':
-        return (
-          <WarehouseComponent
-            numberOfGates={numberOfGates}
-            setNumberOfGates={setNumberOfGates}
-            loadingDocks={loadingDocks}
-            setLoadingDocks={setLoadingDocks}
-            storageCapacity={storageCapacity}
-            setStorageCapacity={setStorageCapacity}
-            errors={errors}
-
-          />
-        );
-
-      case 'Tower':
-        return (
-          <TowerComponent
-            rooms={rooms}
-            setRooms={setRooms}
-            baths={baths}
-            setBaths={setBaths}
-            numberOfUnits={numberOfUnits}
-            setNumberOfUnits={setNumberOfUnits}
-            floors={floors}
-            setFloors={setFloors}
-            direction={direction}
-            setDirection={setDirection}
-            errors={errors}
-          />
-        );
-
-      default:
-        return (
-          <Text style={styles.error}>Please select a valid property type</Text>
-        );
-    }
-  };
-
   return (
     <ScrollView style={styles.container}>
-      
+      {/* Title and Explanation Header */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.screenTitle}>Property Details</Text>
+        <Text style={styles.screenExplanation}>
+          Please provide additional details about your property.
+        </Text>
+      </View>
 
-      {renderFieldsForPropertyType()}
-
-      
+      <RenderPropertyFields
+        selectedPropertyType={selectedPropertyType}
+        errors={errors}
+        beds={beds}
+        setBeds={setBeds}
+        baths={baths}
+        setBaths={setBaths}
+        floors={floors}
+        setFloors={setFloors}
+        livingRooms={livingRooms}
+        setLivingRooms={setLivingRooms}
+        rooms={rooms}
+        setRooms={setRooms}
+        direction={direction}
+        setDirection={setDirection}
+        numberOfStreets={numberOfStreets}
+        setNumberOfStreets={setNumberOfStreets}
+        footTraffic={footTraffic}
+        setFootTraffic={setFootTraffic}
+        proximity={proximity}
+        setProximity={setProximity}
+        floorNumber={floorNumber}
+        setFloorNumber={setFloorNumber}
+        numberOfGates={numberOfGates}
+        setNumberOfGates={setNumberOfGates}
+        loadingDocks={loadingDocks}
+        setLoadingDocks={setLoadingDocks}
+        storageCapacity={storageCapacity}
+        setStorageCapacity={setStorageCapacity}
+        numberOfUnits={numberOfUnits}
+        setNumberOfUnits={setNumberOfUnits}
+        parkingSpaces={parkingSpaces}
+        setParkingSpaces={setParkingSpaces}
+      />
 
       <CustomButton
         btnWidth={'100%'}
         borderRadius={30}
         disabled={false}
         handleClick={handleSubmit}
-        title={intl.formatMessage({id: 'buttons.next'})}
+        title={intl.formatMessage({ id: 'buttons.next' })}
         showRightIconButton={true}
-      />    
+      />
     </ScrollView>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerContainer: {
+    padding: 20,
+    backgroundColor: Colors.light.background || '#fff',
+  },
+  screenTitle: {
+    fontSize: 24,
+    fontFamily: fonts.primary.bold,
+    color: Colors.darkText || '#000',
+    marginBottom: 8,
+  },
+  screenExplanation: {
+    fontSize: 16,
+    fontFamily: fonts.primary.regular,
+    color: Colors.textSecondary || '#555',
+  },
+  // ... (other styles remain unchanged)
   pickerContainer: {
     width: '45%',
     marginBottom: 20,
@@ -481,7 +353,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937', // Dark text color
+    color: '#1F2937',
     marginBottom: 10,
   },
   input: {
@@ -497,7 +369,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
   },
-  
   pickerTrigger: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E5E7EB',
@@ -509,10 +380,10 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   error: {
-    color: '#EF4444', // Red color for errors
+    color: '#EF4444',
     fontSize: 16,
     textAlign: 'center',
     marginVertical: 20,
@@ -527,7 +398,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
@@ -558,7 +429,7 @@ const styles = StyleSheet.create({
   optionSelected: {
     borderColor: '#4caf50',
     borderWidth: 2,
-    borderRadius: 30, // Makes the selected option more rounded
+    borderRadius: 30,
     backgroundColor: '#f0f0f0',
   },
   optionText: {
@@ -572,7 +443,7 @@ const styles = StyleSheet.create({
   arrowButton: {
     padding: 10,
     backgroundColor: '#e0e0e0',
-    borderRadius: 25, // Rounded arrows for a better look
+    borderRadius: 25,
   },
   arrowText: {
     fontSize: 18,

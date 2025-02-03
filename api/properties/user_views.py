@@ -29,14 +29,9 @@ logger = logging.getLogger(__name__)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_property(request):
-    user_identifier = request.user.pk  # Correctly accessing the primary key
-
-    logger.debug(f"Received add property request from user {user_identifier}")
-    logger.debug(f"Request data: {request.data}")
-    logger.debug(f"Request files: {request.FILES}")
+    user_identifier = request.user.pk
 
     serializer = AddPropertySerializer(data=request.data)
-
     if serializer.is_valid():
         ownership_info = serializer.validated_data.get('ownership')
         ownership_type = serializer.validated_data.get('ownershipType')
@@ -53,7 +48,6 @@ def add_property(request):
         if marker_position:
             longitude = marker_position.get('longitude')
             latitude = marker_position.get('latitude')
-            logger.debug(f"longitude: {longitude}, latitude: {latitude}")
             coordinates = Point(float(longitude), float(latitude))
 
         # Create and save the Property instance
@@ -72,8 +66,7 @@ def add_property(request):
             bedrooms=serializer.validated_data.get('bedrooms'),
             bathrooms=serializer.validated_data.get('bathrooms'),
             has_water=serializer.validated_data.get('waterAccess', False),
-            has_electricity=serializer.validated_data.get(
-                'electricityAccess', False),
+            has_electricity=serializer.validated_data.get('electricityAccess', False),
             has_sewage=serializer.validated_data.get('sewageSystem', False),
             direction=serializer.validated_data.get('direction'),
             floors=serializer.validated_data.get('floors'),
@@ -90,21 +83,24 @@ def add_property(request):
             number_of_units=serializer.validated_data.get('numberOfUnits'),
             property_features=serializer.validated_data.get('propertyFeature'),
         )
-
-        # Save the property
         property_instance.save()
 
         # Store media files
         store_property_media(request, property_instance)
+
+        # Calculate similar properties once the property is created.
+        from .helper import calculate_similar_properties
+        similar = calculate_similar_properties(property_instance)
+        property_instance.similar_properties = similar
+        property_instance.save(update_fields=['similar_properties'])
 
         return Response({
             "message": "Property created successfully!",
             "propertyId": property_instance.property_id
         }, status=status.HTTP_201_CREATED)
     else:
-        # If the data is invalid, return errors
-        logger.error(f"Add property serializer.errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 def store_property_media(request, property_instance):
@@ -248,8 +244,8 @@ def explore_properties_by_interests(request):
 def get_property_by_id(request, property_id):
     if request.method == 'GET':
         property_instance = get_object_or_404(Property, pk=property_id)
-        property_data = map_property(property_instance)
-        return Response(property_data, status=status.HTTP_200_OK)
+        serializer = UserPropertySerializer(property_instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

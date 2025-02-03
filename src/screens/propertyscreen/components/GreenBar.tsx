@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#90ee90', // Light green color
     paddingVertical: 10,
     paddingHorizontal: 25,
-    borderRadius: 30,
+    borderRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: -10, // Move the GreenBar up by 10 pixels

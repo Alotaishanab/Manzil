@@ -1,10 +1,46 @@
 import React from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
-import { BedIcon, BathroomIcon, FloorIcon, LivingRoomIcon } from '@svgs';
-import { ScrollPicker } from '../molecules/ScrollPicker';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import {
+  BedIcon,
+  BathroomIcon,
+  FloorIcon,
+  LivingRoomIcon,
+  DirectionIcon,
+} from '@svgs';
+import { CircularPickerComponent } from '../molecules/CircularPickerComponent';
+import { DirectionPicker } from '@components'; // Import your custom DirectionPicker
 
-const optionsGenerator = (length) => Array.from({ length }, (_, i) => i + 1);
+const MAX_OPTIONS = 10;
 
+/**
+ * Helper to generate numeric options.
+ */
+const generateOptions = (max) => Array.from({ length: max }, (_, i) => i + 1);
+
+/**
+ * OptionPicker: A reusable field component for numeric values (e.g., Beds, Baths, etc.)
+ * Displays an icon above a label and a circular picker.
+ */
+const OptionPicker = ({ label, value, setValue, options, Icon }) => {
+  return (
+    <View style={styles.optionContainer}>
+      <Icon width={28} height={28} fill="#333" style={styles.optionIcon} />
+      <Text style={styles.optionLabel}>{label}</Text>
+      <CircularPickerComponent
+        currentValue={value}
+        setValue={setValue}
+        options={options}
+        size={100} // Adjusted for a compact, modern look
+        strokeWidth={8}
+        indicatorStyle={styles.indicator}
+      />
+    </View>
+  );
+};
+
+/**
+ * HouseComponent: Displays pickers for Beds, Baths, Floors, Living Rooms and a custom DirectionPicker for Direction.
+ */
 export const HouseComponent = ({
   beds,
   setBeds,
@@ -19,74 +55,46 @@ export const HouseComponent = ({
 }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Beds Row */}
-      <View style={styles.row}>
-        <Text style={styles.categoryTitle}>Beds</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <ScrollPicker
-            title="Beds"
-            currentValue={beds}
-            setValue={setBeds}
-            options={optionsGenerator(10)}
-            IconComponent={BedIcon}
-          />
-        </ScrollView>
+      {/* Row for Beds & Baths */}
+      <View style={styles.rowContainer}>
+        <OptionPicker
+          label="Beds"
+          value={beds}
+          setValue={setBeds}
+          options={generateOptions(MAX_OPTIONS)}
+          Icon={BedIcon}
+        />
+        <OptionPicker
+          label="Baths"
+          value={baths}
+          setValue={setBaths}
+          options={generateOptions(MAX_OPTIONS)}
+          Icon={BathroomIcon}
+        />
       </View>
 
-      {/* Baths Row */}
-      <View style={styles.row}>
-        <Text style={styles.categoryTitle}>Baths</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <ScrollPicker
-            title="Baths"
-            currentValue={baths}
-            setValue={setBaths}
-            options={optionsGenerator(10)}
-            IconComponent={BathroomIcon}
-          />
-        </ScrollView>
+      {/* Row for Floors & Living Rooms */}
+      <View style={styles.rowContainer}>
+        <OptionPicker
+          label="Floors"
+          value={floors}
+          setValue={setFloors}
+          options={generateOptions(MAX_OPTIONS)}
+          Icon={FloorIcon}
+        />
+        <OptionPicker
+          label="Living Rooms"
+          value={livingRooms}
+          setValue={setLivingRooms}
+          options={generateOptions(MAX_OPTIONS)}
+          Icon={LivingRoomIcon}
+        />
       </View>
 
-      {/* Floors Row */}
-      <View style={styles.row}>
-        <Text style={styles.categoryTitle}>Floors</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <ScrollPicker
-            title="Floors"
-            currentValue={floors}
-            setValue={setFloors}
-            options={optionsGenerator(10)}
-            IconComponent={FloorIcon}
-          />
-        </ScrollView>
-      </View>
-
-      {/* Living Rooms Row */}
-      <View style={styles.row}>
-        <Text style={styles.categoryTitle}>Living Rooms</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <ScrollPicker
-            title="Living Rooms"
-            currentValue={livingRooms}
-            setValue={setLivingRooms}
-            options={optionsGenerator(10)}
-            IconComponent={LivingRoomIcon}
-          />
-        </ScrollView>
-      </View>
-
-      {/* Direction Row */}
-      <View style={styles.row}>
-        <Text style={styles.categoryTitle}>Direction</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <ScrollPicker
-            title="Direction"
-            currentValue={direction}
-            setValue={setDirection}
-            options={['North', 'East', 'South', 'West']}
-            IconComponent={LivingRoomIcon} // Replace with compass icon if available
-          />
-        </ScrollView>
+      {/* Direction Picker */}
+      <View style={styles.directionContainer}>
+        <Text style={styles.optionLabel}>Direction</Text>
+        <DirectionPicker currentValue={direction} setValue={setDirection} />
       </View>
     </ScrollView>
   );
@@ -96,17 +104,47 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 20,
     paddingHorizontal: 15,
-    backgroundColor: '#F7F8FA',
   },
-  row: {
-    marginBottom: 15,
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
-  categoryTitle: {
+  optionContainer: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    // Subtle shadow for a modern, tactile feel:
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  optionIcon: {
+    marginBottom: 8,
+  },
+  optionLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#555',
-    marginBottom: 5,
-    paddingLeft: 5,
+    color: '#333',
+    marginBottom: 8,
+  },
+  indicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  directionContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
 });
 

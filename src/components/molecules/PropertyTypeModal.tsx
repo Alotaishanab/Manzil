@@ -3,64 +3,72 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   Animated,
   PanResponder,
-  TouchableWithoutFeedback,
   Dimensions,
   Modal,
+  Easing,
+  TouchableOpacity,
 } from 'react-native';
 import { Colors } from '@colors';
 import { fonts } from '@fonts';
-import * as SVGs from '../../assets/svgs'; // Ensure SVGs are correctly imported
+import * as SVGs from '../../assets/svgs';
 import { useIntl } from '@context';
-import { globalStyles } from '@globalStyles';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 export const PropertyTypeModal = ({
   isVisible,
-  toggleModal = () => {},
+  onRequestClose = () => {},
   handleClick,
 }: any) => {
   const { intl } = useIntl();
   const panY = useRef(new Animated.Value(screenHeight)).current;
+  const SWIPE_CLOSE_THRESHOLD = 150;
 
-  const resetPositionAnim = Animated.spring(panY, {
+  // Open animation (200ms)
+  const openAnim = Animated.timing(panY, {
     toValue: 0,
-    tension: 50,
-    friction: 10,
+    duration: 200,
+    easing: Easing.out(Easing.quad),
     useNativeDriver: true,
   });
 
+  // Close animation (200ms)
   const closeAnim = Animated.timing(panY, {
     toValue: screenHeight,
-    duration: 400,
+    duration: 200,
+    easing: Easing.in(Easing.quad),
     useNativeDriver: true,
   });
 
-  const panResponder = useRef(
+  // PanResponder attached to the entire modal container
+  const containerPanResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 0, // Enable responder only if swiping down
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dy) > 5,
       onPanResponderMove: (_, gestureState) => {
+        // Allow dragging down only
         if (gestureState.dy > 0) {
-          panY.setValue(gestureState.dy); // Update the Y position as you drag down
+          panY.setValue(gestureState.dy);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > 150) { // Close if dragged more than 150 units
-          closeAnim.start(() => toggleModal());
+        if (gestureState.dy > SWIPE_CLOSE_THRESHOLD) {
+          closeAnim.start(() => onRequestClose());
         } else {
-          resetPositionAnim.start(); // Otherwise, reset to original position
+          openAnim.start();
         }
       },
     })
   ).current;
 
+  // When modal becomes visible, animate it into view
   useEffect(() => {
     if (isVisible) {
-      resetPositionAnim.start(); // Reset position when modal becomes visible
+      openAnim.start();
     }
   }, [isVisible]);
 
@@ -143,100 +151,131 @@ export const PropertyTypeModal = ({
       console.warn(`Icon ${item?.icon} is not found in SVGs.`);
       return null;
     }
-
     return (
       <TouchableOpacity
         onPress={() => handleClick(item?.name)}
-        style={globalStyles.propertTypeCard}
+        style={styles.propertyTypeCard}
       >
-        <Icon width={50} height={50} />
-        <Text style={globalStyles.propertyTypeCardText}>{item?.name}</Text>
+        <Icon width={40} height={40} />
+        <Text style={styles.propertyTypeText}>{item?.name}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
     <Modal transparent visible={isVisible} animationType="none">
-      <TouchableWithoutFeedback onPress={toggleModal}>
+      <TouchableWithoutFeedback onPress={onRequestClose}>
         <View style={styles.modalOverlay}>
-          <Animated.View
-            style={[
-              styles.modalContainer,
-              {
-                transform: [{ translateY: panY }],
-              },
-            ]}
-            {...panResponder.panHandlers}
-          >
-            {/* Draggable Handle */}
-            <View style={styles.dragHandleContainer}>
-              <View style={styles.dragHandle} />
-            </View>
-
-            {/* Modal Title */}
-            <Text style={styles.modalTitle}>Property Type</Text>
-
-            {/* Property Types List */}
-            <FlatList
-              data={allPropertyType}
-              renderItem={renderPropertyType}
-              numColumns={3}
-              showsVerticalScrollIndicator={false}
-              horizontal={false}
-              ListFooterComponent={<View style={{ marginBottom: 10 }} />}
-              ListFooterComponentStyle={{ marginBottom: 20 }}
-              columnWrapperStyle={styles.propertyColumnWrap}
-            />
-          </Animated.View>
+          {/* Tapping outside the modal closes it */}
+          <View style={styles.outsideArea} />
+          <TouchableWithoutFeedback>
+            <Animated.View
+              {...containerPanResponder.panHandlers}
+              style={[styles.modalContainer, { transform: [{ translateY: panY }] }]}
+            >
+              {/* Header area with drag handle and header text */}
+              <View style={styles.headerWrapper}>
+                <View style={styles.dragHandleContainer}>
+                  <View style={styles.dragHandle} />
+                </View>
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.modalTitle}>Property Type</Text>
+                  <Text style={styles.modalExplanation}>
+                    Select the type that best describes your property.
+                  </Text>
+                </View>
+              </View>
+              {/* Property Types List */}
+              <FlatList
+                data={allPropertyType}
+                renderItem={renderPropertyType}
+                numColumns={3}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.flatListContainer}
+                columnWrapperStyle={styles.propertyColumnWrap}
+              />
+            </Animated.View>
+          </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
   );
 };
 
+export default React.memo(PropertyTypeModal);
+
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darkens background for effect
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  outsideArea: {
+    flex: 1,
   },
   modalContainer: {
-    backgroundColor: Colors.light.offWhite,
+    backgroundColor: '#FFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 20,
-    maxHeight: screenHeight * 0.8, // Takes 80% of screen height
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    maxHeight: screenHeight * 0.8,
+  },
+  headerWrapper: {
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   dragHandleContainer: {
-    width: '100%',
     alignItems: 'center',
-    marginVertical: 10,
+    marginBottom: 8,
   },
   dragHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: '#ccc',
-    borderRadius: 2.5,
+    width: 60,
+    height: 4,
+    backgroundColor: '#CCC',
+    borderRadius: 2,
+  },
+  headerTextContainer: {
+    alignItems: 'flex-start',
   },
   modalTitle: {
     fontSize: 18,
     fontFamily: fonts.primary.bold,
-    color: Colors.light.headingTitle,
-    textAlign: 'center',
-    marginBottom: 10,
+    color: Colors.darkText || '#000',
+    marginBottom: 4,
+  },
+  modalExplanation: {
+    fontSize: 14,
+    fontFamily: fonts.primary.regular,
+    color: Colors.textSecondary || '#555',
+  },
+  flatListContainer: {
+    paddingBottom: 20,
   },
   propertyColumnWrap: {
     justifyContent: 'space-between',
-    marginVertical: 10,
-    marginHorizontal: 5,
+    marginBottom: 20,
   },
-  propertyType: {
-    color: Colors.light.headingTitle,
-    fontSize: 16,
-    fontFamily: fonts.primary.semiBold,
+  propertyTypeCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F7F9FC',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+    flex: 1,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  propertyTypeText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontFamily: fonts.primary.regular,
+    color: Colors.darkText || '#000',
+    textAlign: 'center',
   },
 });
-
-export default React.memo(PropertyTypeModal);

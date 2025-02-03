@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   container: {
     // Make overall height smaller for a less “fat” card
     height: screenHeight * 0.12,
-    width: screenWidth * 0.93,
+    width: screenWidth * 0.96,
     paddingVertical: 10,
     paddingHorizontal: 20,
     // Glassmorphic style

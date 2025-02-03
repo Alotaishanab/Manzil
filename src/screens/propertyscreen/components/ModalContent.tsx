@@ -1,7 +1,14 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import PropertyDetails from './PropertyDetails';
-import MapComponent from './MapComponent';
+import MapComponent, { parseCoordinates } from './MapComponent';
 import GreenBar from './GreenBar';
 import DescriptionBox from './DescriptionBox';
 import PropertyFeatures from './PropertyFeatures';
@@ -13,10 +20,12 @@ import { SimilarProperties } from '@screens';
 import { fonts } from '../../../assets/fonts/index';
 import { useNavigation } from '@react-navigation/native';
 import { renderPropertyIcons } from '../../../../src/helpers/renderPropertyIcons'; 
+import { formatDate } from '@helpers';
+
 const { width: screenWidth } = Dimensions.get('window');
 
 interface ModalContentProps {
-  property: any; // Add this prop to receive the property data
+  property: any; // This object contains: property_details, lister_info, rented_period
   expandedHeight: number;
   scrollOffsetY: any;
   scrollViewRef: React.RefObject<ScrollView>;
@@ -33,6 +42,11 @@ const ModalContent: React.FC<ModalContentProps> = ({
   handleTermsClick,
 }) => {
   const navigation = useNavigation();
+  // Destructure the nested objects for easier access.
+  const { property_details: details, lister_info } = property;
+  const markerPosition = parseCoordinates(details.coordinates);
+  
+  
 
   const handleCardClick = (propertyId: string) => {
     console.log('Card clicked!', propertyId);
@@ -57,49 +71,47 @@ const ModalContent: React.FC<ModalContentProps> = ({
         <View style={styles.dragIcon} />
         
         <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>{`${property.price.toLocaleString()}﷼`}</Text>
+          <Text style={styles.priceText}>
+            {details.price !== undefined
+              ? `${details.price.toLocaleString()}﷼`
+              : 'N/A'}
+          </Text>
 
           {/* Render the property icons */}
           <View style={styles.iconContainer}>
-            {renderPropertyIcons(property)}
+            {renderPropertyIcons({
+              property: details,
+              containerStyle: { justifyContent: 'center' },
+            })}
           </View>
           
-          <Text style={styles.detailsText}>{property.address}</Text>
+          <Text style={styles.detailsText}>
+            {details.address ? details.address : 'N/A'}
+          </Text>
         </View>
 
-        {/* Add margin to lower the GreenBar */}
         <GreenBar style={styles.greenBar} />
       </View>
 
       <View style={styles.contentContainer}>
-      <PropertyDetails
-  title={property.title}
-  area={property.area}
-  bathrooms={property.bathrooms}
-  bedrooms={property.bedrooms}
-  livingRooms={property.living_rooms}
-  propertyCategory={property.property_category}
-  listingDate={property.listing_date}
-/>
+      <PropertyDetails 
+        details={details} 
+        selectedPropertyType={details.property_category || details.property_type}
+      />
 
 
+        <Utilities 
+          hasWater={details.has_water}
+          hasElectricity={details.has_electricity}
+          hasSewage={details.has_sewage}
+        />
 
-<Utilities 
-  hasWater={property.has_water}
-  hasElectricity={property.has_electricity}
-  hasSewage={property.has_sewage}
-/>
+        <DescriptionBox description={details.description} />
 
-       
-<DescriptionBox 
-  description={property.description}
-
-/>
-
-        <MapComponent location={property.location} />
+        <MapComponent markerPosition={markerPosition} />
         <TimetoAddress/>
-        <AdInfo property={property} />
-        <AgentDetails property={property} />
+        <AdInfo property={details} />
+        <AgentDetails property={{ ...details, lister_info }} />
 
         <View style={styles.similarHomesSection}>
           <Text style={styles.sectionTitle}>Similar Properties</Text>
@@ -131,7 +143,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   dragIcon: {
-    width: 75,
+    width: 65,
     height: 3,
     backgroundColor: '#aaa',
     borderRadius: 2.5,

@@ -1,4 +1,3 @@
-// src/screens/PropertyScreen.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -39,6 +38,8 @@ export const PropertyScreen: React.FC = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
+  // IMPORTANT: Since your API now nests property details,
+  // update how you merge media.
   const { data: property, isLoading, error } = useGetPropertyById(propertyId);
 
   useEffect(() => {
@@ -47,9 +48,17 @@ export const PropertyScreen: React.FC = () => {
       Alert.alert("Error", "Failed to load property details.");
     }
     if (property) {
-      console.log("Fetched Property Data:", property);
+      console.log("Fetched Property Data:", JSON.stringify(property, null, 2));
     }
   }, [property, error]);
+
+  // Merge images and videos from the nested property_details.
+  const allMedia = property
+    ? [
+        ...(property.property_details.property_images || []),
+        ...(property.property_details.property_videos || []),
+      ]
+    : [];
 
   const handleShare = () => {
     Alert.alert("Share", "Share this property with others.");
@@ -75,8 +84,9 @@ export const PropertyScreen: React.FC = () => {
     HapticFeedback.trigger('impactLight');
   };
 
-  const category = property?.category || "Apartment";
-  const type = property?.type || "Sell";
+  // Use nested fields for category and type:
+  const category = property?.property_details.property_category || "Apartment";
+  const type = property?.property_details.property_type || "Sell";
   const displayType = type === 'Sell' ? 'For Sale' : type === 'Rent' ? 'For Rent' : type;
 
   if (isLoading) {
@@ -111,9 +121,9 @@ export const PropertyScreen: React.FC = () => {
           />
 
           <ImageGallery
-            images={property.property_images}
+            images={allMedia}
             expandedHeight={screenHeight * 0.8}
-            onPlaceholderClick={(index) => console.log(`Clicked on image ${index}`)}
+            onPlaceholderClick={(index) => console.log(`Clicked on media ${index}`)}
           />
 
           <BottomSheet
@@ -235,7 +245,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Jost',
   },
-  // You can add additional styles for the skeleton items if needed.
 });
 
 export default PropertyScreen;

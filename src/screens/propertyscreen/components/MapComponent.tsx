@@ -1,50 +1,74 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // React Navigation
-import { CustomMap } from '@components'; // Custom components for map
-import { fonts } from '../../../assets/fonts/index'; // Import fonts
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { CustomMap } from '@components'; // Your custom map component
+import { fonts } from '../../../assets/fonts/index';
 
-const MapComponent: React.FC = () => {
-  const [scaleAnim] = useState(new Animated.Value(1)); // Scale animation for press effect
-  const navigation = useNavigation(); // React Navigation hook
+const { height: screenHeight } = Dimensions.get('window');
 
-  // Function to handle press-in effect
+export interface MarkerPosition {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * Parses a coordinate string in the format:
+ * "SRID=4326;POINT (lng lat)"
+ * and returns an object with latitude and longitude.
+ */
+export const parseCoordinates = (coordString: string): MarkerPosition | null => {
+  if (!coordString) return null;
+  // Example input: "SRID=4326;POINT (-122.42069218307735 37.78770540087569)"
+  const regex = /POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i;
+  const match = coordString.match(regex);
+  if (match && match.length === 3) {
+    const lng = parseFloat(match[1]);
+    const lat = parseFloat(match[2]);
+    return { latitude: lat, longitude: lng };
+  }
+  return null;
+};
+
+interface MapComponentProps {
+  markerPosition?: MarkerPosition | null;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ markerPosition }) => {
+  const [scaleAnim] = React.useState(new Animated.Value(1));
+  const navigation = useNavigation();
+  const modalOverlapHeight = screenHeight * 0.30;
+
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.97, // Slightly scale down
+      toValue: 0.97,
       useNativeDriver: true,
     }).start();
   };
 
-  // Function to handle press-out effect and navigate to the map screen
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
-      toValue: 1, // Return to normal scale
+      toValue: 1,
       useNativeDriver: true,
     }).start(() => {
-      navigation.navigate('MapScreen'); // Navigate to the map screen
+      // Pass the markerPosition to MapScreen (if needed)
+      navigation.navigate('MapScreen', { markerPosition });
     });
   };
 
   return (
     <View style={styles.outerContainer}>
       <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
-        {/* Map Title */}
         <Text style={styles.title}>Map</Text>
-
-        {/* Clickable Custom Map */}
         <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut} activeOpacity={0.7}>
           <View style={styles.mapWrapper}>
             <CustomMap
-              markerPosition={undefined}
-              scrollEnabled={false} // Disable map scrolling
-              zoomEnabled={false} // Disable map zooming
-              rotateEnabled={false} // Disable map rotation
+              markerPosition={markerPosition}
+              scrollEnabled={false}
+              zoomEnabled={false}
+              rotateEnabled={false}
             />
           </View>
         </TouchableOpacity>
-
-        {/* Area and District Information */}
         <View style={styles.locationInfo}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Area:</Text>
@@ -82,23 +106,23 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     fontFamily: fonts.primary.bold,
-    paddingVertical: 10, // Adjusted for consistent spacing
+    paddingVertical: 10,
   },
   mapWrapper: {
     width: '100%',
-    height: 200, // Slightly reduced height for a more compact design
+    height: 200,
     overflow: 'hidden',
   },
   locationInfo: {
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
-    paddingHorizontal: 10, // Slight padding for cleaner layout
+    paddingHorizontal: 10,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6, // Reduced padding for tighter design
+    paddingVertical: 6,
   },
   infoLabel: {
     fontSize: 14,

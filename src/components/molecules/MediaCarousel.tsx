@@ -16,7 +16,7 @@ import { fonts } from '@fonts';
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.8;
-const ITEM_HEIGHT = width * 0.6; // Adjusted for more rectangular shape
+const ITEM_HEIGHT = width * 0.6;
 const SPACING = 10;
 const STACK_OFFSET = 15;
 
@@ -33,24 +33,24 @@ export const MediaCarousel = ({ media, setMedia }) => {
     }
   }, [currentIndex, media]);
 
-  // Function to open media picker
+  // Open media picker
   const openMediaPicker = () => {
     launchImageLibrary(
       {
         mediaType: 'mixed',
         selectionLimit: 0,
       },
-      (response) => {
+      response => {
         if (!response.didCancel && response.assets) {
           const currentMedia = Array.isArray(media) ? media : [];
-          const selectedMedia = response.assets.filter((asset) => asset.uri);
+          const selectedMedia = response.assets.filter(asset => asset.uri);
           setMedia([...currentMedia, ...selectedMedia]);
         }
       }
     );
   };
 
-  // Render the media items in the main carousel
+  // Render main carousel items
   const renderItem = ({ item, index }) => {
     const inputRange = [
       (index - 1) * (ITEM_WIDTH + SPACING),
@@ -60,7 +60,7 @@ export const MediaCarousel = ({ media, setMedia }) => {
 
     const scale = scrollX.interpolate({
       inputRange,
-      outputRange: [0.8, 1, 0.8],
+      outputRange: [0.85, 1, 0.85],
       extrapolate: 'clamp',
     });
 
@@ -73,39 +73,39 @@ export const MediaCarousel = ({ media, setMedia }) => {
     return (
       <Animated.View
         style={[
-          styles.imageContainer,
+          styles.itemContainer,
           { transform: [{ scale }, { translateX }] },
         ]}
       >
         {item.type?.startsWith('video') ? (
           <Video
             source={{ uri: item.uri }}
-            style={styles.mediaStyle}
+            style={styles.media}
             resizeMode="cover"
             controls={true}
-            paused={currentIndex !== index || !isVideoPlaying} // Play video if current item
+            paused={currentIndex !== index || !isVideoPlaying}
             onBuffer={() => console.log('Buffering...')}
             onError={(e) => console.log('Error with video:', e)}
           />
         ) : (
           <ImageBackground
             source={{ uri: item.uri }}
-            style={styles.imageBgContainer}
-            imageStyle={styles.imageBgStyle}
+            style={styles.media}
+            imageStyle={styles.mediaImage}
           />
         )}
       </Animated.View>
     );
   };
 
-  // Render the thumbnails below the carousel
+  // Render thumbnails below the main carousel
   const renderThumbnails = () => (
     <FlatList
       data={media}
       horizontal
       keyExtractor={(item, index) => `${item.uri}-${index}`}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.thumbnailsContainer}
+      contentContainerStyle={styles.thumbnailContainer}
       renderItem={({ item, index }) => (
         <TouchableOpacity onPress={() => setCurrentIndex(index)} activeOpacity={0.7}>
           <View style={[
@@ -117,7 +117,7 @@ export const MediaCarousel = ({ media, setMedia }) => {
                 source={{ uri: item.uri }}
                 style={styles.thumbnailContent}
                 resizeMode="cover"
-                paused={true} // Do not play in thumbnail, just show first frame
+                paused={true}
               />
             ) : (
               <ImageBackground
@@ -158,10 +158,8 @@ export const MediaCarousel = ({ media, setMedia }) => {
         </TouchableOpacity>
       )}
 
-      {/* Thumbnails Section */}
       {media.length > 0 && renderThumbnails()}
 
-      {/* Button to Open Media Picker */}
       {media.length > 0 && (
         <TouchableOpacity onPress={openMediaPicker} style={styles.addMediaLink}>
           <Text style={styles.addMediaLinkText}>+ Add More Media</Text>
@@ -176,32 +174,28 @@ export default MediaCarousel;
 const styles = StyleSheet.create({
   carouselContainer: {
     width: '100%',
-    height: ITEM_HEIGHT + 150, // Adjust container height to remove extra space
+    height: ITEM_HEIGHT + 150,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageContainer: {
+  itemContainer: {
     width: ITEM_WIDTH,
     height: ITEM_HEIGHT,
     marginHorizontal: SPACING / 2,
     borderRadius: 15,
     overflow: 'hidden',
+    backgroundColor: '#000', // For better contrast while loading
   },
-  imageBgContainer: {
+  media: {
     width: '100%',
     height: '100%',
     borderRadius: 15,
   },
-  imageBgStyle: {
+  mediaImage: {
     borderRadius: 15,
   },
-  mediaStyle: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 15,
-  },
-  thumbnailsContainer: {
-    marginTop: 5,  // Reduce top margin to remove extra space
+  thumbnailContainer: {
+    marginTop: 8,
     paddingHorizontal: SPACING,
   },
   thumbnail: {
@@ -210,12 +204,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 10,
     overflow: 'hidden',
-    borderColor: 'transparent',
     borderWidth: 2,
+    borderColor: 'transparent',
   },
   activeThumbnail: {
     borderColor: Colors.light.primaryBtn,
-    borderWidth: 2,
   },
   thumbnailContent: {
     width: '100%',
@@ -226,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     borderRadius: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   noMediaText: {
     fontSize: 16,
@@ -234,7 +227,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary.medium,
   },
   mainMediaMessage: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 16,
     color: Colors.light.headingTitle,
     fontFamily: fonts.primary.medium,
@@ -245,7 +238,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   addMediaLinkText: {
     color: Colors.light.primaryBtn,

@@ -25,7 +25,7 @@ interface TimetoAddressProps {
   travelTime: string | null;
 }
 
-export const TimetoAddress: React.FC<TimetoAddressProps> = ({
+const TimetoAddress: React.FC<TimetoAddressProps> = ({
   propertyAddress,
   destinationAddress,
   setDestinationAddress,
