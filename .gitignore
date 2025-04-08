@@ -1,78 +1,150 @@
-# OSX
-#
+# ===============================
+# Global
+# ===============================
 .DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+*.tmp
+*.bak
 
-# Xcode
-#
-build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-**/.xcode.env.local
+# ===============================
+# macOS
+# ===============================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
 
-#  env files
+# ===============================
+# Python / Django
+# ===============================
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+*.pyo
+*.pyd
+*.pdb
 .env
-
-
-# Android/IntelliJ
-#
+.venv
+venv/
+env/
+ENV/
 build/
-.idea
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+coverage.*
+.tox/
+.nox/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
 
-# node.js
-#
+# Django specific
+db.sqlite3
+media/
+staticfiles/
+
+# ===============================
+# Node.js / React Native
+# ===============================
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.expo/
+.expo-shared/
+*.expo
+*.expo.ts
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
+# Metro / React Native
+.cache/
+babel.config.js
+android/app/debug.keystore
 
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
+# iOS
+ios/build/
+ios/Pods/
+ios/Podfile.lock
+ios/Podfile~
+*.xcworkspace
+*.xcodeproj
+ios/.DS_Store
+ios/.env
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
 
-# Bundle artifact
-*.jsbundle
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/
+android/.DS_Store
 
-# Ruby / CocoaPods
-**/Pods/
-/vendor/bundle/
+# macOS development artifacts
+*.xcuserstate
+*.xcworkspace
+.idea/
 
-# Temporary files created by Metro to check the health of the file watcher
-.metro-health-check*
+# ===============================
+# Docker
+# ===============================
+*.pid
+*.tar
+docker-compose.override.yml
+docker-compose.*.yml
+.env.docker
+.env.local
+.env.dev
+.env.prod
+.env.staging
 
-# testing
-/coverage
+# Docker volumes & artifacts
+pgdata/
+redis-data/
+__pycache__/
+*.db
 
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# ===============================
+# VSCode & JetBrains
+# ===============================
+.vscode/
+.idea/
+*.iml
+
+# ===============================
+# Others
+# ===============================
+*.sublime-workspace
+*.sublime-project
+*.orig
+*.rej
+*.gz
+*.zip
+
+# ===============================
+# System Specific
+# ===============================
+ehthumbs.db
+Icon?
+Desktop.ini
